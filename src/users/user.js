@@ -8,4 +8,6 @@ module.exports = sequelize.define('user', {
   password: S.STRING,
   expire_at: S.DATE,
   is_subscribing: S.BOOLEAN
-})
+},
+  { timestamps: false }
+)

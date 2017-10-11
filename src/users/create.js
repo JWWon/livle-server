@@ -1,15 +1,12 @@
 'use strict';
+const User = require('./user')
 
 module.exports = (event, callback) => {
-  console.log(event)
   const data = JSON.parse(event.body)
 
-  data.updatedAt = new Date().getTime();
-
-  return dbdbdb(params, (error, data) => {
-    if (error) {
-      callback(error);
-    }
-    callback(error, params.Item);
-  });
+  return User.create(data).then(user => {
+    callback(null, user)
+  }).catch(err => {
+    callback(err)
+  })
 };

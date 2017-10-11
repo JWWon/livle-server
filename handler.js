@@ -1,6 +1,6 @@
 'use strict';
 
-const usersCreate = require('./users/create');
+const usersCreate = require('./src/users/create');
 
 const resHeaders = {
   "Access-Control-Allow-Origin" : "*"

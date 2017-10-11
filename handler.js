@@ -14,6 +14,6 @@ module.exports.usersCreate = (event, context, callback) => {
       body: JSON.stringify(result),
     }
 
-    context.succeed(response);
+    error ? context.fail(error) : context.succeed(response)
   })
 }

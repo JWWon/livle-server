@@ -1,0 +1,16 @@
+service: livle-server
+
+provider:
+  name: aws
+  runtime: nodejs4.3
+  region: ap-northeast-2
+  stage: dev
+
+functions:
+  usersCreate:
+    handler: handler.usersCreate
+    events:
+      - http:
+          path: users
+          method: post
+          cors: true

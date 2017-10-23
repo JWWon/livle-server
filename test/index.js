@@ -27,11 +27,11 @@ describe('User', function() {
   it('creation failure when no password', function(done) {
     const context = {
       succeed: function(result) {
-        done(new Error('never context.succeed'))
+        expect(result.statusCode).to.equal(400)
+        done()
       },
       fail: function(err) {
-        //console.log(err)
-        done()
+        done( new Error( 'never context.fail' ) )
       }
     }
 

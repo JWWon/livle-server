@@ -11,8 +11,9 @@ module.exports = (event, context) => {
 
   // TODO duplicate check
   return User.create(data).then(user => {
-    user.token = 'testtoken'
-    return context.succeed(response(200, user))
+    const userData = user.dataValues
+    userData.token = user.getToken()
+    return context.succeed(response(200, userData))
   }).catch(err => {
     return context.fail(err)
   })

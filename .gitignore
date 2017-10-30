@@ -17,3 +17,4 @@ admin.env
 .env
 tmp
 package-lock.json
+*.mwb.bak

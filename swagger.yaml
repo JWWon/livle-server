@@ -419,6 +419,16 @@ definitions:
       is_subscribing:
         type: boolean
         description: 구독 지속 중임을 나타냄 (현재 권한이 있는지 여부는 expire_at으로 확인할 것)
+  Artist:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      image:
+        type: string
   Ticket:
     type: object
     description: 'capacity, checkin_code는 리턴되지 않음'
@@ -429,6 +439,10 @@ definitions:
       title:
         type: string
         example: 댕댕이 페스티벌
+      artists:
+        type: array
+        items:
+          $ref: '#/definitions/Artist'
       start_at:
         type: number
         description: 시작시간

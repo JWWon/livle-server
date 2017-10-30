@@ -135,7 +135,7 @@ paths:
         '404':
           description: 잘못된 토큰
   /session:
-    post:
+    get:
       tags:
         - session
       summary: 로그인
@@ -145,21 +145,21 @@ paths:
         - application/json
       parameters:
         - name: email
-          in: body
-          description: ID of pet to return
+          in: query
+          type: string
           required: true
-          schema:
-            type: object
-            properties:
-              email:
-                type: string
-                example: contacts@livle.kr
-              password:
-                type: string
-                example: '12345'
+        - name: password
+          in: query
+          type: string
+          required: true
+          description: 암호화된 형식으로 전송되어야 함
       responses:
         '200':
           description: 로그인 성공
+          headers:
+            Set-Cookie:
+              type: string
+              description: 토큰
           schema:
             $ref: '#/definitions/User'
         '400':

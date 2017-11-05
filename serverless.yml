@@ -6,12 +6,25 @@ provider:
   region: ap-northeast-2
   stage: dev
   profile: livle-serverless
+  environment:
+    DB_NAME: ${file(./keys.yml):DB_NAME}
+    DB_HOST: ${file(./keys.yml):DB_HOST}
+    DB_PORT: ${file(./keys.yml):DB_PORT}
+    DB_USER: ${file(./keys.yml):DB_USER}
+    DB_PASS: ${file(./keys.yml):DB_PASS}
 
 functions:
-  usersCreate:
-    handler: handler.usersCreate
+  userCreate:
+    handler: handler.userCreate
     events:
       - http:
-          path: users
+          path: user
           method: post
+          cors: true
+  userDestroy:
+    handler: handler.userDestroy
+    events:
+      - http:
+          path: user
+          method: delete
           cors: true

@@ -5,6 +5,7 @@ provider:
   runtime: nodejs6.10
   region: ap-northeast-2
   stage: dev
+  profile: livle-serverless
 
 functions:
   usersCreate:

@@ -1,4 +1,4 @@
 'use strict';
 
-module.exports.usersCreate = require('./src/users/create')
-module.exports.usersDestroy = require('./src/users/destroy')
+module.exports.userCreate = require('./src/user/create')
+module.exports.userDestroy = require('./src/user/destroy')

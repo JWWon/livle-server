@@ -19,7 +19,7 @@ describe('User', function() {
       }
     }
 
-    test(handler.usersCreate,
+    test(handler.userCreate,
       { email: "test@test.com", password: "test" },
       context)
   })
@@ -35,9 +35,61 @@ describe('User', function() {
       }
     }
 
-    test( handler.usersCreate,
-      { email: 'test@test.com' },
+    test( handler.userCreate,
+      { email: 'abc@abc.com' },
       context
     )
   })
+
+  it('creation failure on duplicate email', function(done) {
+    const context = {
+      succeed: function(result) {
+        expect(result.statusCode).to.equal(403)
+        done()
+      },
+      fail: function(err) {
+        done( new Error( 'never context.fail' ) )
+      }
+    }
+
+    test( handler.userCreate,
+      { email: 'test@test.com', password: 'testtest' },
+      context
+    )
+  })
+
+  it('creation failure on invalid email', function(done) {
+    const context = {
+      succeed: function(result) {
+        expect(result.statusCode).to.equal(405)
+        done()
+      },
+      fail: function(err) {
+        done( new Error( 'never context.fail' ) )
+      }
+    }
+
+    test( handler.userCreate,
+      { email: 'hahahacom', password: 'hello' },
+      context
+    )
+  })
+
+  it('successful deletion', function(done) {
+    const context = {
+      succeed: function(result) {
+        expect(result.statusCode).to.equal(200)
+        done()
+      },
+      fail: function(err) {
+        done( new Error( 'never context.fail' ) )
+      }
+    }
+
+    test( handler.userDestroy,
+      { email: "test@test.com", password: "test" },
+      context
+    )
+  })
+
 })

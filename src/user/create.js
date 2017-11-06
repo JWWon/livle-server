@@ -8,7 +8,7 @@ const isValid = (email) => {
 }
 
 module.exports = (event, context, callback) => {
-  //context.callbackWaitsForEmptyEventLoop = false;
+  context.callbackWaitsForEmptyEventLoop = false
 
   const data = JSON.parse(event.body)
   if(!data.email || !data.password) {

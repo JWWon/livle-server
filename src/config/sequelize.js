@@ -9,7 +9,8 @@ module.exports = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process
   port: process.env.DB_PORT,
   dialect: "mysql",
   pool: {
-    max: 1
+    max: 1,
+    idle: 100
   },
   operatorsAliases: false
 })

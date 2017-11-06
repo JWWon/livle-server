@@ -3,8 +3,8 @@ info:
   description: 라이블 API
   version: 1.0.0
   title: Livle App API
-host: api.livle.kr
-basePath: /v2
+host: 05jaeecklb.execute-api.ap-northeast-2.amazonaws.com
+basePath: /dev
 tags:
   - name: user
     description: 회원정보
@@ -24,14 +24,13 @@ paths:
       tags:
         - user
       summary: 회원가입
+      description: '이메일, 비밀번호 validation은 클라이언트에서 해주세요.'
       consumes:
-        - application/json
-      produces:
         - application/json
       parameters:
         - name: user
           in: body
-          description: ID of pet to return
+          description: 가입할 유저의 아이디와 비밀번호
           required: true
           schema:
             type: object
@@ -48,6 +47,8 @@ paths:
           schema:
             $ref: '#/definitions/User'
         '400':
+          description: 잘못된 요청 (이메일이나 비밀번호가 없음)
+        '403':
           description: 이미 존재하는 아이디
         '405':
           description: 잘못된 이메일 형식

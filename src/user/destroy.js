@@ -7,16 +7,18 @@ const isValid = (email) => {
   return regex.test(email)
 }
 
-module.exports = (event, context) => {
+module.exports = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
   const data = JSON.parse(event.body)
   if(!data.email || !data.password) {
-    return context.succeed(response(400, null, "이메일과 비밀번호를 입력해주세요."))
+    return callback(null, response(400, null, "이메일과 비밀번호를 입력해주세요."))
   }
 
   return User.destroy({ where: { email: data.email, password: data.password } })
     .then(() => {
-      return context.succeed(response(200, null))
+      return callback(null, response(200, null))
     }).catch(err => {
-      return context.succeed(response(404, null, "일치하는 회원정보가 없습니다."))
-  })
+      return callback(null, response(403, null, "일치하는 회원정보가 없습니다."))
+    })
 }

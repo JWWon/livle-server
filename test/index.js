@@ -3,92 +3,67 @@
 const expect = require('chai').expect
 const handler = require('../handler')
 
-const test = (func, params, context) => {
-  func({ body: JSON.stringify(params) }, context)
+const test = (func, params, callback) => {
+  func({ body: JSON.stringify(params) }, {}, callback)
 }
 
 describe('User', function() {
   it('successful creation', function(done) {
-    const context = {
-      succeed: function(result) {
-        expect(result).to.exist
-        done()
-      },
-      fail: function() {
-        done( new Error( 'never context.fail' ) )
-      }
+    const callback = (error, result) => {
+      expect(result).to.exist
+      done()
     }
 
     test(handler.userCreate,
       { email: "test@test.com", password: "test" },
-      context)
+      callback)
   })
 
   it('creation failure when no password', function(done) {
-    const context = {
-      succeed: function(result) {
-        expect(result.statusCode).to.equal(400)
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(400)
         done()
-      },
-      fail: function(err) {
-        done( new Error( 'never context.fail' ) )
-      }
     }
 
     test( handler.userCreate,
       { email: 'abc@abc.com' },
-      context
+      callback
     )
   })
 
   it('creation failure on duplicate email', function(done) {
-    const context = {
-      succeed: function(result) {
-        expect(result.statusCode).to.equal(403)
-        done()
-      },
-      fail: function(err) {
-        done( new Error( 'never context.fail' ) )
-      }
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(403)
+      done()
     }
 
     test( handler.userCreate,
       { email: 'test@test.com', password: 'testtest' },
-      context
+      callback
     )
   })
 
   it('creation failure on invalid email', function(done) {
-    const context = {
-      succeed: function(result) {
-        expect(result.statusCode).to.equal(405)
-        done()
-      },
-      fail: function(err) {
-        done( new Error( 'never context.fail' ) )
-      }
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(405)
+      done()
     }
 
     test( handler.userCreate,
       { email: 'hahahacom', password: 'hello' },
-      context
+      callback
     )
   })
 
   it('successful deletion', function(done) {
-    const context = {
-      succeed: function(result) {
-        expect(result.statusCode).to.equal(200)
-        done()
-      },
-      fail: function(err) {
-        done( new Error( 'never context.fail' ) )
-      }
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
     }
 
     test( handler.userDestroy,
       { email: "test@test.com", password: "test" },
-      context
+      callback
     )
   })
 

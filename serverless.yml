@@ -19,16 +19,16 @@ provider:
     DB_PORT: ${file(./keys.yml):DB_PORT}
     DB_USER: ${file(./keys.yml):DB_USER}
     DB_PASS: ${file(./keys.yml):DB_PASS}
+  vpc:
+    securityGroupIds:
+      - "Fn::GetAtt": ServerlessSecurityGroup.GroupId
+    subnetIds:
+      - Ref: ServerlessSubnetA
+      - Ref: ServerlessSubnetB
 
 functions:
   userCreate:
     handler: handler.userCreate
-    vpc:
-      securityGroupIds:
-        - "Fn::GetAtt": ServerlessSecurityGroup.GroupId
-      subnetIds:
-        - Ref: ServerlessSubnetA
-        - Ref: ServerlessSubnetB
     events:
       - http:
           path: user

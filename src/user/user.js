@@ -2,15 +2,17 @@ const S = require('sequelize')
 const sequelize = require('../config/sequelize')
 
 const jwt = require('jsonwebtoken')
-const secret = 'livlesecret'
+const secret = 'livleusersecret'
 
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
-  email: { type: S.STRING, unique: true },
+  email: { type: S.STRING, unique: true, allowNull: false },
   nickname: S.STRING,
-  password: S.STRING,
+  password: { type: S.STRING, allowNull: false },
   expire_at: S.DATE,
-  is_subscribing: S.BOOLEAN
+  is_subscribing: S.BOOLEAN,
+  password_reset_token: S.STRING,
+  customer_uid: S.STRING
 },
   { timestamps: false }
 )

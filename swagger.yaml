@@ -7,9 +7,9 @@ host: 05jaeecklb.execute-api.ap-northeast-2.amazonaws.com
 basePath: /dev
 tags:
   - name: user
-    description: 회원정보
-  - name: session
-    description: 로그인 정보
+    description: 라이블 일반 회원 (앱)
+  - name: partner
+    description: 공연기획사 회원 (웹)
   - name: ticket
     description: 콘서트 정보
   - name: reservation
@@ -135,10 +135,10 @@ paths:
           description: 비밀번호나 토큰이 없음
         '404':
           description: 잘못된 토큰
-  /session:
+  /user/session:
     get:
       tags:
-        - session
+        - user
       summary: 로그인
       consumes:
         - application/json
@@ -157,10 +157,6 @@ paths:
       responses:
         '200':
           description: 로그인 성공
-          headers:
-            Set-Cookie:
-              type: string
-              description: 토큰
           schema:
             $ref: '#/definitions/User'
         '400':
@@ -169,7 +165,7 @@ paths:
           description: 일치하는 회원이 없음
     delete:
       tags:
-        - session
+        - user
       summary: 로그아웃
       responses:
         '200':
@@ -420,6 +416,11 @@ definitions:
       is_subscribing:
         type: boolean
         description: 구독 지속 중임을 나타냄 (현재 권한이 있는지 여부는 expire_at으로 확인할 것)
+      token:
+        type: string
+        description: >-
+          회원가입 또는 로그인 시에만 전달됨. 클라이언트에 저장해두고 요청보낼 때 header에 Authorization이라는 이름으로
+          포함하기.
   Artist:
     type: object
     properties:

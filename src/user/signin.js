@@ -1,6 +1,6 @@
 'use strict'
 
-const User = require('../user/user')
+const User = require('./user')
 const response = require('../response')
 
 module.exports = (event, context, callback) => {

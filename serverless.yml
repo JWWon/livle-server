@@ -48,11 +48,11 @@ functions:
           path: user
           method: delete
           cors: true
-  sessionGet:
-    handler: handler.sessionGet
+  userSignin:
+    handler: handler.userSignin
     events:
       - http:
-          path: session
+          path: user/session
           method: get
           cors: true
 

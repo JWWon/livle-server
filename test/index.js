@@ -6,7 +6,7 @@ const handler = require('../handler')
 var authToken = ''
 
 const test = (func, params, callback) => {
-  func({ headers: { Authorization: authToken }, body: JSON.stringify(params) }, {}, callback)
+  func({ headers: { Authorization: authToken }, body: JSON.stringify(params.body), queryStringParameters: params.query }, {}, callback)
 }
 
 describe('User', function() {
@@ -22,7 +22,7 @@ describe('User', function() {
     }
 
     test(handler.userCreate,
-      { email: userEmail, password: userPass },
+      { body: { email: userEmail, password: userPass } },
       callback)
   })
 
@@ -33,7 +33,7 @@ describe('User', function() {
     }
 
     test( handler.userCreate,
-      { email: 'abc@abc.com' },
+      { body: { email: 'abc@abc.com' } },
       callback
     )
   })
@@ -45,7 +45,7 @@ describe('User', function() {
     }
 
     test( handler.userCreate,
-      { email: 'test@test.com', password: 'testtest' },
+      { body: { email: 'test@test.com', password: 'testtest' } },
       callback
     )
   })
@@ -57,7 +57,7 @@ describe('User', function() {
     }
 
     test( handler.userCreate,
-      { email: 'hahahacom', password: 'hello' },
+      { body: { email: 'hahahacom', password: 'hello' } },
       callback
     )
   })
@@ -74,6 +74,18 @@ describe('User', function() {
     )
   })
 
+  it('successful signin', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.userSignin,
+      { query: { email: userEmail, password: userPass } },
+      callback
+    )
+  })
+
   it('successful deletion', function(done) {
     const callback = (error, result) => {
       expect(result.statusCode).to.equal(200)
@@ -81,7 +93,7 @@ describe('User', function() {
     }
 
     test( handler.userDestroy,
-      { email: userEmail, password: userPass },
+      { body: { email: userEmail, password: userPass } },
       callback
     )
   })

@@ -6,3 +6,5 @@ module.exports.userDestroy = require('./src/user/destroy')
 module.exports.userSignin = require('./src/user/signin')
 
 module.exports.partnerSignin = require('./src/partner/signin')
+
+module.exports.ticketCreate = require('./src/ticket/create')

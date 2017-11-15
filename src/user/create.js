@@ -19,7 +19,7 @@ module.exports = (event, context, callback) => {
     return callback(null, response(405, null, "이메일의 형식이 잘못 되었습니다."))
 
   return User.create({ email: data.email, password: data.password })
-    .then((user) => {
+    .then(user => {
       var userData = user.dataValues
       userData.token = user.getToken()
       return callback(null, response(200, userData))

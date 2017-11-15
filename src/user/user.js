@@ -15,25 +15,14 @@ const User = sequelize.define('user', {
   { timestamps: false }
 )
 
-User.prototype.getToken = () => {
-  const token = jwt.sign(this, secret)
+User.prototype.getToken = function() { // Arrow function cannot access 'this'
+  const token = jwt.sign(this.dataValues, secret)
   return token
 }
 
-User.currentUser = (headers, context) => {
-  if (headers) {
-    const token = headers.Authorization
-    if(token) {
-      try {
-        const user = jwt.verify(token, secret)
-        // TODO : sequelize 오브젝트로 인식되려나
-        return user
-      } catch(err) {
-        return null // Errorneous token
-      }
-    }
-  }
-  return null
-}
+User.fromToken = token => new Promise( (resolve, reject) => !token ? reject() :
+  jwt.verify(token, secret, (err, decoded) => User.findById(decoded.id)
+    .then(user => resolve(user) ))
+)
 
 module.exports = User

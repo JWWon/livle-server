@@ -3,19 +3,26 @@
 const expect = require('chai').expect
 const handler = require('../handler')
 
+var authToken = ''
+
 const test = (func, params, callback) => {
-  func({ body: JSON.stringify(params) }, {}, callback)
+  func({ headers: { Authorization: authToken }, body: JSON.stringify(params) }, {}, callback)
 }
 
 describe('User', function() {
+  const userEmail = 'test@test.com'
+  const userPass = 'test'
+
   it('successful creation', function(done) {
     const callback = (error, result) => {
+      const res = JSON.parse(result.body)
+      authToken = res.token
       expect(result).to.exist
       done()
     }
 
     test(handler.userCreate,
-      { email: "test@test.com", password: "test" },
+      { email: userEmail, password: userPass },
       callback)
   })
 
@@ -55,6 +62,18 @@ describe('User', function() {
     )
   })
 
+  it('successful retrieval', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.userGet,
+      { },
+      callback
+    )
+  })
+
   it('successful deletion', function(done) {
     const callback = (error, result) => {
       expect(result.statusCode).to.equal(200)
@@ -62,7 +81,7 @@ describe('User', function() {
     }
 
     test( handler.userDestroy,
-      { email: "test@test.com", password: "test" },
+      { email: userEmail, password: userPass },
       callback
     )
   })

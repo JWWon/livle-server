@@ -34,12 +34,26 @@ functions:
           path: user
           method: post
           cors: true
+  userGet:
+    handler: handler.userGet
+    events:
+      - http:
+          path: user
+          method: get
+          cors: true
   userDestroy:
     handler: handler.userDestroy
     events:
       - http:
           path: user
           method: delete
+          cors: true
+  sessionGet:
+    handler: handler.sessionGet
+    events:
+      - http:
+          path: session
+          method: get
           cors: true
 
 resources:

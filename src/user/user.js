@@ -27,4 +27,15 @@ User.fromToken = token => new Promise( (resolve, reject) => !token ? reject() :
     .then(user => resolve(user) ))
 )
 
+User.checkSession = event => {
+  const token = event.headers.Authorization
+  if(!token) return null
+  try {
+    const user = jwt.verify(token, secret)
+    return user.id
+  } catch(e) {
+    return null
+  }
+}
+
 module.exports = User

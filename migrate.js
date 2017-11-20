@@ -1,29 +1,21 @@
-const userMigration = () => require('./src/user/user').sync()
-  .then(() => {
-    console.log('User migrated')
-    partnerMigration()
-  }).catch(err => {
-    console.error('Failed to migrate User', err)
-    process.exit(1)
-  })
+// Use with cautions
+// It forcefully syncs the schema
 
-const partnerMigration = () => require('./src/partner/partner').sync()
-  .then(() => {
-    console.log('Parnter migrated')
-    ticketMigration()
-  }).catch(err => {
-    console.error('Failed to migrate Partner', err)
-    process.exit(1)
-  })
+const User = require('./src/user/user')
+const Ticket = require('./src/ticket/ticket')
+const Partner = require('./src/partner/partner')
 
-const ticketMigration = () => require('./src/ticket/ticket').sync()
-  .then(() => {
-    console.log('Ticket migrated')
-    process.exit()
-  }).catch(err => {
-    console.error('Failed to migrate Ticket', err)
-    process.exit(1)
-  })
+const dropTables = User.drop().then(() => Ticket.drop()).then(() => Partner.drop()).catch(err => {
+  console.error('Failed to drop tables', err)
+  process.exit(1)
+})
 
+const migrateTables = () => User.sync().then(() => Partner.sync()).then(() => Ticket.sync()).catch(err => {
+  console.error('Failed to migrate tables', err)
+  process.exit(1)
+})
 
-userMigration()
+dropTables.then(() => migrateTables()).then(() => {
+  console.log("Migration succeeded")
+  process.exit()
+})

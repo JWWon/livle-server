@@ -76,6 +76,13 @@ functions:
           path: partner/session
           method: get
           cors: true
+  ticketCreate:
+    handler: handler.ticketCreate
+    events:
+      - http:
+          path: ticket
+          method: post
+          cors: true
 
 resources:
   Resources:

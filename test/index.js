@@ -133,7 +133,7 @@ describe('Partner', function() {
     }
 
     test( handler.partnerSignin,
-      { query: { username: 'livle', password: 'livle' } },
+      { query: { username: 'admin@livle.kr', password: 'livle' } },
       callback
     )
   })

@@ -136,6 +136,16 @@ describe('Partner', function() {
       callback
     )
   })
+
+  it('successfully get user from session', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.partnerGet,
+      { }, callback)
+  })
 })
 
 describe('Ticket', function() {

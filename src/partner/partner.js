@@ -23,8 +23,10 @@ Partner.prototype.getCookie = function() {
   const token = jwt.sign(this.dataValues, secret)
   const sessionId = `${cookiePrefix}${token}`
   const newCookie = cookie.serialize(cookieKey, sessionId, { path: '/' })
-  return newCookie
+  return { "Set-Cookie": newCookie }
 }
+
+Partner.clearCookie = { "Set-Cookie": cookie.serialize(cookieKey, 'empty', { path: '/', maxAge: 0 }) }
 
 Partner.fromHeaders = headers => new Promise( (resolve, reject) => {
   const cookieStr = headers ? (headers.Cookie || '') : ''
@@ -32,7 +34,7 @@ Partner.fromHeaders = headers => new Promise( (resolve, reject) => {
   if(!cookies[cookieKey]) return reject()
 
   const token = cookies[cookieKey].replace(cookiePrefix, '')
-  return jwt.verify(token, secret, (err, decoded) => err ? reject()
+  return jwt.verify(token, secret, (err, decoded) => err ? reject(err)
     : Partner.findById(decoded.id).then(partner => resolve(partner)) )
 })
 

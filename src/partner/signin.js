@@ -15,7 +15,7 @@ module.exports = (event, context, callback) => {
       if(partner.approved) {
         var partnerData = partner.dataValues
         partnerData.password = null
-        return callback(null, response(200, partnerData, null, { "Set-Cookie": partner.getCookie() }))
+        return callback(null, response(200, partnerData, null, partner.getCookie()))
       } else {
         return callback(null, response(401, null, "승인되지 않은 유저입니다."))
       }

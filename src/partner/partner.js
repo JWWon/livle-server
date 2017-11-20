@@ -1,10 +1,12 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
 
+  /*
 const cookie = require('cookie')
 
 const cookieKey = 'Authorization'
 const cookiePrefix = 'Bearer '
+*/
 
 const jwt = require('jsonwebtoken')
 const secret = 'livlepartnersecret'
@@ -19,21 +21,13 @@ const Partner = sequelize.define('partner', {
   { timestamps: false }
 )
 
-Partner.prototype.getCookie = function() {
-  const token = jwt.sign(this.dataValues, secret)
-  const sessionId = `${cookiePrefix}${token}`
-  const newCookie = cookie.serialize(cookieKey, sessionId, { path: '/' })
-  return { "Set-Cookie": newCookie }
+Partner.prototype.getToken = function () {
+  return jwt.sign(this.dataValues, secret)
 }
 
-Partner.clearCookie = { "Set-Cookie": cookie.serialize(cookieKey, 'empty', { path: '/', maxAge: 0 }) }
-
 Partner.fromHeaders = headers => new Promise( (resolve, reject) => {
-  const cookieStr = headers ? (headers.Cookie || '') : ''
-  const cookies = cookie.parse(cookieStr)
-  if(!cookies[cookieKey]) return reject()
-
-  const token = cookies[cookieKey].replace(cookiePrefix, '')
+  const token = ( headers && headers.Authorization ) || null
+  if(!token) return reject()
   return jwt.verify(token, secret, (err, decoded) => err ? reject(err)
     : Partner.findById(decoded.id).then(partner => resolve(partner)) )
 })

@@ -12,7 +12,7 @@ module.exports = (event, context, callback) => {
     return callback(null, response(200, partnerData))
   }).catch(err => {
     if(err) {
-      return callback(null, response(403, null, "유효하지 않은 세션입니다.", Partner.clearCookie))
+      return callback(null, response(403, null, "유효하지 않은 세션입니다."))
     } else {
       return callback(null, response(401, null, "로그인되지 않았습니다."))
     }

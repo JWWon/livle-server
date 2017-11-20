@@ -25,11 +25,6 @@ provider:
     subnetIds:
       - Ref: ServerlessSubnetA
       - Ref: ServerlessSubnetB
-custom:
-   cors:
-     origin: 'http://localhost:3000' # Development
-     #origin: 'https://livle.kr'
-     allowCredentials: true
 
 functions:
   userCreate:
@@ -66,21 +61,21 @@ functions:
       - http:
           path: partner
           method: post
-          cors: ${self:custom.cors}
+          cors: true
   partnerGet:
     handler: handler.partnerGet
     events:
       - http:
           path: partner
           method: get
-          cors: ${self:custom.cors}
+          cors: true
   partnerSignin:
     handler: handler.partnerSignin
     events:
       - http:
           path: partner/session
           method: get
-          cors: ${self:custom.cors}
+          cors: true
 
 resources:
   Resources:

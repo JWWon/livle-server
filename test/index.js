@@ -4,10 +4,10 @@ const expect = require('chai').expect
 const handler = require('../handler')
 
 var authToken = ''
-var cookie = ''
+var headers = {}
 
 const test = (func, params, callback) => {
-  func({ headers: { Authorization: authToken, Cookie: cookie }, body: JSON.stringify(params.body), queryStringParameters: params.query }, {}, callback)
+  func({ headers: { Authorization: authToken }, body: JSON.stringify(params.body), queryStringParameters: params.query }, {}, callback)
 }
 
 describe('User', function() {
@@ -126,7 +126,8 @@ describe('Partner', function() {
 
   it('successful signin', function(done) {
     const callback = (error, result) => {
-      cookie = result.headers["Set-Cookie"]
+      const res = JSON.parse(result.body)
+      authToken = res.token
       expect(result.statusCode).to.equal(200)
       done()
     }

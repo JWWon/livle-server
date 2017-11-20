@@ -215,9 +215,9 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: Cookie
+        - name: Authorization
           in: header
-          description: 세션 정보를 담고 있는 쿠키
+          description: 세션 정보를 담고 있는 토큰
           required: true
           type: string
       responses:
@@ -298,7 +298,7 @@ paths:
       parameters:
         - name: Cookie
           in: header
-          description: 세션 정보를 담고 있는 쿠키
+          description: 세션 정보를 담고 있는 토큰
           required: true
           type: string
         - name: title
@@ -522,6 +522,10 @@ definitions:
         type: integer
         format: int64
       username:
+        type: string
+      company:
+        type: string
+      token:
         type: string
   Artist:
     type: object

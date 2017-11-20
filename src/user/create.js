@@ -24,6 +24,7 @@ module.exports = (event, context, callback) => {
   return User.create({ email: data.email, password: data.password })
     .then(user => {
       var userData = user.dataValues
+      userData.password = null
       userData.token = user.getToken()
       return callback(null, response(200, userData))
     }).catch(err => {

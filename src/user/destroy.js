@@ -2,11 +2,6 @@
 const User = require('./user')
 const response = require('../response')
 
-const isValid = (email) => {
-  const regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-  return regex.test(email)
-}
-
 module.exports = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 

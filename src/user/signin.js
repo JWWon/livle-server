@@ -13,6 +13,7 @@ module.exports = (event, context, callback) => {
   return User.findOne({ where: { email: email, password: password } })
     .then(user => {
       var userData = user.dataValues
+      userData.password = null
       userData.token = user.getToken()
       return callback(null, response(200, userData))
     })

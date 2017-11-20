@@ -170,6 +170,65 @@ paths:
       responses:
         '200':
           description: 로그아웃 성공
+  /partner:
+    post:
+      tags:
+        - partner
+      summary: 회원가입
+      description: '이메일, 비밀번호 validation은 클라이언트에서 해주세요.'
+      consumes:
+        - application/json
+      parameters:
+        - name: partner
+          in: body
+          description: 가입할 유저의 아이디와 비밀번호
+          required: true
+          schema:
+            type: object
+            properties:
+              company:
+                type: string
+                example: 라이블
+              username:
+                type: string
+                example: livle
+              password:
+                type: string
+                example: '12345'
+      responses:
+        '200':
+          description: 가입 성공
+          schema:
+            $ref: '#/definitions/Partner'
+        '400':
+          description: 잘못된 요청 (이메일이나 비밀번호가 없음)
+        '403':
+          description: 이미 존재하는 아이디
+        '405':
+          description: 잘못된 이메일 형식
+    get:
+      tags:
+        - partner
+      summary: 세션 체크
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: Cookie
+          in: header
+          description: 세션 정보를 담고 있는 쿠키
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 로그인된 유저
+          schema:
+            $ref: '#/definitions/Partner'
+        '401':
+          description: 로그인되지 않은 상태
+        '403':
+          description: 유효하지 않은 세션
   /partner/session:
     get:
       tags:
@@ -200,6 +259,8 @@ paths:
             $ref: '#/definitions/Partner'
         '400':
           description: 이메일 또는 비밀번호가 없거나 잘못됨
+        '401':
+          description: 아직 승인되지 않은 계정임
         '403':
           description: 일치하는 회원이 없음
   /ticket:

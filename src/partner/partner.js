@@ -12,7 +12,9 @@ const secret = 'livlepartnersecret'
 const Partner = sequelize.define('partner', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
   username: { type: S.STRING, allowNull: false, unique: true },
-  password: { type: S.STRING, allowNull: false }
+  password: { type: S.STRING, allowNull: false },
+  company: { type: S.STRING, allowNull: false },
+  approved: { type: S.BOOLEAN, defaultValue: false }
 },
   { timestamps: false }
 )

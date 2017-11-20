@@ -12,9 +12,13 @@ module.exports = (event, context, callback) => {
 
   return Partner.findOne({ where: { username: username, password: password } })
     .then(partner => {
-      var partnerData = partner.dataValues
-      partnerData.password = null
-      return callback(null, response(200, partnerData, null, { "Set-Cookie": partner.getCookie() }))
+      if(partner.approved) {
+        var partnerData = partner.dataValues
+        partnerData.password = null
+        return callback(null, response(200, partnerData, null, { "Set-Cookie": partner.getCookie() }))
+      } else {
+        return callback(null, response(401, null, "승인되지 않은 유저입니다."))
+      }
     })
     .catch(err => callback(null, response(403, null, "일치하는 회원 정보가 없습니다.")))
 }

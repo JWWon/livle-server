@@ -101,6 +101,22 @@ describe('User', function() {
 
 })
 
+describe('Ticket', function() {
+  it('successful retrieve of list', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.ticketGet,
+      {},
+      callback
+    )
+  })
+})
+
+describe('Web', () => null)
+
 describe('Partner', function() {
   it('successful creation', function(done) {
     const callback = (error, result) => {
@@ -170,10 +186,14 @@ describe('Ticket', function() {
       done()
     }
 
+
+    var date = new Date()
+    date.setDate(date.getDate() + 5)
     test( handler.ticketCreate,
-      { body: { title: '테스트 콘서트', start_at: new Date(), end_at: new Date(),
+      { body: { title: '테스트 콘서트', start_at: date, end_at: date,
         image: "test", capacity: 100, place: "판교" } },
       callback
     )
   })
+
 })

@@ -91,6 +91,13 @@ functions:
           path: ticket
           method: post
           cors: true
+  ticketGet:
+    handler: handler.ticketGet
+    events:
+      - http:
+          path: ticket
+          method: get
+          cors: true
   fileUpload:
     handler: handler.fileUpload
     events:

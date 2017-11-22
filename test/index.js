@@ -115,6 +115,28 @@ describe('Ticket', function() {
   })
 })
 
+describe('Subscription', function() {
+  it('successful subscription', function(done) {
+    const callback = (error, result) => {
+      console.error(error)
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+
+    test( handler.subscriptionCreate,
+      { body: { imp_uid: 'test' } },
+      callback
+    )
+  })
+})
+
+/*
+ *
+ * 웹 테스트
+ *
+ */
+
 describe('Web', () => null)
 
 describe('Partner', function() {
@@ -197,3 +219,4 @@ describe('Ticket', function() {
   })
 
 })
+

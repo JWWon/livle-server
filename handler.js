@@ -14,3 +14,5 @@ module.exports.ticketCreate = require('./src/ticket/create')
 module.exports.ticketGet = require('./src/ticket/get')
 
 module.exports.fileUpload = require('./src/file/upload')
+
+module.exports.subscriptionCreate = require('./src/subscription/create')

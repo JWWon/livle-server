@@ -10,6 +10,7 @@
   "dependencies": {
     "aws-sdk": "^2.6.7",
     "email-validator": "^1.1.1",
+    "iamport": "^0.3.4",
     "jsonwebtoken": "^8.1.0",
     "mysql2": "^1.4.2",
     "sequelize": "^4.13.8",

@@ -105,6 +105,13 @@ functions:
           path: file
           method: get
           cors: true
+  subscriptionCreate:
+    handler: handler.subscriptionCreate
+    events:
+      - http:
+          path: subscription
+          method: post
+          cors: true
 
 resources:
   Resources:

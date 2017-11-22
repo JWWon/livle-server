@@ -13,6 +13,14 @@ provider:
         - ec2:DescribeNetworkInterfaces
         - ec2:DeleteNetworkInterface
       Resource: "*"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws:s3:::livle"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws:s3:::livle/*"
   environment:
     DB_NAME: ${file(./keys.yml):DB_NAME}
     DB_HOST: ${file(./keys.yml):DB_HOST}
@@ -82,6 +90,13 @@ functions:
       - http:
           path: ticket
           method: post
+          cors: true
+  fileUpload:
+    handler: handler.fileUpload
+    events:
+      - http:
+          path: file
+          method: get
           cors: true
 
 resources:

@@ -149,6 +149,20 @@ describe('Partner', function() {
   })
 })
 
+describe('File', function() {
+  it('successful signing', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.fileUpload,
+      { },
+      callback
+    )
+  })
+})
+
 describe('Ticket', function() {
   it('successful creation', function(done) {
     const callback = (error, result) => {

@@ -11,3 +11,5 @@ module.exports.partnerSignin = require('./src/partner/signin')
 module.exports.partnerDestroy = require('./src/partner/destroy')
 
 module.exports.ticketCreate = require('./src/ticket/create')
+
+module.exports.fileUpload = require('./src/file/upload')

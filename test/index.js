@@ -109,14 +109,26 @@ describe('Ticket', function() {
 describe('Subscription', function() {
   it('successful subscription', function(done) {
     const callback = (error, result) => {
-      console.error(error)
+      if(error) return done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
 
-
     test( handler.subscriptionCreate,
       { body: { cardNumber: '1111-2222-3333-4444', expiry: '2017-12', birth: '920723', password: '00'} },
+      callback
+    )
+  })
+
+  it('successful cancellation', function(done) {
+    const callback = (error, result) => {
+      if(error) return done(error)
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.subscriptionDelete,
+      { },
       callback
     )
   })

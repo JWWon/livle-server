@@ -27,6 +27,8 @@ provider:
     DB_PORT: ${file(./keys.yml):DB_PORT}
     DB_USER: ${file(./keys.yml):DB_USER}
     DB_PASS: ${file(./keys.yml):DB_PASS}
+    IMP_KEY: ${file(./keys.yml):IMP_KEY}
+    IMP_SECRET: ${file(./keys.yml):IMP_SECRET}
   vpc:
     securityGroupIds:
       - "Fn::GetAtt": ServerlessSecurityGroup.GroupId
@@ -111,6 +113,13 @@ functions:
       - http:
           path: subscription
           method: post
+          cors: true
+  subscriptionDelete:
+    handler: handler.subscriptionDelete
+    events:
+      - http:
+          path: subscription
+          method: delete
           cors: true
 
 resources:

@@ -42,17 +42,13 @@ User.checkSession = event => {
 const Subscription = require('../subscription/subscription')
 User.hasMany(Subscription, { foreignKey: { name: 'user_id', allowNull: false } })
 
-User.prototype.isSubscribing = function() {
+User.prototype.getSubscription = function() {
   return new Promise((resolve, reject) =>
-    this.getSubscriptions({
-      where: {
-        cancelled_at: { [Op.Ne]: null }
-      }
-    }).then(items => {
+    this.getSubscriptions().then(items => {
       if(items.length == 0) {
-        return resolve(false)
+        return resolve(null)
       } else if (items.length == 1) {
-        return resolve(true)
+        return resolve(items[0])
       } else {
         reject(new Error("Two or more subscriptions record"))
       }

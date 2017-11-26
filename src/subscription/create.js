@@ -34,9 +34,9 @@ module.exports = (event, context, callback) => {
   const token = event.headers.Authorization
   return User.fromToken(token)
     .then(user =>
-      user.isSubscribing()
-      .then(subscribing => {
-        if(subscribing) {
+      user.getSubscription()
+      .then(sub => {
+        if(sub) {
           return callback(new Error("[405] 이미 구독 중입니다."))
         }
         // 빌링 키 발급 프로세스

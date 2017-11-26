@@ -8,6 +8,6 @@ if(process.env.NODE_ENV === 'dev') {
 }
 
 module.exports = new Iamport({
-  iamKey: process.env.IMP_KEY,
+  impKey: process.env.IMP_KEY,
   impSecret: process.env.IMP_SECRET
 })

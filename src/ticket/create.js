@@ -11,7 +11,8 @@ module.exports = (event, context, callback) => {
       if(partner.username != "admin@livle.kr") {
         return callback(new Error("[403] 관리자만 추가할 수 있습니다."))
       }
-      var data = JSON.parse(event.body)
+      let data = JSON.parse(event.body)
+      data.partner_id = partner.id
       return Ticket.create(data)
         .then(ticket => {
           return callback(null, response(200, ticket.dataValues))

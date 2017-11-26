@@ -1,49 +1,62 @@
 'use strict'
 
 const User = require('../user/user')
+const Subscription = require('./subscription')
 const response = require('../response')
 const iamport = require('../config/iamport')
 
-const PRICE = 8900 // Example
+const PRICE = 1 // TODO change
 
-const cancelPayment = (imp_uid, errorText, callback) =>
-  iamport.payment.cancel({ imp_uid: imp_uid, reason: errorText })
-    .then(() => callback(new Error(errorText + " : 결제가 취소되었습니다.")))
-    .catch(() => {
-      // Fatal error - 취소 실패
-      return callback(new Error(errorText + " : 결제를 취소하는 데 실패했습니다."))
-    })
-
-const authorizePayment = (user, imp_uid) =>
-  new Promise( (resolve, reject) => {
-    // TODO : 구독 정보 데이터베이스에 추가 implement
-    resolve()
-  })
+const doPay = (subscription) =>
+  new Promise( (resolve, reject) =>
+    iamport.subscribe.again({
+      customer_uid: subscription.id,
+      merchant_uid: 'livle_subscription' + new Date().getTime(),
+      amount: PRICE,
+      name: '라이블 정기구독권 결제',
+    }).then((res) =>
+      subscription.update({ latest_paid_at: new Date() })
+      .then(res => { console.log('updated'); resolve()})
+      .catch(err =>
+        reject(new Error("결제 내용을 업데이트 하는 도중 오류가 발생했습니다. 관리자에게 문의하세요."))
+      )
+    ).catch((err) => reject(err))
+  )
 
 module.exports = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   const data = event.body && JSON.parse(event.body)
-  if(!data || !data.imp_uid) return callback(new Error("[400] 결제 아이디가 없습니다."))
+  if( !(data && data.cardNumber && data.expiry && data.birth && data.password) ) {
+    return callback(new Error("[400] 결제 정보가 누락되었습니다."))
+  }
 
-  return iamport.payment.getByImpUid({
-    imp_uid: data.imp_uid
-  }).then(result => {
-    const resData = result.response
-    if(resData.status === 'paid' && amount === PRICE) {
-      if(!User.checkSession(event)) return cancelPayment(data.imp_uid, "[401] 로그인이 필요합니다.", callback)
-      const token = event.headers.Authorization
-      // TODO : 아마 외부통신 열어야 될 것 같음
-      return User.fromToken(token)
-        .then(user => authorizePayment(user, data.imp_uid)
-            .then(() => callback(null, response(200, "성공인가")))
-            .catch(err => callback(err))
-        )
-        .catch(err => cancelPayment(data.imp_uid, "[403] 유효하지 않은 세션입니다.", callback))
-    } else {
-      return cancelPayment(data.imp_uid, "[412] 결제되지 않았거나 액수가 일치하지 않습니다.", callback)
-    }
-  }).catch(err => callback(new Error("[404] 유효하지 않은 결제 아이디입니다.")))
-
+  const token = event.headers.Authorization
+  return User.fromToken(token)
+    .then(user =>
+      user.isSubscribing()
+      .then(subscribing => {
+        if(subscribing) {
+          return callback(new Error("[405] 이미 구독 중입니다."))
+        }
+        // 빌링 키 발급 프로세스
+        return Subscription.create({ user_id: user.id })
+          .then(subscription =>{
+            return iamport.subscribe_customer.create({
+              customer_uid: subscription.id,
+              card_number: data.cardNumber,
+              expiry: data.expiry,
+              birth: data.birth,
+              pwd_2digit: data.password,
+            }).then(res => {
+              return doPay(subscription)
+                .then(res => callback(null, response(200)))
+            }).catch(err => {
+              process.exit(-1)
+              subscription.destroy().then(res => callback(err))
+            })
+          })
+      })
+    ).catch(err => { console.error(err); callback(new Error("[401] 로그인이 필요합니다."))})
 
 }

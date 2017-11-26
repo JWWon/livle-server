@@ -10,12 +10,14 @@ const test = (func, params, callback) => {
   func({ headers: { Authorization: authToken }, body: JSON.stringify(params.body), queryStringParameters: params.query }, {}, callback)
 }
 
+const userEmail = 'test@test.com'
+const userPass = 'test'
+
 describe('User', function() {
-  const userEmail = 'test@test.com'
-  const userPass = 'test'
 
   it('successful creation', function(done) {
     const callback = (error, result) => {
+      if(error) done(error)
       const res = JSON.parse(result.body)
       authToken = res.token
       expect(result).to.exist
@@ -65,6 +67,7 @@ describe('User', function() {
 
   it('successful retrieval', function(done) {
     const callback = (error, result) => {
+      if(error) done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
@@ -83,18 +86,6 @@ describe('User', function() {
 
     test( handler.userSignin,
       { query: { email: userEmail, password: userPass } },
-      callback
-    )
-  })
-
-  it('successful deletion', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.userDestroy,
-      { body: { email: userEmail, password: userPass } },
       callback
     )
   })
@@ -125,7 +116,21 @@ describe('Subscription', function() {
 
 
     test( handler.subscriptionCreate,
-      { body: { imp_uid: 'test' } },
+      { body: { cardNumber: '1111-2222-3333-4444', expiry: '2017-12', birth: '920723', password: '00'} },
+      callback
+    )
+  })
+})
+
+describe('User deletion', function() {
+  it('successful deletion', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.userDestroy,
+      { body: { email: userEmail, password: userPass } },
       callback
     )
   })
@@ -219,4 +224,3 @@ describe('Ticket', function() {
   })
 
 })
-

@@ -1,5 +1,6 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
+const Op = S.Op
 
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'
@@ -10,9 +11,7 @@ const User = sequelize.define('user', {
   nickname: S.STRING,
   password: { type: S.STRING, allowNull: false },
   expire_at: S.DATE,
-  is_subscribing: S.BOOLEAN,
   password_reset_token: S.STRING,
-  customer_uid: S.STRING
 },
   { timestamps: false }
 )
@@ -23,8 +22,10 @@ User.prototype.getToken = function() { // Arrow function cannot access 'this'
 }
 
 User.fromToken = token => new Promise( (resolve, reject) => !token ? reject() :
-  jwt.verify(token, secret, (err, decoded) => User.findById(decoded.id)
-    .then(user => resolve(user) ))
+  jwt.verify(token, secret, (err, decoded) =>
+    User.findById(decoded.id)
+    .then(user => user ? resolve(user) : reject(new Error("Not found")))
+  )
 )
 
 User.checkSession = event => {
@@ -36,6 +37,27 @@ User.checkSession = event => {
   } catch(e) {
     return null
   }
+}
+
+const Subscription = require('../subscription/subscription')
+User.hasMany(Subscription, { foreignKey: { name: 'user_id', allowNull: false } })
+
+User.prototype.isSubscribing = function() {
+  return new Promise((resolve, reject) =>
+    this.getSubscriptions({
+      where: {
+        cancelled_at: { [Op.Ne]: null }
+      }
+    }).then(items => {
+      if(items.length == 0) {
+        return resolve(false)
+      } else if (items.length == 1) {
+        return resolve(true)
+      } else {
+        reject(new Error("Two or more subscriptions record"))
+      }
+    }).catch(err => reject(err))
+  )
 }
 
 module.exports = User

@@ -17,7 +17,4 @@ const Ticket = sequelize.define('ticket', {
   { timestamps: false }
 )
 
-const Partner = require('../partner/partner')
-Ticket.belongsTo(Partner)
-
 module.exports = Ticket

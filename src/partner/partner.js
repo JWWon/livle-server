@@ -32,5 +32,7 @@ Partner.fromHeaders = headers => new Promise( (resolve, reject) => {
     : Partner.findById(decoded.id).then(partner => resolve(partner)) )
 })
 
+const Ticket = require('../ticket/ticket')
+Partner.hasMany(Ticket, { foreignKey: { name: 'partner_id', allowNull: false } })
 
 module.exports = Partner

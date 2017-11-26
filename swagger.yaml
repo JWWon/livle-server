@@ -289,7 +289,30 @@ paths:
       tags:
         - ticket
       summary: '[관리자] 새로운 티켓 등록하기'
-      description: 아티스트 추가 미구현
+      parameters:
+        - name: Authorization
+          in: header
+          description: 세션 정보를 담고 있는 토큰
+          required: true
+          type: string
+        - name: ticket
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Ticket'
+      responses:
+        '200':
+          description: 성공
+          schema:
+            $ref: '#/definitions/Ticket'
+        '401':
+          description: 로그인되지 않음
+        '403':
+          description: 관리자가 아님
+    patch:
+      tags:
+        - ticket
+      summary: '[관리자] 등록된 티켓 정보 수정하기 [미구현]'
       parameters:
         - name: Authorization
           in: header

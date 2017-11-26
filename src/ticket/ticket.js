@@ -17,4 +17,7 @@ const Ticket = sequelize.define('ticket', {
   { timestamps: false }
 )
 
+const Artist = require('./artist')
+Ticket.hasMany(Artist, { foreignKey: { name: 'ticket_id', allowNull: false } })
+
 module.exports = Ticket

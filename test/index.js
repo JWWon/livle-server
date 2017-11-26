@@ -80,6 +80,7 @@ describe('User', function() {
 
   it('successful signin', function(done) {
     const callback = (error, result) => {
+      if(error) return done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
@@ -221,16 +222,34 @@ describe('File', function() {
 describe('Ticket', function() {
   it('successful creation', function(done) {
     const callback = (error, result) => {
+      if(error) return done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
-
 
     var date = new Date()
     date.setDate(date.getDate() + 5)
     test( handler.ticketCreate,
       { body: { title: '테스트 콘서트', start_at: date, end_at: date,
         image: "test", capacity: 100, place: "판교" } },
+      callback
+    )
+  })
+
+  it('successful creation with artists', function(done) {
+    const callback = (error, result) => {
+      console.log(result)
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    var date = new Date()
+    date.setDate(date.getDate() + 5)
+    test( handler.ticketCreate,
+      { body: { title: '테스트 콘서트', start_at: date, end_at: date,
+        image: "test", capacity: 100, place: "판교",
+        artists: [ { name: '아이유', image: 'iu', }, { name: 'asdf', image: 'qwer' } ],
+      } },
       callback
     )
   })

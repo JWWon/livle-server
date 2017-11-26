@@ -22,7 +22,7 @@ User.prototype.getToken = function() { // Arrow function cannot access 'this'
 }
 
 User.fromToken = token => new Promise( (resolve, reject) => !token ? reject() :
-  jwt.verify(token, secret, (err, decoded) =>
+  jwt.verify(token, secret, (err, decoded) => err ? reject(err) :
     User.findById(decoded.id)
     .then(user => user ? resolve(user) : reject(new Error("Not found")))
   )

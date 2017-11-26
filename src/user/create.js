@@ -1,33 +1,23 @@
 'use strict'
 const User = require('./user')
-const response = require('../response')
 const validator = require('email-validator')
 
-  /*
-const isValid = (email) => {
-  const regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-  return regex.test(email)
-}
-*/
-
-module.exports = (event, context, callback) => {
-  context.callbackWaitsForEmptyEventLoop = false
-
-  const data = JSON.parse(event.body)
-  if(!data.email || !data.password) {
-    return callback(null, response(400, null, "이메일과 비밀번호를 입력해주세요."))
+module.exports = (params, respond) => {
+  if(!params.body.email || !params.body.password) {
+    return respond(400, "이메일과 비밀번호를 입력해주세요.")
   }
 
-  if(!validator.validate(data.email))
-    return callback(null, response(405, null, "이메일의 형식이 잘못 되었습니다."))
+  if(!validator.validate(params.body.email)) {
+    return respond(405, "이메일의 형식이 잘못 되었습니다.")
+  }
 
-  return User.create({ email: data.email, password: data.password })
+  return User.create({ email: params.body.email, password: params.body.password })
     .then(user => {
       var userData = user.dataValues
       userData.password = null
       userData.token = user.getToken()
-      return callback(null, response(200, userData))
+      return respond(200, userData)
     }).catch(err => {
-      return callback(null, response(403, null, "이미 가입되어 있는 이메일 주소입니다."))
+      return respond(403, "이미 가입되어 있는 이메일 주소입니다.")
   })
 }

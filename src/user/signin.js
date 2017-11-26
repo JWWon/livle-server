@@ -1,21 +1,19 @@
 'use strict'
 
 const User = require('./user')
-const response = require('../response')
 
-module.exports = (event, context, callback) => {
-  context.callbackWaitsForEmptyEventLoop = false
+module.exports = (params, respond) => {
 
-  const email = event.queryStringParameters.email
-  const password = event.queryStringParameters.password
-  if(!email || !password) callback(new Error("[400] 이메일이나 비밀번호가 입력되지 않았습니다."))
+  if(!params.query.email || !params.query.password) {
+    respond(400, '이메일이나 비밀번호가 입력되지 않았습니다.')
+  }
 
-  return User.findOne({ where: { email: email, password: password } })
+  return User.findOne({ where: { email: params.query.email, password: params.query.password } })
     .then(user => {
-      var userData = user.dataValues
+      let userData = user.dataValues
       userData.password = null
       userData.token = user.getToken()
-      return callback(null, response(200, userData))
+      return respond(200, userData)
     })
-    .catch(err => callback(null, response(403, null, "일치하는 회원 정보가 없습니다.")))
+    .catch(err => respond(403, "일치하는 회원 정보가 없습니다."))
 }

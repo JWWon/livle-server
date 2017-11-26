@@ -14,7 +14,7 @@ module.exports = (event, context, callback) => {
       user.getSubscription()
       .then(subscription => {
         if(!subscription) {
-          return callback(new Error("[400] 구독 정보가 없습니다."))
+          return callback(new Error("[404] 구독 정보가 없습니다."))
         }
 
         return iamport.subscribe_customer.delete({

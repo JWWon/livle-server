@@ -15,7 +15,7 @@ tags:
   - name: reservation
     description: '콘서트 예약 정보 [미구현]'
   - name: subscription
-    description: '구독 정보 [미구현]'
+    description: 구독 정보
   - name: file
     description: 파일 관리
 schemes:
@@ -410,7 +410,7 @@ paths:
     get:
       tags:
         - subscription
-      summary: 구독 정보 (카드 등)
+      summary: '구독 정보 (카드 등) [미구현]'
       description: 근데 카드 정보가 안 나오는 거 같은데
       parameters:
         - name: Authorization
@@ -443,31 +443,45 @@ paths:
           type: string
         - name: payment
           in: body
+          required: true
           schema:
             type: object
             properties:
-              imp_uid:
+              cardNumber:
                 type: string
-                example: 아임포트 결제 아이디
+                example: 1111-2222-3333-4444
+              expiry:
+                type: string
+                example: 2018-03
+                description: 카드 유효기간
+              birth:
+                type: string
+                example: '920723'
+                description: 카드 소유자 생년월일 (주민번호 앞 6자리)
+              password:
+                type: string
+                description: 카드 비밀번호 앞 두자리
+                example: '12'
       responses:
         '200':
           description: 구독 성공
         '400':
-          description: 결제 아이디가 없음
+          description: 결제 정보 중 누락된 것이 있음
         '401':
-          description: 로그인되지 않음 (결제됐다면 취소)
-        '403':
-          description: 유효하지 않은 세션 (결제됐다면 취소)
-        '404':
-          description: 유효하지 않은 결제아이디
+          description: 로그인되지 않음
+        '405':
+          description: 이미 구독 중
     delete:
       tags:
         - subscription
       summary: 구독 취소
-      description: 결제 Validation 등
       responses:
         '200':
           description: 구독 취소 성공
+        '401':
+          description: 로그인되지 않음
+        '404':
+          description: 구독 중인 내역이 없음
   /file:
     get:
       tags:

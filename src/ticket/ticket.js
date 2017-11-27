@@ -1,5 +1,7 @@
+'use strict'
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
+const _ = require('lodash')
 
 const Ticket = sequelize.define('ticket', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
@@ -19,5 +21,27 @@ const Ticket = sequelize.define('ticket', {
 
 const Artist = require('./artist')
 Ticket.hasMany(Artist, { foreignKey: { name: 'ticket_id', allowNull: false } })
+
+Ticket.until = (until) => new Promise((resolve, reject) =>
+  Ticket.findAll({
+    where: {
+      start_at: { [S.Op.gt]: new Date(), [S.Op.lt]: until }
+    }
+  }).then(tickets =>
+    Promise.all(
+      _.map(tickets, t => t.getArtists())
+    ).then(artistsArray => resolve(
+      _.zipWith(
+        tickets, artistsArray,
+        (t, aArr) => {
+          let ticket = t.dataValues
+          let artists = _.map(aArr, a => a.dataValues)
+          ticket.artists = artists
+          return ticket
+        }
+      )
+    ))
+  ).catch(err => reject(err))
+)
 
 module.exports = Ticket

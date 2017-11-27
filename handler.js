@@ -35,7 +35,7 @@ module.exports.partnerSignin = require('./src/partner/signin')
 module.exports.partnerDestroy = require('./src/partner/destroy')
 
 module.exports.ticketCreate = lambda(require('./src/ticket/create'))
-module.exports.ticketGet = require('./src/ticket/get')
+module.exports.ticketGet = lambda(require('./src/ticket/get'))
 
 module.exports.fileUpload = require('./src/file/upload')
 

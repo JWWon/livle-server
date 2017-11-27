@@ -1,6 +1,5 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
-const Op = S.Op
 
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'
@@ -21,17 +20,19 @@ User.prototype.getToken = function() { // Arrow function cannot access 'this'
   return token
 }
 
-User.fromToken = token => new Promise( (resolve, reject) => !token ? reject() :
-  jwt.verify(token, secret, (err, decoded) => err ? reject(err) :
-    User.findById(decoded.id)
-    .then(user => user ? resolve(user) : reject(new Error("Not found")))
-  )
+User.fromToken = (token) =>
+  new Promise( (resolve, reject) => !token ? reject() :
+    jwt.verify(token, secret,
+      (err, decoded) => err ? reject(err) :
+      User.findById(decoded.id)
+      .then((user) => user ? resolve(user) : reject(new Error('Not found')))
+    )
 )
 
-User.checkSession = event => {
+User.checkSession = (event) => {
   const token = event.headers.Authorization
   if(!token) return null
-  try {
+  try{
     const user = jwt.verify(token, secret)
     return user.id
   } catch(e) {
@@ -40,19 +41,21 @@ User.checkSession = event => {
 }
 
 const Subscription = require('../subscription/subscription')
-User.hasMany(Subscription, { foreignKey: { name: 'user_id', allowNull: false } })
+User.hasMany(Subscription, {
+  foreignKey: { name: 'user_id', allowNull: false },
+})
 
 User.prototype.getSubscription = function() {
   return new Promise((resolve, reject) =>
-    this.getSubscriptions().then(items => {
+    this.getSubscriptions().then((items) => {
       if(items.length == 0) {
         return resolve(null)
-      } else if (items.length == 1) {
+      } else if(items.length == 1) {
         return resolve(items[0])
-      } else {
-        reject(new Error("Two or more subscriptions record"))
+      } else{
+        reject(new Error('Two or more subscriptions record'))
       }
-    }).catch(err => reject(err))
+    }).catch((err) => reject(err))
   )
 }
 

@@ -5,11 +5,11 @@ module.exports = (statusCode, body, message, headers) => {
   }
 
   headers = headers || {}
-  headers["Access-Control-Allow-Origin"] = "*"
+  headers['Access-Control-Allow-Origin'] = '*'
 
-  return {
+  return{
     statusCode: statusCode,
     headers: headers,
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   }
 }

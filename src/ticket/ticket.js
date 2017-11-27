@@ -14,7 +14,7 @@ const Ticket = sequelize.define('ticket', {
   music_id: S.STRING,
   video_id: S.STRING,
   article: S.STRING,
-  checkin_code: S.INTEGER
+  checkin_code: S.INTEGER,
 },
   { timestamps: false }
 )
@@ -25,23 +25,23 @@ Ticket.hasMany(Artist, { foreignKey: { name: 'ticket_id', allowNull: false } })
 Ticket.until = (until) => new Promise((resolve, reject) =>
   Ticket.findAll({
     where: {
-      start_at: { [S.Op.gt]: new Date(), [S.Op.lt]: until }
-    }
-  }).then(tickets =>
+      start_at: { [S.Op.gt]: new Date(), [S.Op.lt]: until },
+    },
+  }).then((tickets) =>
     Promise.all(
-      _.map(tickets, t => t.getArtists())
-    ).then(artistsArray => resolve(
+      _.map(tickets, (t) => t.getArtists())
+    ).then((artistsArray) => resolve(
       _.zipWith(
         tickets, artistsArray,
         (t, aArr) => {
           let ticket = t.dataValues
-          let artists = _.map(aArr, a => a.dataValues)
+          let artists = _.map(aArr, (a) => a.dataValues)
           ticket.artists = artists
           return ticket
         }
       )
     ))
-  ).catch(err => reject(err))
+  ).catch((err) => reject(err))
 )
 
 module.exports = Ticket

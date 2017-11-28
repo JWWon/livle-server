@@ -1,6 +1,6 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const saltRounds = 10
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'

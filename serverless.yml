@@ -114,6 +114,13 @@ functions:
           path: subscription
           method: post
           cors: true
+  subscriptionGet:
+    handler: handler.subscriptionGet
+    events:
+      - http:
+          path: subscription
+          method: get
+          cors: true
   subscriptionDelete:
     handler: handler.subscriptionDelete
     events:

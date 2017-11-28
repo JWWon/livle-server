@@ -1,6 +1,7 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
-
+const bcrypt = require('bcrypt')
+const saltRounds = 10
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'
 
@@ -39,6 +40,64 @@ User.checkSession = (event) => {
     return null
   }
 }
+
+User.signUp = (email, password) => new Promise((resolve, reject) =>
+  bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
+    : User.create({
+      email: email,
+      password: hash
+    }).then((user) => {
+      let userData = user.dataValues
+      userData.password = undefined
+      userData.token = user.getToken()
+      return resolve(userData)
+    }).catch((err) => reject(err))
+  )
+)
+
+User.signIn = (email, password) => new Promise((resolve, reject) =>
+  User.findOne({
+    where: {
+      email: email
+    },
+  }).then((user) =>
+    bcrypt.compare(password, user.password, (err, res) => {
+      if(err) return reject(err)
+      if(res) {
+        let userData = user.dataValues
+        userData.password = undefined
+        userData.token = user.getToken()
+        return resolve(userData)
+      } else {
+        reject('WRONG_PASSWORD')
+      }
+    })
+  ).catch((err) => reject('NOT_FOUND'))
+)
+
+User.dropOut = (email, password) => new Promise((resolve, reject) =>
+  User.findOne({
+    where: {
+      email: email
+    },
+  }).then((user) =>
+    bcrypt.compare(password, user.password, (err, res) => {
+      if(err) return reject(err)
+      if(res) {
+        user.getSubscription()
+          .then((sub) => sub ? reject('SUBSCRIBING')
+            : User.destroy({
+              where: {
+                email: email
+              }
+            }).then(() => resolve())
+          ).catch(err => reject(err))
+      } else {
+        reject('WRONG_PASSWORD')
+      }
+    })
+  ).catch((err) => reject('NOT_FOUND'))
+)
 
 const Subscription = require('../subscription/subscription')
 User.hasMany(Subscription, {

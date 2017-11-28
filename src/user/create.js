@@ -11,16 +11,7 @@ module.exports = (params, respond) => {
     return respond(405, '이메일의 형식이 잘못 되었습니다.')
   }
 
-  return User.create({
-    email: params.body.email,
-    password: params.body.password,
-  })
-    .then((user) => {
-      let userData = user.dataValues
-      userData.password = null
-      userData.token = user.getToken()
-      return respond(200, userData)
-    }).catch((err) => {
-      return respond(403, '이미 가입되어 있는 이메일 주소입니다.')
-  })
+  return User.signUp(params.body.email, params.body.password)
+    .then((user) => respond(200, user))
+    .catch((err) => respond(403, '이미 가입되어 있는 이메일 주소입니다.'))
 }

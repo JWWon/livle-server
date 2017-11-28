@@ -41,7 +41,7 @@ module.exports = (params, respond) => {
         // 빌링 키 발급 프로세스
         return Subscription.create({
           user_id: user.id,
-          last_four_digits: data.cardNumber.slice(-4)
+          last_four_digits: data.cardNumber.slice(-4),
         }).then((subscription) =>
           iamport.subscribe_customer.create({
             customer_uid: subscription.id,

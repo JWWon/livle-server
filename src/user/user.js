@@ -41,11 +41,17 @@ User.checkSession = (event) => {
   }
 }
 
+User.REJECTIONS = {
+  WRONG_PASSWORD: 'wrong_password',
+  SUBSCRIBING: 'subscribing',
+  NOT_FOUND: 'not_found',
+}
+
 User.signUp = (email, password) => new Promise((resolve, reject) =>
   bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
     : User.create({
       email: email,
-      password: hash
+      password: hash,
     }).then((user) => {
       let userData = user.dataValues
       userData.password = undefined
@@ -58,7 +64,7 @@ User.signUp = (email, password) => new Promise((resolve, reject) =>
 User.signIn = (email, password) => new Promise((resolve, reject) =>
   User.findOne({
     where: {
-      email: email
+      email: email,
     },
   }).then((user) =>
     bcrypt.compare(password, user.password, (err, res) => {
@@ -68,35 +74,35 @@ User.signIn = (email, password) => new Promise((resolve, reject) =>
         userData.password = undefined
         userData.token = user.getToken()
         return resolve(userData)
-      } else {
-        reject('WRONG_PASSWORD')
+      } else{
+        reject(User.REJECTIONS.WRONG_PASSWORD)
       }
     })
-  ).catch((err) => reject('NOT_FOUND'))
+  ).catch((err) => reject(User.REJECTIONS.NOT_FOUND))
 )
 
 User.dropOut = (email, password) => new Promise((resolve, reject) =>
   User.findOne({
     where: {
-      email: email
+      email: email,
     },
   }).then((user) =>
     bcrypt.compare(password, user.password, (err, res) => {
       if(err) return reject(err)
       if(res) {
         user.getSubscription()
-          .then((sub) => sub ? reject('SUBSCRIBING')
+          .then((sub) => sub ? reject(User.REJECTIONS.SUBSCRIBING)
             : User.destroy({
               where: {
-                email: email
-              }
+                email: email,
+              },
             }).then(() => resolve())
-          ).catch(err => reject(err))
-      } else {
-        reject('WRONG_PASSWORD')
+          ).catch((err) => reject(err))
+      } else{
+        reject(User.REJECTIONS.WRONG_PASSWORD)
       }
     })
-  ).catch((err) => reject('NOT_FOUND'))
+  ).catch((err) => reject(User.REJECTIONS.NOT_FOUND))
 )
 
 const Subscription = require('../subscription/subscription')

@@ -18,6 +18,7 @@ describe('User', function() {
   it('successful creation', function(done) {
     const callback = (error, result) => {
       if(error) done(error)
+      expect(result.statusCode).to.equal(200)
       const res = JSON.parse(result.body)
       authToken = res.token
       expect(result).to.exist
@@ -147,7 +148,7 @@ describe('Subscription', function() {
       if(error) return done(error)
       expect(result.statusCode).to.equal(200)
       const res = JSON.parse(result.body)
-      expect(res.lastFourDigits).to.equal(cardNumber.slice(-4))
+      expect(res.last_four_digits).to.equal(cardNumber.slice(-4))
       done()
     }
 

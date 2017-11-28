@@ -155,7 +155,6 @@ paths:
           in: query
           type: string
           required: true
-          description: 암호화된 형식으로 전송되어야 함
       responses:
         '200':
           description: 로그인 성공
@@ -164,7 +163,9 @@ paths:
         '400':
           description: 이메일 또는 비밀번호가 없거나 잘못됨
         '403':
-          description: 일치하는 회원이 없음
+          description: 해당 아이디로 가입된 정보는 있으나 비밀번호가 틀림
+        '404':
+          description: 해당 아이디로 가입된 정보가 없음
     delete:
       tags:
         - user
@@ -433,8 +434,7 @@ paths:
     get:
       tags:
         - subscription
-      summary: '구독 정보 (카드 등) [미구현]'
-      description: 근데 카드 정보가 안 나오는 거 같은데
+      summary: 구독 정보 (카드 등)
       parameters:
         - name: Authorization
           in: header
@@ -449,6 +449,13 @@ paths:
             properties:
               card_name:
                 type: string
+                example: 신한카드
+              last_four_digits:
+                type: string
+                example: '1234'
+              latest_paid_at:
+                type: string
+                example: '2017-11-28T09:14:47.558Z'
         '401':
           description: 로그인되지 않음
         '404':
@@ -488,6 +495,18 @@ paths:
       responses:
         '200':
           description: 구독 성공
+          schema:
+            type: object
+            properties:
+              card_name:
+                type: string
+                example: 신한카드
+              last_four_digits:
+                type: string
+                example: '1234'
+              latest_paid_at:
+                type: string
+                example: '2017-11-28T09:14:47.558Z'
         '400':
           description: 결제 정보 중 누락된 것이 있음
         '401':

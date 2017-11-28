@@ -17,13 +17,11 @@ module.exports = (params, respond) => {
         return iamport.subscribe_customer.get({
           customer_uid: subscription.id,
         }).then((res) => respond(200, {
-          cardName: res.card_name,
-          latestPaidAt: subscription.latest_paid_at,
-          lastFourDigits: subscription.last_four_digits,
+          card_name: res.card_name,
+          latest_paid_at: subscription.latest_paid_at,
+          last_four_digits: subscription.last_four_digits,
         })
-        ).catch((err) =>
-          respond(500, err)
-        )
+        ).catch((err) => respond(500, err))
       })
     ).catch((err) =>
       respond(401, '로그인이 필요합니다.')

@@ -15,7 +15,7 @@ const doPay = (subscription) =>
       name: '라이블 정기구독권 결제',
     }).then((res) =>
       subscription.update({ latest_paid_at: new Date() })
-      .then((res) => resolve())
+      .then((res) => resolve(res))
       .catch((err) =>
         reject(new Error('결제 내용을 업데이트 하는 도중 오류가 발생했습니다. 관리자에게 문의하세요.'))
       )
@@ -49,9 +49,13 @@ module.exports = (params, respond) => {
             expiry: data.expiry,
             birth: data.birth,
             pwd_2digit: data.password,
-          }).then((res) => {
+          }).then((payRes) => {
             return doPay(subscription)
-              .then((res) => respond(200))
+              .then((subRes) => respond(200, {
+                card_name: payRes.card_name,
+                latest_paid_at: subRes.latest_paid_at,
+                last_four_digits: subRes.last_four_digits,
+              }))
           }).catch((err) =>
             subscription.destroy().then((res) => respond(500, err))
           )

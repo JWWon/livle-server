@@ -14,16 +14,13 @@ module.exports = (params, respond) => {
           return respond(404, '구독 정보가 없습니다.')
         }
 
-        return iamport.subscribe_customer.delete({
+        return iamport.subscribe_customer.get({
           customer_uid: subscription.id,
-        }).then((res) =>
-          subscription.destroy().then((res) =>
-            respond(200)
-          )
-          /*
-          subscription.update({ cancelled_at: new Date() })
-          .then(res => callback(null, response(200)))
-          */
+        }).then((res) => respond(200, {
+          cardName: res.card_name,
+          latestPaidAt: subscription.latest_paid_at,
+          lastFourDigits: subscription.last_four_digits,
+        })
         ).catch((err) =>
           respond(500, err)
         )

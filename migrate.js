@@ -31,5 +31,14 @@ const migrateTables = () =>
 
 dropTables.then(() => migrateTables()).then(() => {
   console.log("Migration succeeded")
-  process.exit()
+  Partner.create({ username: 'admin@livle.kr',
+    password: 'livle',
+    company: 'Livle',
+    approved: true
+  }).then(() => {
+    console.log('Admin account created')
+    process.exit()
+  }).catch((err) => {
+    console.error('Failed to create admin account', err)
+  })
 })

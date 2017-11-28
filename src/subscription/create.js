@@ -39,21 +39,23 @@ module.exports = (params, respond) => {
           return respond(405, '이미 구독 중입니다.')
         }
         // 빌링 키 발급 프로세스
-        return Subscription.create({ user_id: user.id })
-          .then((subscription) =>
-            iamport.subscribe_customer.create({
-              customer_uid: subscription.id,
-              card_number: data.cardNumber,
-              expiry: data.expiry,
-              birth: data.birth,
-              pwd_2digit: data.password,
-            }).then((res) => {
-              return doPay(subscription)
-                .then((res) => respond(200))
-            }).catch((err) =>
-              subscription.destroy().then((res) => respond(500, err))
-            )
+        return Subscription.create({
+          user_id: user.id,
+          last_four_digits: data.cardNumber.slice(-4)
+        }).then((subscription) =>
+          iamport.subscribe_customer.create({
+            customer_uid: subscription.id,
+            card_number: data.cardNumber,
+            expiry: data.expiry,
+            birth: data.birth,
+            pwd_2digit: data.password,
+          }).then((res) => {
+            return doPay(subscription)
+              .then((res) => respond(200))
+          }).catch((err) =>
+            subscription.destroy().then((res) => respond(500, err))
           )
+        )
       })
     ).catch((err) => respond(401, '로그인이 필요합니다.'))
 }

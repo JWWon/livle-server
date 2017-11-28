@@ -96,6 +96,7 @@ describe('User', function() {
 describe('Ticket', function() {
   it('successful retrieve of list', function(done) {
     const callback = (error, result) => {
+      if(error) return done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
@@ -108,7 +109,13 @@ describe('Ticket', function() {
 })
 
 describe('Subscription', function() {
+  const cardNumber = '1111-2222-3333-4444'
+  const expiry = '2017-12'
+  const birth = '920723'
+  const password = '00'
+
   it('successful subscription', function(done) {
+    this.timeout(5000)
     const callback = (error, result) => {
       if(error) return done(error)
       expect(result.statusCode).to.equal(200)
@@ -116,7 +123,21 @@ describe('Subscription', function() {
     }
 
     test( handler.subscriptionCreate,
-      { body: { cardNumber: '1111-2222-3333-4444', expiry: '2017-12', birth: '920723', password: '00'} },
+      { body: { cardNumber: cardNumber, expiry: expiry, birth: birth, password: password} },
+      callback
+    )
+  })
+
+  it('subscription fails if already subscribing', function(done) {
+    this.timeout(5000)
+    const callback = (error, result) => {
+      if(error) return done(error)
+      expect(result.statusCode).to.equal(405)
+      done()
+    }
+
+    test( handler.subscriptionCreate,
+      { body: { cardNumber: cardNumber, expiry: expiry, birth: birth, password: password} },
       callback
     )
   })

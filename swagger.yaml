@@ -356,7 +356,7 @@ paths:
     post:
       tags:
         - ticket
-      summary: '티켓 예약하기 [미구현]'
+      summary: 티켓 예약하기
       produces:
         - application/json
       parameters:
@@ -371,14 +371,10 @@ paths:
           description: 예약 성공
           schema:
             $ref: '#/definitions/Reservation'
-        '401':
-          description: 로그인되지 않음
-        '402':
-          description: 구독 중인 유저가 아니거나 패널티를 받고 있음
-        '403':
-          description: 남은 좌석이 없음
-        '404':
-          description: 존재하지 않는 티켓
+        '400':
+          description: >-
+            실패 - (ticket_not_found : 존재하지 않는 티켓, overdue: 기한이 지난 티켓, no_vacancy:
+            잔여 좌석없음, no_permission: 구독 중인 유저가 아니거나 패널티를 받고 있음)
   /reservation:
     get:
       tags:
@@ -642,10 +638,18 @@ definitions:
       id:
         type: integer
         format: int64
+      user_id:
+        type: integer
+        format: int64
       ticket_id:
         type: integer
         format: int64
+      status:
+        type: string
+        example: valid
+        description: 'valid, cancelled, noshow 중 하나'
+      created_at:
+        type: string
       checked_at:
-        type: integer
-        format: int64
+        type: string
         description: '체크인한 시간 (js Date type), null if not checked in'

@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "description": "Livle server with serverless framework for aws lambda",
   "scripts": {
+    "deploy": "eslint src & serverless deploy",
     "lint": "eslint src",
-    "test": "mocha"
+    "test": "eslint src & mocha"
   },
   "author": "",
   "license": "MIT",

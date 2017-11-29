@@ -95,8 +95,8 @@ describe('User', function() {
 
 })
 
+let ticket
 describe('Ticket', function() {
-  let ticket
   it('successful retrieve of list', function(done) {
     const callback = (error, result) => {
       if(error) return done(error)
@@ -172,6 +172,34 @@ describe('Subscription', function() {
 
     test( handler.subscriptionGet,
       { },
+      callback
+    )
+  })
+
+  it('successful reservation', function(done) {
+    const callback = (error, result) => {
+      if(error) return done(error)
+      console.log(result)
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.ticketReserve,
+      { path: { ticketId: ticket.id } },
+      callback
+    )
+  })
+
+  it('reservation failure on duplicate', function(done) {
+    const callback = (error, result) => {
+      if(error) return done(error)
+      console.log(result)
+      expect(result.statusCode).to.equal(400)
+      done()
+    }
+
+    test( handler.ticketReserve,
+      { path: { ticketId: ticket.id } },
       callback
     )
   })

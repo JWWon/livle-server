@@ -10,7 +10,7 @@ module.exports = (event, context, callback) => {
 
   return Partner.fromHeaders(event.headers)
     .then((partner) => {
-      if(partner.username != 'admin@livle.kr') {
+      if (partner.username != 'admin@livle.kr') {
         return callback(new Error('[403] 관리자만 추가할 수 있습니다.'))
       }
 

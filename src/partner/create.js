@@ -6,7 +6,7 @@ module.exports = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   const data = JSON.parse(event.body)
-  if(!data.username || !data.password || !data.company) {
+  if (!data.username || !data.password || !data.company) {
     return callback(null, response(400, null, '필요한 정보를 모두 입력해주세요.'))
   }
 

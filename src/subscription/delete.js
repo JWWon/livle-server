@@ -10,7 +10,7 @@ module.exports = (params, respond) => {
     .then((user) =>
       user.getSubscription()
       .then((subscription) => {
-        if(!subscription) {
+        if (!subscription) {
           return respond(404, '구독 정보가 없습니다.')
         }
 

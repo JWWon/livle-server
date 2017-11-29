@@ -13,7 +13,7 @@ module.exports = (params, respond) => {
       .catch((err) => respond(500, err))
   }
 
-  if(User.checkSession({ headers: { Authorization: params.auth } })) {
+  if (User.checkSession({ headers: { Authorization: params.auth } })) {
     return getTickets()
   }
   Partner.fromHeaders({ Authorization: params.auth })

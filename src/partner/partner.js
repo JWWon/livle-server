@@ -27,7 +27,7 @@ Partner.prototype.getToken = function() {
 
 Partner.fromHeaders = (headers) => new Promise( (resolve, reject) => {
   const token = ( headers && headers.Authorization ) || null
-  if(!token) return reject()
+  if (!token) return reject()
   return jwt.verify(token, secret, (err, decoded) => err ? reject(err)
     : Partner.findById(decoded.id).then((partner) => resolve(partner)) )
 })

@@ -3,11 +3,11 @@ const User = require('./user')
 const validator = require('email-validator')
 
 module.exports = (params, respond) => {
-  if(!params.body.email || !params.body.password) {
+  if (!params.body.email || !params.body.password) {
     return respond(400, '이메일과 비밀번호를 입력해주세요.')
   }
 
-  if(!validator.validate(params.body.email)) {
+  if (!validator.validate(params.body.email)) {
     return respond(405, '이메일의 형식이 잘못 되었습니다.')
   }
 

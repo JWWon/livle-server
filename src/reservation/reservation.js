@@ -19,7 +19,7 @@ Reservation.REJECTIONS = {
   TICKET_NOT_FOUND: 'ticket_not_found',
   OVERDUE: 'overdue',
   NO_VANCANCY: 'no_vacancy',
-  NO_PERMISSION: 'no_permission'
+  NO_PERMISSION: 'no_permission',
 }
 
 const R = Reservation.REJECTIONS
@@ -33,18 +33,18 @@ Reservation.make = (user, ticket_id) =>
   new Promise((resolve, reject) =>
     Ticket.findOne({
       where: {
-        id: ticket_id
-      }
+        id: ticket_id,
+      },
     }).then((ticket) => {
-      if(ticket.start_at < new Date()) {
+      if (ticket.start_at < new Date()) {
         return reject(R.OVERDUE)
       }
       return user.reservable().then((reservable) => {
-        if(!reservable) return reject(R.NO_PERMISSION)
+        if (!reservable) return reject(R.NO_PERMISSION)
         return sequelize.transaction((t) =>
           ticket.getReservations({ transaction: t })
           .then((reservations) => {
-            if(reservations.length < ticket.capacity) {
+            if (reservations.length < ticket.capacity) {
               return Reservation.create({
                 ticket_id: ticket.id,
                 user_id: user.id,
@@ -57,7 +57,9 @@ Reservation.make = (user, ticket_id) =>
         ).then((result) => resolve(result))
           .catch((err) => reject(err))
       }).catch((err) => reject(err))
-    }).catch((err) => { console.error(err); reject(R.TICKET_NOT_FOUND) })
+    }).catch((err) => {
+ console.error(err); reject(R.TICKET_NOT_FOUND)
+})
   )
 
 module.exports = Reservation

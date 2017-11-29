@@ -32,11 +32,11 @@ User.fromToken = (token) =>
 
 User.checkSession = (event) => {
   const token = event.headers.Authorization
-  if(!token) return null
-  try{
+  if (!token) return null
+  try {
     const user = jwt.verify(token, secret)
     return user.id
-  } catch(e) {
+  } catch (e) {
     return null
   }
 }
@@ -68,13 +68,13 @@ User.signIn = (email, password) => new Promise((resolve, reject) =>
     },
   }).then((user) =>
     bcrypt.compare(password, user.password, (err, res) => {
-      if(err) return reject(err)
-      if(res) {
+      if (err) return reject(err)
+      if (res) {
         let userData = user.dataValues
         userData.password = undefined
         userData.token = user.getToken()
         return resolve(userData)
-      } else{
+      } else {
         reject(User.REJECTIONS.WRONG_PASSWORD)
       }
     })
@@ -88,8 +88,8 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
     },
   }).then((user) =>
     bcrypt.compare(password, user.password, (err, res) => {
-      if(err) return reject(err)
-      if(res) {
+      if (err) return reject(err)
+      if (res) {
         user.getSubscription()
           .then((sub) => sub ? reject(User.REJECTIONS.SUBSCRIBING)
             : User.destroy({
@@ -98,7 +98,7 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
               },
             }).then(() => resolve())
           ).catch((err) => reject(err))
-      } else{
+      } else {
         reject(User.REJECTIONS.WRONG_PASSWORD)
       }
     })
@@ -113,11 +113,11 @@ User.hasMany(Subscription, {
 User.prototype.getSubscription = function() {
   return new Promise((resolve, reject) =>
     this.getSubscriptions().then((items) => {
-      if(items.length == 0) {
+      if (items.length == 0) {
         return resolve(null)
-      } else if(items.length == 1) {
+      } else if (items.length == 1) {
         return resolve(items[0])
-      } else{
+      } else {
         reject(new Error('Two or more subscriptions record'))
       }
     }).catch((err) => reject(err))
@@ -127,7 +127,7 @@ User.prototype.getSubscription = function() {
 User.prototype.reservable = function() {
   return new Promise((resolve, reject) =>
     this.getSubscription().then((sub) => {
-      if(!sub || sub.suspended_by && new Date() < sub.suspended_by) {
+      if (!sub || sub.suspended_by && new Date() < sub.suspended_by) {
         return resolve(false)
       }
       return resolve(true)

@@ -6,7 +6,7 @@ module.exports = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   const data = JSON.parse(event.body)
-  if(!data.username || !data.password) {
+  if (!data.username || !data.password) {
     return callback(null, response(400, null, '아이디와 비밀번호를 입력해주세요.'))
   }
 

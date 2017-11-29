@@ -3,7 +3,7 @@ module.exports = {
   "rules": {
     "semi": [1, "never"],
     "object-curly-spacing": ["error", "always"],
-    "keyword-spacing": ["error", { "before": true, "after": false }]
+    "camelcase": ["warn", { "properties": "never" }],
   },
   "parserOptions": {
     "ecmaVersion": 6

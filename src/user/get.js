@@ -3,7 +3,7 @@
 const User = require('./user')
 
 module.exports = (params, respond) => {
-  if(!params.auth) return respond(401, '로그인되지 않았습니다.')
+  if (!params.auth) return respond(401, '로그인되지 않았습니다.')
 
   return User.fromToken(params.auth)
     .then((user) => respond(200, user.dataValues))

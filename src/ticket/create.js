@@ -7,7 +7,7 @@ const _ = require('lodash')
 module.exports = (params, respond) =>
   Partner.fromHeaders({ Authorization: params.auth })
     .then((partner) => {
-      if(partner.username != 'admin@livle.kr') {
+      if (partner.username != 'admin@livle.kr') {
         return respond(403, '관리자만 추가할 수 있습니다.')
       }
       const artistParams = params.body.artists || []

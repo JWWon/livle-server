@@ -24,7 +24,7 @@ const doPay = (subscription) =>
 
 module.exports = (params, respond) => {
   const data = params.body
-  if( !(
+  if ( !(
     data && data.cardNumber && data.expiry && data.birth && data.password
   ) ) {
     return respond(400, '결제 정보가 누락되었습니다.')
@@ -35,7 +35,7 @@ module.exports = (params, respond) => {
     .then((user) =>
       user.getSubscription()
       .then((sub) => {
-        if(sub) {
+        if (sub) {
           return respond(405, '이미 구독 중입니다.')
         }
         // 빌링 키 발급 프로세스

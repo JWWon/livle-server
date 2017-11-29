@@ -1,6 +1,5 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
-const Ticket = require('../ticket/ticket')
 
 const Reservation = sequelize.define('reservation', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
@@ -12,35 +11,53 @@ const Reservation = sequelize.define('reservation', {
     unique: true,
     fields: ['user_id', 'ticket_id'],
     where: {
-      deleted_at: null
-    }
-  }]})
+      deleted_at: null,
+    },
+  }] })
 
-Reservation.REJECTIONS = { TICKET_NOT_FOUND: 'ticket_not_found', OVERDUE: 'overdue', NO_VANCANCY: 'no_vacancy' }
+Reservation.REJECTIONS = {
+  TICKET_NOT_FOUND: 'ticket_not_found',
+  OVERDUE: 'overdue',
+  NO_VANCANCY: 'no_vacancy',
+  NO_PERMISSION: 'no_permission'
+}
+
 const R = Reservation.REJECTIONS
+
+const Ticket = require('../ticket/ticket')
+Ticket.hasMany(Reservation, {
+  foreignKey: { name: 'ticket_id', allowNull: false },
+})
+
 Reservation.make = (user, ticket_id) =>
   new Promise((resolve, reject) =>
-    Ticket.find_by({ id: ticket_id })
-    .then((ticket) => {
-      if(ticket.start_at > new Date()) {
+    Ticket.findOne({
+      where: {
+        id: ticket_id
+      }
+    }).then((ticket) => {
+      if(ticket.start_at < new Date()) {
         return reject(R.OVERDUE)
       }
-      return S.transaction((t) =>
-        ticket.getReservations({ transaction: t })
-        .then((reservations) => {
-          if(reservations.count < ticket.capacity) {
-            return Reservation.create({
-              ticket_id: ticket.id,
-              user_id: user.id,
-              status: 'valid' },
-              { transaction: t })
-          } else {
-            throw new Error(R.NO_VANCANCY)
-          }
-        })
-      ).then((result) => resolve(result))
-        .catch((err) => reject(err))
-    }).catch((err) => reject(R.TICKET_NOT_FOUND))
+      return user.reservable().then((reservable) => {
+        if(!reservable) return reject(R.NO_PERMISSION)
+        return sequelize.transaction((t) =>
+          ticket.getReservations({ transaction: t })
+          .then((reservations) => {
+            if(reservations.length < ticket.capacity) {
+              return Reservation.create({
+                ticket_id: ticket.id,
+                user_id: user.id,
+                status: 'valid' },
+                { transaction: t })
+            } else {
+              throw new Error(R.NO_VANCANCY)
+            }
+          })
+        ).then((result) => resolve(result))
+          .catch((err) => reject(err))
+      }).catch((err) => reject(err))
+    }).catch((err) => { console.error(err); reject(R.TICKET_NOT_FOUND) })
   )
 
 module.exports = Reservation

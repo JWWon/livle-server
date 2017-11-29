@@ -7,7 +7,8 @@ var authToken = ''
 var headers = {}
 
 const test = (func, params, callback) => {
-  func({ headers: { Authorization: authToken }, body: JSON.stringify(params.body), queryStringParameters: params.query }, {}, callback)
+  func({ headers: { Authorization: authToken }, body: JSON.stringify(params.body),
+    queryStringParameters: params.query, pathParameters: params.path }, {}, callback)
 }
 
 const userEmail = 'test@test.com'
@@ -95,15 +96,32 @@ describe('User', function() {
 })
 
 describe('Ticket', function() {
+  let ticket
   it('successful retrieve of list', function(done) {
     const callback = (error, result) => {
       if(error) return done(error)
       expect(result.statusCode).to.equal(200)
+      const res = JSON.parse(result.body)
+      ticket = res[0]
       done()
     }
 
     test( handler.ticketGet,
       {},
+      callback
+    )
+  })
+
+  it('reservation failure with no subscription', function(done) {
+    const callback = (error, result) => {
+      if(error) return done(error)
+      console.log(result)
+      expect(result.statusCode).to.equal(400)
+      done()
+    }
+
+    test( handler.ticketReserve,
+      { path: { ticketId: ticket.id } },
       callback
     )
   })

@@ -126,12 +126,12 @@ User.prototype.getSubscription = function() {
 
 User.prototype.reservable = function() {
   return new Promise((resolve, reject) =>
-    this.getSubscription().then(sub => {
-      if(sub.suspended_by && new Date() < sub.suspended_by) {
+    this.getSubscription().then((sub) => {
+      if(!sub || sub.suspended_by && new Date() < sub.suspended_by) {
         return resolve(false)
       }
       return resolve(true)
-    }).catch(err => reject())
+    }).catch((err) => reject(err))
   )
 }
 

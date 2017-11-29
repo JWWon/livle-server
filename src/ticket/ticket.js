@@ -44,9 +44,4 @@ Ticket.until = (until) => new Promise((resolve, reject) =>
   ).catch((err) => reject(err))
 )
 
-const Reservation = require('../reservation/reservation')
-Ticket.hasMany(Reservation, {
-  foreignKey: { name: 'ticket_id', allowNull: false },
-})
-
 module.exports = Ticket

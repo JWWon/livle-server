@@ -19,6 +19,7 @@ const lambda = (func) => {
     //params.path =
     params.query = event.queryStringParameters
     params.auth = event.headers && event.headers.Authorization
+    params.path = event.pathParameters
 
     func(params, respond)
   }
@@ -36,6 +37,7 @@ module.exports.partnerDestroy = require('./src/partner/destroy')
 
 module.exports.ticketCreate = lambda(require('./src/ticket/create'))
 module.exports.ticketGet = lambda(require('./src/ticket/get'))
+module.exports.ticketReserve = lambda(require('./src/ticket/reserve'))
 
 module.exports.fileUpload = require('./src/file/upload')
 

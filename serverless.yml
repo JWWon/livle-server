@@ -31,10 +31,10 @@ provider:
     IMP_SECRET: ${file(./keys.yml):IMP_SECRET}
   vpc:
     securityGroupIds:
-      - "Fn::GetAtt": ServerlessSecurityGroup.GroupId
+      - "Fn::GetAtt": LivleSecurityGroup.GroupId
     subnetIds:
-      - Ref: ServerlessSubnetA
-      - Ref: ServerlessSubnetB
+      - Ref: LivleSubnetA
+      - Ref: LivleSubnetC
 
 functions:
   userCreate:
@@ -131,60 +131,156 @@ functions:
 
 resources:
   Resources:
-    ServerlessVPC:
+    LivleVPC:
       Type: AWS::EC2::VPC
       Properties:
         CidrBlock: "10.0.0.0/16"
-    ServerlessSubnetA:
-      DependsOn: ServerlessVPC
+        EnableDnsHostnames: true # For RDS to be publicly accessible
+    LivleSubnetA:
+      DependsOn: LivleVPC
       Type: AWS::EC2::Subnet
       Properties:
         VpcId:
-          Ref: ServerlessVPC
+          Ref: LivleVPC
         AvailabilityZone: ${self:provider.region}a
         CidrBlock: "10.0.0.0/24"
-    ServerlessSubnetB:
-      DependsOn: ServerlessVPC
+        Tags:
+          - Key: 'Name'
+            Value: 'LivleSubnetA'
+    LivleSubnetC:
+      DependsOn: LivleVPC
       Type: AWS::EC2::Subnet
       Properties:
         VpcId:
-          Ref: ServerlessVPC
+          Ref: LivleVPC
         AvailabilityZone: ${self:provider.region}c
         CidrBlock: "10.0.1.0/24"
-    ServerlessSecurityGroup:
-      DependsOn: ServerlessVPC
+        Tags:
+          - Key: 'Name'
+            Value: 'LivleSubnetC'
+    LivleSubnetIgw:
+      DependsOn: LivleVPC
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId:
+          Ref: LivleVPC
+        AvailabilityZone: ${self:provider.region}c
+        CidrBlock: "10.0.2.0/24"
+        Tags:
+          - Key: 'Name'
+            Value: 'LivleSubnetIgw'
+    LivleInternetGateway:
+      Type: AWS::EC2::InternetGateway
+    LivleIgwAttachment:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        InternetGatewayId:
+          Ref: LivleInternetGateway
+        VpcId:
+          Ref: LivleVPC
+    LivleIgwRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId:
+          Ref: LivleVPC
+        Tags:
+          - Key: 'Name'
+            Value: 'LivleIgwRouteTable'
+    LivleIgwRoute:
+      Type: AWS::EC2::Route
+      Properties:
+        DestinationCidrBlock: '0.0.0.0/0'
+        GatewayId:
+          Ref: LivleInternetGateway
+        RouteTableId:
+          Ref: LivleIgwRouteTable
+    LivleIgwRTSubnet:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId:
+          Ref: LivleIgwRouteTable
+        SubnetId:
+          Ref: LivleSubnetIgw
+    LivleNatEIP:
+      Type: AWS::EC2::EIP
+      Properties:
+        Domain: 'vpc'
+    LivleNatGateway:
+      Type: AWS::EC2::NatGateway
+      Properties:
+        AllocationId:
+          "Fn::GetAtt": LivleNatEIP.AllocationId
+        SubnetId:
+          Ref: LivleSubnetIgw
+    LivleNatRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId:
+          Ref: LivleVPC
+        Tags:
+          - Key: 'Name'
+            Value: 'LivleNatRouteTable'
+    LivleNatRoute:
+      Type: AWS::EC2::Route
+      Properties:
+        DestinationCidrBlock: '0.0.0.0/0'
+        NatGatewayId:
+          Ref: LivleNatGateway
+        RouteTableId:
+          Ref: LivleNatRouteTable
+    LivleNatSubnetA:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId:
+          Ref: LivleNatRouteTable
+        SubnetId:
+          Ref: LivleSubnetA
+    LivleNatSubnetC:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId:
+          Ref: LivleNatRouteTable
+        SubnetId:
+          Ref: LivleSubnetC
+    LivleSecurityGroup:
+      DependsOn: LivleVPC
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: SecurityGroup for Serverless Functions
         VpcId:
-          Ref: ServerlessVPC
-    ServerlessStorageSecurityGroup:
-      DependsOn: ServerlessVPC
+          Ref: LivleVPC
+    LivleStorageSecurityGroup:
+      DependsOn: LivleVPC
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: Ingress for Memcached Cluster & RDS Instance
         VpcId:
-          Ref: ServerlessVPC
+          Ref: LivleVPC
         SecurityGroupIngress:
           - IpProtocol: tcp
             FromPort: '3306'
             ToPort: '3306'
+            CidrIp: '0.0.0.0/0' # For development purpose
+          - IpProtocol: tcp
+            FromPort: '3306'
+            ToPort: '3306'
             SourceSecurityGroupId:
-              Ref: ServerlessSecurityGroup
+              Ref: LivleSecurityGroup
           - IpProtocol: tcp
             FromPort: '11211'
             ToPort: '11211'
             SourceSecurityGroupId:
-              Ref: ServerlessSecurityGroup
-    ServerlessRDSSubnetGroup:
+              Ref: LivleSecurityGroup
+    LivleRDSSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
       Properties:
         DBSubnetGroupDescription: "RDS Subnet Group"
         SubnetIds:
-          - Ref: ServerlessSubnetA
-          - Ref: ServerlessSubnetB
-    ServerlessRDSCluster:
-      DependsOn: ServerlessStorageSecurityGroup
+          - Ref: LivleSubnetA
+          - Ref: LivleSubnetC
+          - Ref: LivleSubnetIgw
+    LivleRDSCluster:
+      DependsOn: LivleStorageSecurityGroup
       Type: AWS::RDS::DBInstance
       Properties:
         Engine: mariadb
@@ -194,6 +290,7 @@ resources:
         DBInstanceClass: db.t2.micro
         AllocatedStorage: 10
         VPCSecurityGroups:
-        - "Fn::GetAtt": ServerlessStorageSecurityGroup.GroupId
+        - "Fn::GetAtt": LivleStorageSecurityGroup.GroupId
         DBSubnetGroupName:
-          Ref: ServerlessRDSSubnetGroup
+          Ref: LivleRDSSubnetGroup
+        PubliclyAccessible: true

@@ -124,4 +124,20 @@ User.prototype.getSubscription = function() {
   )
 }
 
+User.prototype.reservable = function() {
+  return new Promise((resolve, reject) =>
+    this.getSubscription().then(sub => {
+      if(sub.suspended_by && new Date() < sub.suspended_by) {
+        return resolve(false)
+      }
+      return resolve(true)
+    }).catch(err => reject())
+  )
+}
+
+const Reservation = require('../reservation/reservation')
+User.hasMany(Reservation, {
+  foreignKey: { name: 'user_id', allowNull: false },
+})
+
 module.exports = User

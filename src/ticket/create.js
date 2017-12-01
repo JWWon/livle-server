@@ -4,8 +4,8 @@ const Ticket = require('./ticket')
 const Artist = require('./artist')
 const _ = require('lodash')
 
-const randomCode = (digits) =>
-  digits > 0 ? parseInt(Math.random() * 10).toString() + randomCode(digits - 1) : ''
+const randomCode = (digits) => digits > 0 ?
+  parseInt(Math.random() * 10).toString() + randomCode(digits - 1) : ''
 
 module.exports = (params, respond) =>
   Partner.fromHeaders({ Authorization: params.auth })

@@ -14,7 +14,7 @@ const Ticket = sequelize.define('ticket', {
   music_id: S.STRING,
   video_id: S.STRING,
   article: S.STRING,
-  checkin_code: S.STRING
+  checkin_code: S.STRING,
 },
   { timestamps: false }
 )

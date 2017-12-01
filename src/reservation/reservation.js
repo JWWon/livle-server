@@ -3,6 +3,7 @@ const sequelize = require('../config/sequelize')
 
 const Reservation = sequelize.define('reservation', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
+  // eslint-disable-next-line new-cap
   status: { type: S.ENUM('valid', 'noshow', 'checked'), allowNull: false },
   checked_at: S.DATE,
 }, { createdAt: 'created_at', updatedAt: false,
@@ -32,11 +33,11 @@ Reservation.belongsTo(Ticket, {
   foreignKey: { name: 'ticket_id', allowNull: false },
 })
 
-Reservation.make = (user, ticket_id) =>
+Reservation.make = (user, ticketId) =>
   new Promise((resolve, reject) =>
     Ticket.findOne({
       where: {
-        id: ticket_id,
+        id: ticketId,
       },
     }).then((ticket) => {
       if (ticket.start_at < new Date()) {

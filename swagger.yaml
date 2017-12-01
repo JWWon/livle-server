@@ -138,7 +138,7 @@ paths:
         '404':
           description: 잘못된 토큰
   /user/session:
-    get:
+    post:
       tags:
         - user
       summary: 로그인
@@ -147,14 +147,19 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: email
-          in: query
-          type: string
+        - name: user
+          in: body
+          description: 로그인할 유저의 아이디와 비밀번호
           required: true
-        - name: password
-          in: query
-          type: string
-          required: true
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                example: contacts@livle.kr
+              password:
+                type: string
+                example: '12345'
       responses:
         '200':
           description: 로그인 성공

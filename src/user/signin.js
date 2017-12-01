@@ -4,11 +4,11 @@ const User = require('./user')
 const R = User.REJECTIONS
 
 module.exports = (params, respond) => {
-  if (!params.query.email || !params.query.password) {
+  if (!params.body || !params.body.email || !params.body.password) {
     respond(400, '이메일이나 비밀번호가 입력되지 않았습니다.')
   }
 
-  return User.signIn(params.query.email, params.query.password)
+  return User.signIn(params.body.email, params.body.password)
     .then((user) => respond(200, user))
     .catch((err) => {
       if (err === R.NOT_FOUND) {

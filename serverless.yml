@@ -63,7 +63,7 @@ functions:
     events:
       - http:
           path: user/session
-          method: get
+          method: post
           cors: true
   partnerCreate:
     handler: handler.partnerCreate

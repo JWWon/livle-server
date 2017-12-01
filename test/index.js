@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect
 const handler = require('../handler')
+require('dotenv').config() // .env 파일에서 환경변수 읽어오기
 
 var authToken = ''
 var headers = {}
@@ -128,10 +129,10 @@ describe('Ticket', function() {
 })
 
 describe('Subscription', function() {
-  const cardNumber = '1111-2222-3333-4444'
-  const expiry = '2017-12'
-  const birth = '920723'
-  const password = '00'
+  const cardNumber = process.env.CARD_NUMBER
+  const expiry = process.env.EXPIRY
+  const birth = process.env.BIRTH
+  const password = process.env.PASSWORD
 
   it('successful subscription', function(done) {
     this.timeout(5000)
@@ -200,6 +201,19 @@ describe('Subscription', function() {
 
     test( handler.ticketReserve,
       { path: { ticketId: ticket.id } },
+      callback
+    )
+  })
+
+  it('successful retrieval of reservation', function(done) {
+    const callback = (error, result) => {
+      if(error) return done(error)
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.reservationGet,
+      { },
       callback
     )
   })

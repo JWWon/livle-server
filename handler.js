@@ -39,6 +39,8 @@ module.exports.ticketCreate = lambda(require('./src/ticket/create'))
 module.exports.ticketGet = lambda(require('./src/ticket/get'))
 module.exports.ticketReserve = lambda(require('./src/ticket/reserve'))
 
+module.exports.reservationGet = lambda(require('./src/reservation/get'))
+
 module.exports.fileUpload = require('./src/file/upload')
 
 module.exports.subscriptionCreate = lambda(require('./src/subscription/create'))

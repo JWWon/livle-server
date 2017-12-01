@@ -205,15 +205,30 @@ describe('Subscription', function() {
     )
   })
 
+  let reservation
   it('successful retrieval of reservation', function(done) {
     const callback = (error, result) => {
       if(error) return done(error)
       expect(result.statusCode).to.equal(200)
+      reservation = JSON.parse(result.body)[0]
       done()
     }
 
     test( handler.reservationGet,
       { },
+      callback
+    )
+  })
+
+  it('checkin failure with invalid checkin code', function(done) {
+    const callback = (error, result) => {
+      if(error) return done(error)
+      expect(result.statusCode).to.equal(403)
+      done()
+    }
+
+    test( handler.reservationCheckin,
+      { path: { reservationId: reservation.id }, body: { code: '1234' } },
       callback
     )
   })

@@ -4,6 +4,9 @@ const Ticket = require('./ticket')
 const Artist = require('./artist')
 const _ = require('lodash')
 
+const randomCode = (digits) =>
+  digits > 0 ? parseInt(Math.random() * 10).toString() + randomCode(digits - 1) : ''
+
 module.exports = (params, respond) =>
   Partner.fromHeaders({ Authorization: params.auth })
     .then((partner) => {
@@ -13,6 +16,7 @@ module.exports = (params, respond) =>
       const artistParams = params.body.artists || []
       const ticketParam = _.omit(params.body, 'artists')
       ticketParam.partner_id = partner.id
+      ticketParam.checkin_code = randomCode(4) // 4자리 랜덤코드 생성
       return Ticket.create(ticketParam)
         .then((ticket) =>
           Promise.all(

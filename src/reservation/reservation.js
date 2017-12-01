@@ -28,6 +28,9 @@ const Ticket = require('../ticket/ticket')
 Ticket.hasMany(Reservation, {
   foreignKey: { name: 'ticket_id', allowNull: false },
 })
+Reservation.belongsTo(Ticket, {
+  foreignKey: { name: 'ticket_id', allowNull: false },
+})
 
 Reservation.make = (user, ticket_id) =>
   new Promise((resolve, reject) =>

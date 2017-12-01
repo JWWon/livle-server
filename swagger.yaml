@@ -391,7 +391,9 @@ paths:
         '200':
           description: 성공
           schema:
-            $ref: '#/definitions/Reservation'
+            type: array
+            items:
+              $ref: '#/definitions/Reservation'
         '401':
           description: 로그인되지 않음
   '/reservation/{reservationId}/check':
@@ -413,19 +415,25 @@ paths:
           type: string
         - name: code
           in: body
+          required: true
           schema:
-            type: integer
+            type: string
+            example: '1234'
       responses:
         '200':
           description: 체크인 성공
+          schema:
+            $ref: '#/definitions/Reservation'
         '400':
           description: 요청에 코드가 없음
         '401':
           description: 로그인되지 않음
         '403':
-          description: 잘못된 코드
+          description: 잘못된 체크인 코드
         '404':
-          description: 잘못된 예약 아이디
+          description: 잘못된 예약 아이디이거나 이 유저의 예약이 아님
+        '405':
+          description: 이미 체크인 함
   /subscription:
     get:
       tags:

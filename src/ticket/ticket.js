@@ -14,7 +14,7 @@ const Ticket = sequelize.define('ticket', {
   music_id: S.STRING,
   video_id: S.STRING,
   article: S.STRING,
-  checkin_code: S.INTEGER,
+  checkin_code: S.STRING
 },
   { timestamps: false }
 )
@@ -35,6 +35,7 @@ Ticket.until = (until) => new Promise((resolve, reject) =>
         tickets, artistsArray,
         (t, aArr) => {
           let ticket = t.dataValues
+          ticket.checkin_code = undefined // Hide
           let artists = _.map(aArr, (a) => a.dataValues)
           ticket.artists = artists
           return ticket

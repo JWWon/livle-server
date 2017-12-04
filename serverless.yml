@@ -40,6 +40,17 @@ provider:
       - Ref: LivleSubnetA
       - Ref: LivleSubnetC
 
+plugins:
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: 'api.livle.kr'
+    certificateName: '*.livle.kr'
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+
 functions:
   userCreate:
     handler: handler.userCreate

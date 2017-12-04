@@ -47,7 +47,7 @@ custom:
   customDomain:
     domainName: 'api.livle.kr'
     certificateName: '*.livle.kr'
-    basePath: ''
+    basePath: ${self:provider.stage}
     stage: ${self:provider.stage}
     createRoute53Record: true
 

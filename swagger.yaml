@@ -3,7 +3,7 @@ info:
   description: 라이블 API
   version: 1.0.0
   title: Livle App API
-host: 06orbci903.execute-api.ap-northeast-2.amazonaws.com
+host: api.livle.kr
 basePath: /dev
 tags:
   - name: user

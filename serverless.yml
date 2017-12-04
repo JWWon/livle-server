@@ -21,6 +21,10 @@ provider:
       Action:
         - s3:*
       Resource: "arn:aws:s3:::livle/*"
+    - Effect: Allow
+      Action:
+        - ses:SendEmail
+      Resource: "*"
   environment:
     DB_NAME: ${file(./keys.yml):DB_NAME}
     DB_HOST: ${file(./keys.yml):DB_HOST}
@@ -64,6 +68,13 @@ functions:
       - http:
           path: user/session
           method: post
+          cors: true
+  userRequestPassword:
+    handler: handler.userRequestPassword
+    events:
+      - http:
+          path: user/password
+          method: get
           cors: true
   partnerCreate:
     handler: handler.partnerCreate

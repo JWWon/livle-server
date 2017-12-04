@@ -81,6 +81,20 @@ describe('User', function() {
     )
   })
 
+  it('successful password request', function(done) {
+    const callback = (error, result) => {
+      if(error) done(error)
+      console.log(result)
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.userRequestPassword,
+      { query: { email: userEmail } },
+      callback
+    )
+  }).timeout(5000)
+
   it('successful signin', function(done) {
     const callback = (error, result) => {
       if(error) return done(error)
@@ -89,7 +103,7 @@ describe('User', function() {
     }
 
     test( handler.userSignin,
-      { query: { email: userEmail, password: userPass } },
+      { body: { email: userEmail, password: userPass } },
       callback
     )
   })

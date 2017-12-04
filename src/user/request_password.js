@@ -70,7 +70,7 @@ module.exports = (params, respond) => {
     return user.update({ password_reset_token: uuid() })
       .then((user) => sendEmail(user)
         .then(() => respond(200))
-        .catch((err) => { console.error(err);  respond(500, err) })
+        .catch((err) => respond(500, err))
       )
   }).catch((err) => respond(500, err))
 }

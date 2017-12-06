@@ -87,6 +87,13 @@ functions:
           path: user/password
           method: get
           cors: true
+  userList:
+    handler: handler.userList
+    events:
+      - http:
+          path: user/all
+          method: get
+          cors: true
   partnerCreate:
     handler: handler.partnerCreate
     events:
@@ -106,6 +113,13 @@ functions:
     events:
       - http:
           path: partner/session
+          method: get
+          cors: true
+  partnerList:
+    handler: handler.partnerList
+    events:
+      - http:
+          path: partner/all
           method: get
           cors: true
   ticketCreate:

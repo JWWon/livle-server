@@ -30,11 +30,13 @@ module.exports.userGet = lambda(require('./src/user/get'))
 module.exports.userDestroy = lambda(require('./src/user/destroy'))
 module.exports.userSignin = lambda(require('./src/user/signin'))
 module.exports.userRequestPassword = lambda(require('./src/user/request_password'))
+module.exports.userList = lambda(require('./src/user/get_all'))
 
 module.exports.partnerCreate = require('./src/partner/create')
 module.exports.partnerGet = lambda(require('./src/partner/get'))
 module.exports.partnerSignin = require('./src/partner/signin')
 module.exports.partnerDestroy = require('./src/partner/destroy')
+module.exports.partnerList = lambda(require('./src/partner/get_all'))
 
 module.exports.ticketCreate = lambda(require('./src/ticket/create'))
 module.exports.ticketGet = lambda(require('./src/ticket/get'))

@@ -329,6 +329,26 @@ describe('Partner', function() {
     test( handler.partnerGet,
       { }, callback)
   })
+
+  it('successfully get users list', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.userList,
+      { }, callback)
+  })
+
+  it('successfully get partners list', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.partnerList,
+      { }, callback)
+  })
 })
 
 describe('File', function() {

@@ -178,6 +178,31 @@ paths:
       responses:
         '200':
           description: 로그아웃 성공
+  /user/all:
+    get:
+      tags:
+        - user
+      summary: '모든 회원정보 가져오기 [관리자]'
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          type: string
+          description: 관리자의 Partner 계정의 토큰입니다.
+          required: true
+      responses:
+        '200':
+          description: 성공
+          schema:
+            items:
+              $ref: '#/definitions/User'
+        '401':
+          description: 헤더에 토큰이 없음
+        '403':
+          description: 헤더에 토큰이 있지만 유효하지 않음
   /partner:
     post:
       tags:
@@ -267,6 +292,30 @@ paths:
           description: 아직 승인되지 않은 계정임
         '403':
           description: 일치하는 회원이 없음
+  /partner/all:
+    get:
+      tags:
+        - partner
+      summary: '모든 파트너 정보 [관리자]'
+      consumes:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          description: 세션 정보를 담고 있는 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Partner'
+        '401':
+          description: 헤더에 토큰이 없음
+        '403':
+          description: 헤더에 토큰이 있지만 유효하지 않음
   /ticket:
     get:
       tags:

@@ -25,6 +25,10 @@ Partner.prototype.getToken = function() {
   return jwt.sign(this.dataValues, secret)
 }
 
+Partner.prototype.isAdmin = function() {
+  return this.approved && this.username.endsWith('@livle.kr')
+}
+
 Partner.fromHeaders = (headers) => new Promise( (resolve, reject) => {
   const token = ( headers && headers.Authorization ) || null
   if (!token) return reject()

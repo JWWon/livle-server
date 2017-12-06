@@ -87,8 +87,8 @@ functions:
           path: user/password
           method: get
           cors: true
-  userList:
-    handler: handler.userList
+  userAll:
+    handler: handler.userAll
     events:
       - http:
           path: user/all
@@ -115,8 +115,8 @@ functions:
           path: partner/session
           method: get
           cors: true
-  partnerList:
-    handler: handler.partnerList
+  partnerAll:
+    handler: handler.partnerAll
     events:
       - http:
           path: partner/all
@@ -134,6 +134,13 @@ functions:
     events:
       - http:
           path: ticket
+          method: get
+          cors: true
+  ticketAll:
+    handler: handler.ticketAll
+    events:
+      - http:
+          path: ticket/all
           method: get
           cors: true
   fileUpload:

@@ -22,26 +22,31 @@ const Ticket = sequelize.define('ticket', {
 const Artist = require('./artist')
 Ticket.hasMany(Artist, { foreignKey: { name: 'ticket_id', allowNull: false } })
 
+Ticket.withArtists = (tickets, showCode) => new Promise((resolve, reject) =>
+  Promise.all(
+    _.map(tickets, (t) => t.getArtists())
+  ).then((artistsArray) => resolve(
+    _.zipWith(
+      tickets, artistsArray,
+      (t, aArr) => {
+        let ticket = t.dataValues
+        if (!showCode) ticket.checkin_code = undefined // Hide
+        let artists = _.map(aArr, (a) => a.dataValues)
+        ticket.artists = artists
+        return ticket
+      }
+    )
+  )).catch((err) => reject(err))
+)
+
 Ticket.until = (until) => new Promise((resolve, reject) =>
   Ticket.findAll({
     where: {
       start_at: { [S.Op.gt]: new Date(), [S.Op.lt]: until },
     },
   }).then((tickets) =>
-    Promise.all(
-      _.map(tickets, (t) => t.getArtists())
-    ).then((artistsArray) => resolve(
-      _.zipWith(
-        tickets, artistsArray,
-        (t, aArr) => {
-          let ticket = t.dataValues
-          ticket.checkin_code = undefined // Hide
-          let artists = _.map(aArr, (a) => a.dataValues)
-          ticket.artists = artists
-          return ticket
-        }
-      )
-    ))
+    Ticket.withArtists(tickets)
+    .then((tickets) => resolve(tickets))
   ).catch((err) => reject(err))
 )
 

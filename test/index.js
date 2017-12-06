@@ -336,7 +336,7 @@ describe('Partner', function() {
       done()
     }
 
-    test( handler.userList,
+    test( handler.userAll,
       { }, callback)
   })
 
@@ -346,7 +346,17 @@ describe('Partner', function() {
       done()
     }
 
-    test( handler.partnerList,
+    test( handler.partnerAll,
+      { }, callback)
+  })
+
+  it('successfully get concerts list', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.ticketAll,
       { }, callback)
   })
 })

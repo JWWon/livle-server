@@ -32,7 +32,7 @@ module.exports.userSignin = lambda(require('./src/user/signin'))
 module.exports.userRequestPassword = lambda(require('./src/user/request_password'))
 
 module.exports.partnerCreate = require('./src/partner/create')
-module.exports.partnerGet = require('./src/partner/get')
+module.exports.partnerGet = lambda(require('./src/partner/get'))
 module.exports.partnerSignin = require('./src/partner/signin')
 module.exports.partnerDestroy = require('./src/partner/destroy')
 

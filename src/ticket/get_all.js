@@ -13,7 +13,7 @@ module.exports = (params, respond) => {
             partner_id: partner.id,
           },
         })
-      return getTickets().then((tickets) => Ticket.withArtists(tickets))
+      return getTickets().then((tickets) => Ticket.withArtists(tickets, true))
         .then((tickets) => respond(200, tickets))
         .catch((err) => respond(500, err))
     }).catch((err) => respond(401, '로그인이 필요합니다.'))

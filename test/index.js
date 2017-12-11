@@ -367,6 +367,17 @@ describe('Partner', function() {
       { }, callback)
   })
 
+  it('successfully get one\'s own concerts list', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.partnerTickets,
+      { path: { partnerId : 1 } }, callback)
+    // Under a condition that the admin account's id is 1
+  })
+
   it('successfully get concerts list', function(done) {
     const callback = (error, result) => {
       expect(result.statusCode).to.equal(200)

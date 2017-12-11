@@ -341,6 +341,33 @@ paths:
           description: 헤더에 토큰이 없음
         '403':
           description: 헤더에 토큰이 있지만 유효하지 않거나 권한이 없음
+  '/partner/{partnerId}/tickets':
+    get:
+      tags:
+        - partner
+      summary: 파트너의 공연 정보 가져오기
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          type: integer
+          format: int64
+        - name: Authorization
+          in: header
+          description: 세션 정보를 담고 있는 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Ticket'
+        '401':
+          description: 헤더에 토큰이 없음
+        '403':
+          description: 헤더에 토큰이 있지만 유효하지 않거나 권한이 없음
   /ticket:
     get:
       tags:

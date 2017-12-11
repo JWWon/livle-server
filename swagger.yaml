@@ -54,6 +54,38 @@ paths:
           description: 이미 존재하는 아이디
         '405':
           description: 잘못된 이메일 형식
+    delete:
+      tags:
+        - user
+      summary: 탈퇴
+      description: '이메일, 비밀번호 validation은 클라이언트에서 해주세요.'
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: body
+          description: 탈퇴할 유저의 아이디와 비밀번호
+          required: true
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                example: contacts@livle.kr
+              password:
+                type: string
+                example: '12345'
+      responses:
+        '200':
+          description: 탈퇴 성공
+        '400':
+          description: 잘못된 요청 (이메일이나 비밀번호가 없음)
+        '403':
+          description: 비밀번호가 틀립니다.
+        '404':
+          description: 해당 이메일의 유저가 없습니다.
+        '405':
+          description: 구독 중인 유저입니다. 탈퇴 전에 구독을 취소해야 합니다.
     get:
       tags:
         - user

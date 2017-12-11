@@ -44,6 +44,7 @@ module.exports.ticketCreate = lambda(require('./src/ticket/create'))
 module.exports.ticketGet = lambda(require('./src/ticket/get'))
 module.exports.ticketReserve = lambda(require('./src/ticket/reserve'))
 module.exports.ticketAll = lambda(require('./src/ticket/get_all'))
+module.exports.ticketStats = lambda(require('./src/ticket/stats'))
 
 module.exports.reservationGet = lambda(require('./src/reservation/get'))
 module.exports.reservationCheckin = lambda(require('./src/reservation/checkin'))

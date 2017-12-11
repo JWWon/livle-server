@@ -475,14 +475,17 @@ paths:
           description: 로그인되지 않음
         '403':
           description: 관리자가 아님
-  '/ticket/{ticketId}':
+  '/ticket/{ticketId}/stats':
     get:
       tags:
         - ticket
-      summary: '티켓 하나의 정보 [미구현]'
-      produces:
-        - application/json
+      summary: (파트너) 티켓 하나의 상세 정보
       parameters:
+        - name: Authorization
+          in: header
+          description: 세션 정보를 담고 있는 토큰
+          required: true
+          type: string
         - name: ticketId
           in: path
           required: true
@@ -492,7 +495,13 @@ paths:
         '200':
           description: 성공
           schema:
-            $ref: '#/definitions/Ticket'
+            $ref: '#/definitions/TicketDetail'
+        '401':
+          description: 로그인되지 않음 (세션토큰이 없음)
+        '403':
+          description: 권한이 없음
+        '404':
+          description: 해당 아이디의 공연을 찾을 수 없음
   '/ticket/{ticketId}/reserve':
     post:
       tags:
@@ -770,6 +779,51 @@ definitions:
         type: string
       image:
         type: string
+  TicketDetail:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      partner_id:
+        type: integer
+        format: int64
+        description: 이 공연의 사장님 아이디
+      title:
+        type: string
+        example: 댕댕이 페스티벌
+      artists:
+        type: array
+        items:
+          $ref: '#/definitions/Artist'
+      start_at:
+        type: number
+        description: 시작시간
+      end_at:
+        type: number
+        description: 종료시간
+      image:
+        type: string
+        description: 카드 메인 이미지 주소
+      capacity:
+        type: number
+        description: 'capacity - # of reservations'
+      place:
+        type: string
+        example: 판교 스타트업캠퍼스
+      music_id:
+        type: string
+        description: 음악 주소나 아이디... 아직 모름
+      video_id:
+        type: string
+        description: 영상 주소나 아이디... 아직 모름
+      article:
+        type: string
+        description: 웹 뷰로 보여줄 추가 정보가 있을 경우 웹 주소
+      reservations:
+        type: array
+        items:
+          $ref: '#/definitions/Reservation'
   Ticket:
     type: object
     description: 'capacity, checkin_code는 리턴되지 않음'
@@ -833,3 +887,6 @@ definitions:
       checked_at:
         type: string
         description: '체크인한 시간 (js Date type), null if not checked in'
+      cancelled_at:
+        type: string
+        description: '취소한 시간, null if not cancelled'

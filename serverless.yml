@@ -150,6 +150,13 @@ functions:
           path: ticket/all
           method: get
           cors: true
+  ticketStats:
+    handler: handler.ticketStats
+    events:
+      - http:
+          path: ticket/{ticketId}/stats
+          method: get
+          cors: true
   fileUpload:
     handler: handler.fileUpload
     events:

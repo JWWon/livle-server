@@ -178,6 +178,10 @@ functions:
           path: subscription
           method: delete
           cors: true
+  subscriptionRenew:
+    handler: handler.subscriptionRenew
+    events:
+      - schedule: cron(0 12 * * ? *) # Everyday 12pm UTC
 
 resources:
   Resources:

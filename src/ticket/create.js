@@ -15,7 +15,7 @@ module.exports = (params, respond) =>
       }
       const artistParams = params.body.artists || []
       const ticketParam = _.omit(params.body, 'artists')
-      ticketParam.partner_id = partner.id
+      ticketParam.partner_id = ticketParam.partner_id || partner.id
       ticketParam.checkin_code = randomCode(4) // 4자리 랜덤코드 생성
       return Ticket.create(ticketParam)
         .then((ticket) =>

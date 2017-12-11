@@ -378,6 +378,9 @@ paths:
         - name: ticket
           in: body
           required: true
+          description: >-
+            Required: partner_id, title, start_at, end_at, image, capacity /
+            vacancies는 유저에게 보여질 계산된 값입니다. 생성 시에는 총 할당 좌석 수인 capacity를 넘겨주세요.
           schema:
             $ref: '#/definitions/Ticket'
       responses:
@@ -715,6 +718,10 @@ definitions:
       id:
         type: integer
         format: int64
+      partner_id:
+        type: integer
+        format: int64
+        description: 이 공연의 사장님 아이디
       title:
         type: string
         example: 댕댕이 페스티벌

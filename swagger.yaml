@@ -316,6 +316,31 @@ paths:
           description: 헤더에 토큰이 없음
         '403':
           description: 헤더에 토큰이 있지만 유효하지 않음
+  '/partner/{partnerId}/approve':
+    post:
+      tags:
+        - partner
+      summary: '파트너 가입 승인 [관리자]'
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          type: integer
+          format: int64
+        - name: Authorization
+          in: header
+          description: 세션 정보를 담고 있는 토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공
+          schema:
+            $ref: '#/definitions/Partner'
+        '401':
+          description: 헤더에 토큰이 없음
+        '403':
+          description: 헤더에 토큰이 있지만 유효하지 않거나 권한이 없음
   /ticket:
     get:
       tags:
@@ -671,6 +696,8 @@ definitions:
         type: string
       token:
         type: string
+      approved:
+        type: boolean
   Artist:
     type: object
     properties:

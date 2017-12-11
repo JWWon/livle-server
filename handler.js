@@ -37,6 +37,7 @@ module.exports.partnerGet = lambda(require('./src/partner/get'))
 module.exports.partnerSignin = require('./src/partner/signin')
 module.exports.partnerDestroy = require('./src/partner/destroy')
 module.exports.partnerAll = lambda(require('./src/partner/get_all'))
+module.exports.partnerApprove = lambda(require('./src/partner/approve'))
 
 module.exports.ticketCreate = lambda(require('./src/ticket/create'))
 module.exports.ticketGet = lambda(require('./src/ticket/get'))

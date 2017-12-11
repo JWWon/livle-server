@@ -122,6 +122,13 @@ functions:
           path: partner/all
           method: get
           cors: true
+  partnerApprove:
+    handler: handler.partnerApprove
+    events:
+      - http:
+          path: partner/{partnerId}/approve
+          method: post
+          cors: true
   ticketCreate:
     handler: handler.ticketCreate
     events:

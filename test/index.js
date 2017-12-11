@@ -284,9 +284,13 @@ describe('User deletion', function() {
 describe('Web', () => null)
 
 describe('Partner', function() {
+  var partnerId
+
   it('successful creation', function(done) {
     const callback = (error, result) => {
       expect(result.statusCode).to.equal(200)
+      const res = JSON.parse(result.body)
+      partnerId = res.id
       done()
     }
 
@@ -295,16 +299,6 @@ describe('Partner', function() {
       callback )
   })
 
-  it('successful deletion', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerDestroy,
-      { body: { username: "test@test.com", password: "test" } },
-      callback )
-  })
 
   it('successful signin', function(done) {
     const callback = (error, result) => {
@@ -318,6 +312,29 @@ describe('Partner', function() {
       { query: { username: 'admin@livle.kr', password: 'livle' } },
       callback
     )
+  })
+
+  it('successful approval', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.partnerApprove,
+      { path: { partnerId: partnerId } },
+      callback
+    )
+  })
+
+  it('successful deletion', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.partnerDestroy,
+      { body: { username: "test@test.com", password: "test" } },
+      callback )
   })
 
   it('successfully get user from session', function(done) {

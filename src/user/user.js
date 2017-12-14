@@ -7,7 +7,7 @@ const secret = 'livleusersecret'
 
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
-  email: { type: S.STRING, unique: true, allowNull: false },
+  email: { type: S.STRING(32), unique: true, allowNull: false },
   nickname: S.STRING,
   password: { type: S.STRING, allowNull: false },
   expire_at: S.DATE,

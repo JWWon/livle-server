@@ -25,6 +25,7 @@
     "dotenv": "^4.0.0",
     "eslint": "^4.12.0",
     "eslint-config-google": "^0.9.1",
+    "faker": "^4.1.0",
     "mocha": "^4.0.1",
     "serverless": "^1.23.0",
     "serverless-domain-manager": "^1.1.21"

@@ -450,6 +450,30 @@ describe('Ticket', function() {
     )
   })
 
+  it('successful update', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      const res = JSON.parse(result.body)
+      ticketId = res.id
+      done()
+    }
+
+    test( handler.ticketUpdate,
+      { path: { ticketId: ticketId },
+        body: {
+          title: '테스트 콘서트 업데이트',
+          image: "test2", capacity: 50, place: "판교",
+          artists: [
+            { id: 1, name: '아이유2', image: 'iu', },
+            { name: 'hello', image: 'qwer' },
+            { name: '수란', image: 'suran' },
+          ],
+        }
+      },
+      callback
+    )
+  })
+
   it('successful deletion', function(done) {
     const callback = (error, result) => {
       expect(result.statusCode).to.equal(200)

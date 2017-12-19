@@ -150,6 +150,13 @@ functions:
           path: ticket/all
           method: get
           cors: true
+  ticketUpdate:
+    handler: handler.ticketUpdate
+    events:
+      - http:
+          path: ticket/{ticketId}
+          method: patch
+          cors: true
   ticketDestroy:
     handler: handler.ticketDestroy
     events:

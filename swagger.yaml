@@ -458,7 +458,7 @@ paths:
     patch:
       tags:
         - ticket
-      summary: '[관리자] 등록된 티켓 정보 수정하기 [미구현]'
+      summary: '[관리자] 등록된 티켓 정보 수정하기'
       parameters:
         - name: Authorization
           in: header

@@ -28,7 +28,7 @@ describe('User', function() {
     }
 
     test(handler.userCreate,
-      { body: { email: userEmail, password: userPass } },
+      { body: { email: userEmail, password: userPass, nickname: 'hi' } },
       callback)
   })
 

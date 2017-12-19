@@ -43,6 +43,10 @@ paths:
               password:
                 type: string
                 example: '12345'
+              nickname:
+                type: string
+                example: 라이블
+                description: optional
       responses:
         '200':
           description: 가입 성공

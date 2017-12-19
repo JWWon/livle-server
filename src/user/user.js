@@ -47,11 +47,12 @@ User.REJECTIONS = {
   NOT_FOUND: 'not_found',
 }
 
-User.signUp = (email, password) => new Promise((resolve, reject) =>
+User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
   bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
     : User.create({
       email: email,
       password: hash,
+      nickname: nickname,
     }).then((user) => {
       let userData = user.dataValues
       userData.password = undefined

@@ -8,27 +8,29 @@ module.exports = (params, respond) => {
 
   return User.fromToken(token)
     .then((user) =>
-      user.getSubscription()
-      .then((subscription) => {
-        if (!subscription) {
+      user.getSubscriptions({
+        where: {
+          cancelled_at: null,
+        },
+      })
+      .then((subs) => {
+        if (subs.length === 0) {
           return respond(404, '구독 정보가 없습니다.')
         }
 
+        const subscription = subs[0]
         return iamport.subscribe_customer.delete({
           customer_uid: subscription.id,
         }).then((res) =>
-          subscription.destroy().then((res) =>
+          subscription.update({ cancelled_at: new Date() })
+          .then((res) =>
             respond(200)
           )
-          /*
-          subscription.update({ cancelled_at: new Date() })
-          .then(res => callback(null, response(200)))
-          */
         ).catch((err) =>
           respond(500, err)
         )
       })
     ).catch((err) =>
-      respond(401, '로그인이 필요합니다.')
+      respond(401, err)
     )
 }

@@ -1,5 +1,6 @@
 'use strict'
 
+const Op = require('sequelize').Op
 const User = require('../user/user')
 const iamport = require('../config/iamport')
 
@@ -8,11 +9,19 @@ module.exports = (params, respond) => {
 
   return User.fromToken(token)
     .then((user) =>
-      user.getSubscription()
-      .then((subscription) => {
-        if (!subscription) {
+      user.getSubscriptions({
+        where: {
+          [Op.or] : [
+            { cancelled_at: null },
+            { valid_by: { [Op.gt]: new Date() } },
+          ]
+        }
+      })
+      .then((subs) => {
+        if (subs.length === 0) {
           return respond(404, '구독 정보가 없습니다.')
         }
+        const subscription = subs[0]
 
         return iamport.subscribe_customer.get({
           customer_uid: subscription.id,

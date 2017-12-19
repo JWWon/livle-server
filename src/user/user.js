@@ -12,6 +12,7 @@ const User = sequelize.define('user', {
   password: { type: S.STRING, allowNull: false },
   expire_at: S.DATE,
   password_reset_token: S.STRING,
+  free_trial_started: S.DATE,
 },
   { timestamps: false }
 )
@@ -45,6 +46,8 @@ User.REJECTIONS = {
   WRONG_PASSWORD: 'wrong_password',
   SUBSCRIBING: 'subscribing',
   NOT_FOUND: 'not_found',
+  NO_VALID_SUBSCRIPTION: 'no_valid_subscription',
+  SUSPENDED: 'suspended',
 }
 
 User.signUp = (email, password) => new Promise((resolve, reject) =>
@@ -81,17 +84,26 @@ User.signIn = (email, password) => new Promise((resolve, reject) =>
   ).catch((err) => reject(User.REJECTIONS.NOT_FOUND))
 )
 
+const Subscription = require('../subscription/subscription')
+User.hasMany(Subscription, {
+  foreignKey: { name: 'user_id', allowNull: false },
+})
+
+
 User.dropOut = (email, password) => new Promise((resolve, reject) =>
   User.findOne({
     where: {
       email: email,
     },
-  }).then((user) =>
+  }).then((user) => !user ? reject(User.REJECTIONS.NOT_FOUND) :
     bcrypt.compare(password, user.password, (err, res) => {
       if (err) return reject(err)
       if (res) {
-        user.getSubscription()
-          .then((sub) => sub ? reject(User.REJECTIONS.SUBSCRIBING)
+        user.getSubscriptions({
+          where: {
+            cancelled_at: null,
+          }
+        }).then((subs) => subs.length > 0 ? reject(User.REJECTIONS.SUBSCRIBING)
             : User.destroy({
               where: {
                 email: email,
@@ -102,33 +114,27 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
         reject(User.REJECTIONS.WRONG_PASSWORD)
       }
     })
-  ).catch((err) => reject(User.REJECTIONS.NOT_FOUND))
+  ).catch((err) => reject(err))
 )
 
-const Subscription = require('../subscription/subscription')
-User.hasMany(Subscription, {
-  foreignKey: { name: 'user_id', allowNull: false },
-})
-
-User.prototype.getSubscription = function() {
+User.prototype.reservable = function(startsAt) {
   return new Promise((resolve, reject) =>
-    this.getSubscriptions().then((items) => {
-      if (items.length == 0) {
-        return resolve(null)
-      } else if (items.length == 1) {
-        return resolve(items[0])
-      } else {
-        reject(new Error('Two or more subscriptions record'))
+    this.getSubscriptions({
+      where: {
+        [S.Op.or]: [
+          { cancelled_at: null },
+          {
+            valid_by: { [S.Op.gte]: startsAt }
+          },
+        ]
+      },
+    }).then((subs) => {
+      if (subs.length === 0) {
+        return resolve(User.REJECTIONS.NO_VALID_SUBSCRIPTION)
       }
-    }).catch((err) => reject(err))
-  )
-}
-
-User.prototype.reservable = function() {
-  return new Promise((resolve, reject) =>
-    this.getSubscription().then((sub) => {
-      if (!sub || sub.suspended_by && new Date() < sub.suspended_by) {
-        return resolve(false)
+      const sub = subs[0]
+      if (sub.suspended_by && sub.suspended_by > new Date()) {
+        return resolve(User.REJECTIONS.SUSPENDED)
       }
       return resolve(true)
     }).catch((err) => reject(err))

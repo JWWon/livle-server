@@ -20,7 +20,6 @@ Reservation.REJECTIONS = {
   TICKET_NOT_FOUND: 'ticket_not_found',
   OVERDUE: 'overdue',
   NO_VANCANCY: 'no_vacancy',
-  NO_PERMISSION: 'no_permission',
 }
 
 const R = Reservation.REJECTIONS
@@ -44,7 +43,7 @@ Reservation.make = (user, ticketId) =>
         return reject(R.OVERDUE)
       }
       return user.reservable().then((reservable) => {
-        if (!reservable) return reject(R.NO_PERMISSION)
+        if (reservable !== true) return reject(reservable)
         return sequelize.transaction((t) =>
           ticket.getReservations({ transaction: t })
           .then((reservations) => {

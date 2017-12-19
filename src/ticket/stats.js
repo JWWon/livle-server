@@ -13,8 +13,8 @@ module.exports = (params, respond) =>
       }).then((ticket) => {
         if (!ticket) return respond(404, '해당 공연을 찾을 수 없습니다.')
         if (partner.id !== ticket.partner_id && !partner.isAdmin()) {
-return respond(403, '권한이 없습니다.')
-}
+          return respond(403, '권한이 없습니다.')
+        }
 
         return ticket.getReservations({ paranoid: false }) // 취소된 예약 포함
           .then((reservations) => {
@@ -24,4 +24,4 @@ return respond(403, '권한이 없습니다.')
             return respond(200, ticketWithStats)
           })
       })
-    ).catch((err) => respond(401, '로그인이 필요합니다.'))
+    ).catch((err) => respond(401, err))

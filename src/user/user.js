@@ -7,6 +7,7 @@ const secret = 'livleusersecret'
 
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
+  // eslint-disable-next-line new-cap
   email: { type: S.STRING(32), unique: true, allowNull: false },
   nickname: S.STRING,
   password: { type: S.STRING, allowNull: false },

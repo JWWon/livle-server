@@ -430,10 +430,12 @@ describe('Ticket', function() {
     )
   })
 
+  let ticketId
   it('successful creation with artists', function(done) {
     const callback = (error, result) => {
-      console.log(result)
       expect(result.statusCode).to.equal(200)
+      const res = JSON.parse(result.body)
+      ticketId = res.id
       done()
     }
 
@@ -448,4 +450,15 @@ describe('Ticket', function() {
     )
   })
 
+  it('successful deletion', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.ticketDestroy,
+      { path: { ticketId: ticketId } },
+      callback
+    )
+  })
 })

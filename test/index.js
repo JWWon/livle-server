@@ -28,7 +28,7 @@ describe('User', function() {
     }
 
     test(handler.userCreate,
-      { body: { email: userEmail, password: userPass } },
+      { body: { email: userEmail, password: userPass, nickname: 'hi' } },
       callback)
   })
 
@@ -387,6 +387,16 @@ describe('Partner', function() {
     test( handler.ticketAll,
       { }, callback)
   })
+
+  it('successfully get ticket details', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.ticketStats,
+      { path: { ticketId: 1 } }, callback)
+  })
 })
 
 describe('File', function() {
@@ -420,10 +430,12 @@ describe('Ticket', function() {
     )
   })
 
+  let ticketId
   it('successful creation with artists', function(done) {
     const callback = (error, result) => {
-      console.log(result)
       expect(result.statusCode).to.equal(200)
+      const res = JSON.parse(result.body)
+      ticketId = res.id
       done()
     }
 
@@ -438,4 +450,39 @@ describe('Ticket', function() {
     )
   })
 
+  it('successful update', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      const res = JSON.parse(result.body)
+      ticketId = res.id
+      done()
+    }
+
+    test( handler.ticketUpdate,
+      { path: { ticketId: ticketId },
+        body: {
+          title: '테스트 콘서트 업데이트',
+          image: "test2", capacity: 50, place: "판교",
+          artists: [
+            { id: 1, name: '아이유2', image: 'iu', },
+            { name: 'hello', image: 'qwer' },
+            { name: '수란', image: 'suran' },
+          ],
+        }
+      },
+      callback
+    )
+  })
+
+  it('successful deletion', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.ticketDestroy,
+      { path: { ticketId: ticketId } },
+      callback
+    )
+  })
 })

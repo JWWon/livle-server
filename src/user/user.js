@@ -7,7 +7,8 @@ const secret = 'livleusersecret'
 
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
-  email: { type: S.STRING, unique: true, allowNull: false },
+  // eslint-disable-next-line new-cap
+  email: { type: S.STRING(32), unique: true, allowNull: false },
   nickname: S.STRING,
   password: { type: S.STRING, allowNull: false },
   expire_at: S.DATE,
@@ -50,11 +51,12 @@ User.REJECTIONS = {
   SUSPENDED: 'suspended',
 }
 
-User.signUp = (email, password) => new Promise((resolve, reject) =>
+User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
   bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
     : User.create({
       email: email,
       password: hash,
+      nickname: nickname,
     }).then((user) => {
       let userData = user.dataValues
       userData.password = undefined

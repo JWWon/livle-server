@@ -11,7 +11,8 @@ module.exports = (params, respond) => {
     return respond(405, '이메일의 형식이 잘못 되었습니다.')
   }
 
-  return User.signUp(params.body.email, params.body.password)
+  return User.signUp(params.body.email, params.body.password,
+    params.body.nickname)
     .then((user) => respond(200, user))
     .catch((err) => respond(403, '이미 가입되어 있는 이메일 주소입니다.'))
 }

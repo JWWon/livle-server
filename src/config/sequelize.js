@@ -14,4 +14,7 @@ module.exports =
       idle: 100,
     },
     operatorsAliases: false,
+    define: {
+      charset: 'utf8mb4',
+    },
   })

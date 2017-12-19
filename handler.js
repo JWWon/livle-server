@@ -42,8 +42,11 @@ module.exports.partnerTickets = lambda(require('./src/partner/tickets'))
 
 module.exports.ticketCreate = lambda(require('./src/ticket/create'))
 module.exports.ticketGet = lambda(require('./src/ticket/get'))
+module.exports.ticketUpdate = lambda(require('./src/ticket/update'))
+module.exports.ticketDestroy = lambda(require('./src/ticket/destroy'))
 module.exports.ticketReserve = lambda(require('./src/ticket/reserve'))
 module.exports.ticketAll = lambda(require('./src/ticket/get_all'))
+module.exports.ticketStats = lambda(require('./src/ticket/stats'))
 
 module.exports.reservationGet = lambda(require('./src/reservation/get'))
 module.exports.reservationCheckin = lambda(require('./src/reservation/checkin'))

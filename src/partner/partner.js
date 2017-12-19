@@ -13,7 +13,8 @@ const secret = 'livlepartnersecret'
 
 const Partner = sequelize.define('partner', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
-  username: { type: S.STRING, allowNull: false, unique: true },
+  // eslint-disable-next-line new-cap
+  username: { type: S.STRING(32), allowNull: false, unique: true },
   password: { type: S.STRING, allowNull: false },
   company: { type: S.STRING, allowNull: false },
   approved: { type: S.BOOLEAN, defaultValue: false },

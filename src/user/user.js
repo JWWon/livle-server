@@ -104,7 +104,7 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
         user.getSubscriptions({
           where: {
             cancelled_at: null,
-          }
+          },
         }).then((subs) => subs.length > 0 ? reject(User.REJECTIONS.SUBSCRIBING)
             : User.destroy({
               where: {
@@ -126,9 +126,9 @@ User.prototype.reservable = function(startsAt) {
         [S.Op.or]: [
           { cancelled_at: null },
           {
-            valid_by: { [S.Op.gte]: startsAt }
+            valid_by: { [S.Op.gte]: startsAt },
           },
-        ]
+        ],
       },
     }).then((subs) => {
       if (subs.length === 0) {

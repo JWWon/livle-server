@@ -20,7 +20,7 @@ module.exports = (params, respond) => {
       user.getSubscriptions({
         where: {
           cancelled_at: null,
-        }
+        },
       }).then((subs) => {
         if (subs.length > 0) {
           return respond(405, '이미 구독 중입니다.')

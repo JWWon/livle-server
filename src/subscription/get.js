@@ -11,11 +11,11 @@ module.exports = (params, respond) => {
     .then((user) =>
       user.getSubscriptions({
         where: {
-          [Op.or] : [
+          [Op.or]: [
             { cancelled_at: null },
             { valid_by: { [Op.gt]: new Date() } },
-          ]
-        }
+          ],
+        },
       })
       .then((subs) => {
         if (subs.length === 0) {

@@ -8,7 +8,7 @@ const doPay = require('./pay')
 module.exports = (params, respond) => {
   const now = new Date()
   Subscription.findAll().then((subscriptions) =>
-    _.map(subscriptions, s => {
+    _.map(subscriptions, (s) => {
       // TODO implement
     })
   )

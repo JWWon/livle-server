@@ -7,6 +7,6 @@ const Subscription = sequelize.define('subscription', {
   last_four_digits: { type: S.STRING, allowNull: false },
   suspended_by: S.DATE,
   cancelled_at: S.DATE,
-}, { createdAt: 'created_at', updatedAt: 'updated_at', })
+}, { createdAt: 'created_at', updatedAt: 'updated_at' })
 
 module.exports = Subscription

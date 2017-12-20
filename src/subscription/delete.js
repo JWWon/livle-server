@@ -16,8 +16,8 @@ module.exports = (params, respond) => {
           .then(() => user.update({
             card_name: null,
             last_four_digits: null,
-            cancelled_at: new Date()
+            cancelled_at: new Date(),
           })).then((user) => respond(200, user))
-        ).catch((err) => { console.error(err); respond(500, err) })
+        ).catch((err) => respond(500, err))
     ).catch((err) => respond(401, err))
 }

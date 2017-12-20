@@ -95,6 +95,22 @@ describe('User', function() {
     )
   }).timeout(5000)
 
+  /*
+  it('successful password update', function(done) {
+    const callback = (error, result) => {
+      if(error) done(error)
+      console.log(result)
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.userUpdatePassword,
+      { body: { token: 'test', password: 'new' } },
+      callback
+    )
+  })
+  */
+
   it('successful signin', function(done) {
     const callback = (error, result) => {
       if(error) return done(error)

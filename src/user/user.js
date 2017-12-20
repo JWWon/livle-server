@@ -122,6 +122,16 @@ User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
   )
 )
 
+User.prototype.updatePassword = function(password) {
+  return new Promise((resolve, reject) =>
+    bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
+      : this.update({ password: hash })
+      .then((user) => resolve())
+      .catch((err) => reject(err))
+    )
+  )
+}
+
 User.signIn = (email, password) => new Promise((resolve, reject) =>
   User.findOne({
     where: {

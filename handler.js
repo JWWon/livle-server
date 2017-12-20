@@ -30,6 +30,7 @@ module.exports.userGet = lambda(require('./src/user/get'))
 module.exports.userDestroy = lambda(require('./src/user/destroy'))
 module.exports.userSignin = lambda(require('./src/user/signin'))
 module.exports.userRequestPassword = lambda(require('./src/user/request_password'))
+module.exports.userUpdatePassword = lambda(require('./src/user/update_password'))
 module.exports.userAll = lambda(require('./src/user/get_all'))
 
 module.exports.partnerCreate = require('./src/partner/create')

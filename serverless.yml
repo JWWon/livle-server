@@ -87,6 +87,13 @@ functions:
           path: user/password
           method: get
           cors: true
+  userUpdatePassword:
+    handler: handler.userUpdatePassword
+    events:
+      - http:
+          path: user/password
+          method: patch
+          cors: true
   userAll:
     handler: handler.userAll
     events:

@@ -147,7 +147,7 @@ paths:
     patch:
       tags:
         - user
-      summary: '비밀번호 재설정하기 [미구현]'
+      summary: 비밀번호 재설정하기
       consumes:
         - application/json
       produces:

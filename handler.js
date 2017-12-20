@@ -51,6 +51,7 @@ module.exports.ticketStats = lambda(require('./src/ticket/stats'))
 
 module.exports.reservationGet = lambda(require('./src/reservation/get'))
 module.exports.reservationCheckin = lambda(require('./src/reservation/checkin'))
+module.exports.reservationCancel = lambda(require('./src/reservation/cancel'))
 
 module.exports.fileUpload = require('./src/file/upload')
 

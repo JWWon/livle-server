@@ -178,6 +178,13 @@ functions:
           path: ticket/{ticketId}/stats
           method: get
           cors: true
+  ticketReserve:
+    handler: handler.ticketReserve
+    events:
+      - http:
+          path: ticket/{ticketId}/reserve
+          method: post
+          cors: true
   fileUpload:
     handler: handler.fileUpload
     events:
@@ -210,6 +217,20 @@ functions:
     handler: handler.subscriptionRenew
     events:
       - schedule: cron(0 12 * * ? *) # Everyday 12pm UTC
+  reservationGet:
+    handler: handler.reservationGet
+    events:
+      - http:
+          path: reservation
+          method: get
+          cors: true
+  reservationCancel:
+    handler: handler.reservationCancel
+    events:
+      - http:
+          path: reservation/{reservationId}
+          method: delete
+          cors: true
 
 resources:
   Resources:

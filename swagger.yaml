@@ -604,6 +604,32 @@ paths:
               $ref: '#/definitions/Reservation'
         '401':
           description: 로그인되지 않음
+  '/reservation/{reservationId}':
+    delete:
+      tags:
+        - reservation
+      summary: 예약 취소하기
+      parameters:
+        - name: reservationId
+          in: path
+          description: 예약 아이디
+          required: true
+          type: integer
+          format: int64
+        - name: Authorization
+          in: header
+          description: 세션토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 성공
+        '401':
+          description: 로그인되지 않음
+        '404':
+          description: 잘못된 예약 아이디이거나 이 유저의 예약이 아님
+        '405':
+          description: 취소할 수 없는 예약 (공연 시작까지 24시간보다 적게 남았거나 이미 체크인처리를 함)
   '/reservation/{reservationId}/check':
     post:
       tags:

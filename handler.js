@@ -54,6 +54,5 @@ module.exports.reservationCheckin = lambda(require('./src/reservation/checkin'))
 module.exports.fileUpload = require('./src/file/upload')
 
 module.exports.subscriptionCreate = lambda(require('./src/subscription/create'))
-module.exports.subscriptionGet = lambda(require('./src/subscription/get'))
 module.exports.subscriptionDelete = lambda(require('./src/subscription/delete'))
 module.exports.subscriptionRenew = lambda(require('./src/subscription/renew'))

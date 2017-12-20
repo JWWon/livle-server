@@ -5,12 +5,10 @@ const User = require('./src/user/user')
 const Ticket = require('./src/ticket/ticket')
 const Artist = require('./src/ticket/artist')
 const Partner = require('./src/partner/partner')
-const Subscription = require('./src/subscription/subscription')
 const Reservation = require('./src/reservation/reservation')
 
 const dropTables =
   Reservation.drop()
-  .then(() => Subscription.drop())
   .then(() => User.drop())
   .then(() => Artist.drop())
   .then(() => Ticket.drop())
@@ -25,7 +23,6 @@ const migrateTables = () =>
     .then(() => Partner.sync())
     .then(() => Ticket.sync())
     .then(() => Artist.sync())
-    .then(() => Subscription.sync())
     .then(() => Reservation.sync())
     .catch(err => {
       console.error('Failed to migrate tables', err)

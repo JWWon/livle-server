@@ -5,22 +5,58 @@ const saltRounds = 10
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'
 
+const iamport = require('../config/iamport')
+const PRICE = 100 // TODO change
+const nDaysLater = require('../subscription/n-days-later')
+
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
   // eslint-disable-next-line new-cap
   email: { type: S.STRING(32), unique: true, allowNull: false },
   nickname: S.STRING,
   password: { type: S.STRING, allowNull: false },
-  expire_at: S.DATE,
   password_reset_token: S.STRING,
-  free_trial_started: S.DATE,
-},
-  { timestamps: false }
-)
+
+  // Subscription
+  card_name: S.STRING,
+  last_four_digits: S.STRING, // null if not subscribing at the moment
+  cancelled_at: S.DATE,
+
+  valid_by: S.DATE,
+  suspended_by: S.DATE,
+  free_trial_started_at: S.DATE,
+}, { createdAt: 'created_at', updatedAt: 'updated_at' })
 
 User.prototype.getToken = function() { // Arrow function cannot access 'this'
   const token = jwt.sign(this.dataValues, secret)
   return token
+}
+
+User.prototype.isSubscribing = function() {
+  // last_four_digits가 있으면 구독 지속 중인 상태
+  return !!this.last_four_digits
+}
+
+User.prototype.reservable = function(startsAt) {
+  return (startsAt < this.valid_by || this.isSubscribing())
+}
+
+User.prototype.pay = function() {
+  return new Promise( (resolve, reject) => {
+    if (this.valid_by > new Date()) {
+      return reject("아직 유효한 구독입니다.")
+    }
+    return iamport.subscribe.again({
+      customer_uid: this.id,
+      merchant_uid: 'livle_subscription' + new Date().getTime(),
+      amount: PRICE,
+      name: '라이블 정기구독권 결제',
+    }).then((res) =>
+      // 결제일 현재가 1월 1일이라면 2월 1일 23시 59분 59초까지 유효
+      this.update({ valid_by: nDaysLater(31) })
+      .then((user) => resolve(user))
+    ).catch((err) => reject(err))
+  })
 }
 
 User.fromToken = (token) =>
@@ -86,12 +122,6 @@ User.signIn = (email, password) => new Promise((resolve, reject) =>
   ).catch((err) => reject(User.REJECTIONS.NOT_FOUND))
 )
 
-const Subscription = require('../subscription/subscription')
-User.hasMany(Subscription, {
-  foreignKey: { name: 'user_id', allowNull: false },
-})
-
-
 User.dropOut = (email, password) => new Promise((resolve, reject) =>
   User.findOne({
     where: {
@@ -101,47 +131,20 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
     bcrypt.compare(password, user.password, (err, res) => {
       if (err) return reject(err)
       if (res) {
-        user.getSubscriptions({
+        if (user.isSubscribing()) {
+          return reject(User.REJECTIONS.SUBSCRIBING)
+        }
+        return User.destroy({
           where: {
-            cancelled_at: null,
+            email: email,
           },
-        }).then((subs) => subs.length > 0 ? reject(User.REJECTIONS.SUBSCRIBING)
-            : User.destroy({
-              where: {
-                email: email,
-              },
-            }).then(() => resolve())
-          ).catch((err) => reject(err))
+        }).then(() => resolve())
       } else {
-        reject(User.REJECTIONS.WRONG_PASSWORD)
+        return reject(User.REJECTIONS.WRONG_PASSWORD)
       }
     })
   ).catch((err) => reject(err))
 )
-
-User.prototype.reservable = function(startsAt) {
-  return new Promise((resolve, reject) =>
-    this.getSubscriptions({
-      where: {
-        [S.Op.or]: [
-          { cancelled_at: null },
-          {
-            valid_by: { [S.Op.gte]: startsAt },
-          },
-        ],
-      },
-    }).then((subs) => {
-      if (subs.length === 0) {
-        return resolve(User.REJECTIONS.NO_VALID_SUBSCRIPTION)
-      }
-      const sub = subs[0]
-      if (sub.suspended_by && sub.suspended_by > new Date()) {
-        return resolve(User.REJECTIONS.SUSPENDED)
-      }
-      return resolve(true)
-    }).catch((err) => reject(err))
-  )
-}
 
 const Reservation = require('../reservation/reservation')
 User.hasMany(Reservation, {

@@ -20,6 +20,7 @@ Reservation.REJECTIONS = {
   TICKET_NOT_FOUND: 'ticket_not_found',
   OVERDUE: 'overdue',
   NO_VANCANCY: 'no_vacancy',
+  NO_VALID_SUBSCRIPTION: 'no_valid_subscription',
 }
 
 const R = Reservation.REJECTIONS
@@ -42,8 +43,7 @@ Reservation.make = (user, ticketId) =>
       if (ticket.start_at < new Date()) {
         return reject(R.OVERDUE)
       }
-      return user.reservable().then((reservable) => {
-        if (reservable !== true) return reject(reservable)
+      if (user.reservable(ticket.start_at)) {
         return sequelize.transaction((t) =>
           ticket.getReservations({ transaction: t })
           .then((reservations) => {
@@ -59,10 +59,12 @@ Reservation.make = (user, ticketId) =>
           })
         ).then((result) => resolve(result))
           .catch((err) => reject(err))
-      }).catch((err) => reject(err))
+      } else {
+        return reject(R.NO_VALID_SUBSCRIPTION)
+      }
     }).catch((err) => {
- console.error(err); reject(R.TICKET_NOT_FOUND)
-})
+      console.error(err); reject(R.TICKET_NOT_FOUND)
+    })
   )
 
 module.exports = Reservation

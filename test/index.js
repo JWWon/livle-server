@@ -176,21 +176,6 @@ describe('Subscription', function() {
     )
   })
 
-  it('successful retrieval', function(done) {
-    const callback = (error, result) => {
-      if(error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      expect(res.last_four_digits).to.equal(cardNumber.slice(-4))
-      done()
-    }
-
-    test( handler.subscriptionGet,
-      { },
-      callback
-    )
-  })
-
   it('successful reservation', function(done) {
     const callback = (error, result) => {
       if(error) return done(error)

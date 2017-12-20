@@ -1,15 +1,27 @@
 'use strict'
 
-const iamport = require('../config/iamport')
-const Subscription = require('./subscription')
 const _ = require('lodash')
-const doPay = require('./pay')
+const Op = require('sequelize').Op
+const User = require('../user/user')
+
+const tomorrow = () => {
+  let date = new Date()
+  date.setHours(24, 0, 0)
+  return date
+}
 
 module.exports = (params, respond) => {
-  const now = new Date()
-  Subscription.findAll().then((subscriptions) =>
-    _.map(subscriptions, (s) => {
-      // TODO implement
+  User.findAll({
+    where: {
+      last_four_digits: { [Op.ne]: null },
+      cancelled_at: null,
+      valid_by: { [Op.lt]: tomorrow() }
+    }
+  }).then((users) => _.map(users, (user) =>
+    // TODO implement
+    user.pay().then((user) => {
+    }).catch((err) => {
     })
+  )
   )
 }

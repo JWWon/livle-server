@@ -1,5 +1,6 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
+const _ = require('lodash')
 const bcrypt = require('bcryptjs')
 const saltRounds = 10
 const jwt = require('jsonwebtoken')
@@ -57,6 +58,24 @@ User.prototype.pay = function() {
       .then((user) => resolve(user))
     ).catch((err) => reject(err))
   })
+}
+
+User.prototype.cancelReservationsAfter = function(date) {
+  return new Promise((resolve, reject) =>
+    this.getReservations().then((reservations) => {
+      const rActions =
+        _.map(reservations, r => new Promise((resolve, reject) =>
+          r.getTicket().then((ticket) => {
+            if (ticket.start_at > date) {
+              r.destroy().then(() => resolve())
+            } else {
+              resolve()
+            }
+          })
+        ))
+      return Promise.all(rActions)
+    }).then(() => resolve()).catch((err) => reject(err))
+  )
 }
 
 User.fromToken = (token) =>

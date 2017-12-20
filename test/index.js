@@ -99,6 +99,8 @@ describe('User', function() {
     const callback = (error, result) => {
       if(error) return done(error)
       expect(result.statusCode).to.equal(200)
+      const res = JSON.parse(result.body)
+      authToken = res.token
       done()
     }
 

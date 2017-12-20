@@ -473,3 +473,23 @@ describe('Ticket', function() {
     )
   })
 })
+
+/*
+ *
+ * 구독 업데이트
+ *
+ */
+
+describe('Subscription renew', function() {
+  it('successful renewal', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.subscriptionRenew,
+      {},
+      callback
+    )
+  })
+})

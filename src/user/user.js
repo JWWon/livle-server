@@ -39,7 +39,8 @@ User.prototype.isSubscribing = function() {
 }
 
 User.prototype.reservable = function(startsAt) {
-  return (startsAt < this.valid_by || this.isSubscribing())
+  return startsAt < this.valid_by ||
+    (this.isSubscribing() && (new Date() <= this.valid_by))
 }
 
 User.prototype.pay = function() {

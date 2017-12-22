@@ -126,6 +126,24 @@ describe('User', function() {
     )
   })
 
+  it('successful signin with facebook', function(done) {
+    const callback = (error, result) => {
+      const code = result.statusCode
+      if (code === 200 || code === 201) {
+        return done()
+      }
+      return done(new Error(`invalid statusCode ${code}`))
+    }
+
+    /* 토큰 구하는 곳
+     * https://developers.facebook.com/tools/explorer
+     */
+    test( handler.userFacebook,
+      { body: { accessToken: process.env.FB_TOKEN } },
+      callback
+    )
+  }).timeout(5000)
+
 })
 
 let ticket

@@ -80,6 +80,13 @@ functions:
           path: user/session
           method: post
           cors: true
+  userFacebook:
+    handler: handler.userFacebook
+    events:
+      - http:
+          path: user/facebook
+          method: post
+          cors: true
   userRequestPassword:
     handler: handler.userRequestPassword
     events:

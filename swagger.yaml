@@ -117,11 +117,29 @@ paths:
     post:
       tags:
         - user
-      summary: '페이스북 가입 [미구현]'
-      description: 'TODO : 페이스북 가입 및 로그인 시 리턴되는 정보'
+      summary: 페이스북 가입 / 로그인
+      parameters:
+        - name: accessToken
+          in: body
+          schema:
+            type: string
+          required: true
+          description: access_token from facebook
       responses:
         '200':
-          description: TODO
+          description: '기존 계정을 발견, 로그인'
+          schema:
+            $ref: '#/definitions/User'
+        '201':
+          description: '기존 유저가 아님, 신규가입됨'
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: access_token이 없음
+        '401':
+          description: access_token이 유효하지 않음
+        '403':
+          description: 이메일로 가입한 내용이 있음. 이메일로 로그인할 것
   /user/password:
     get:
       tags:

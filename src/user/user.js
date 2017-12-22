@@ -15,8 +15,9 @@ const User = sequelize.define('user', {
   // eslint-disable-next-line new-cap
   email: { type: S.STRING(32), unique: true, allowNull: false },
   nickname: S.STRING,
-  password: { type: S.STRING, allowNull: false },
+  password: S.STRING, // 페이스북으로 가입한 유저의 경우 null
   password_reset_token: S.STRING,
+  facebook_token: S.STRING, // unique하게 하고 싶은데 index key length 때문에..
 
   // Subscription
   card_name: S.STRING,

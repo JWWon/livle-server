@@ -1,11 +1,12 @@
 // Use with cautions
 // It forcefully syncs the schema
 
-const User = require('./src/user/user')
-const Ticket = require('./src/ticket/ticket')
-const Artist = require('./src/ticket/artist')
-const Partner = require('./src/partner/partner')
-const Reservation = require('./src/reservation/reservation')
+const User = require('../src/user/user')
+const Ticket = require('../src/ticket/ticket')
+const Artist = require('../src/ticket/artist')
+const Partner = require('../src/partner/partner')
+const Reservation = require('../src/reservation/reservation')
+const testData = require('./data')
 
 const dropTables =
   Reservation.drop()
@@ -37,8 +38,15 @@ dropTables.then(() => migrateTables()).then(() => {
     approved: true
   }).then(() => {
     console.log('Admin account created')
-    process.exit()
+    testData().then(() => {
+      console.log('Test data added')
+      process.exit()
+    }).catch((err) => {
+      console.error('Failed to insert test data', err)
+      process.exit(1)
+    })
   }).catch((err) => {
     console.error('Failed to create admin account', err)
+      process.exit(1)
   })
 })

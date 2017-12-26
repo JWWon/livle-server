@@ -62,24 +62,19 @@ const tickets = _.times(TICKET_SIZE, () => {
   })
 })
 
-Promise.all(tickets).then(tickets => {
-  const creatingArtists = _.map(tickets, t =>
-    new Promise((resolve, reject) => {
-      const artists = _.times(faker.random.number({ min: 1, max: MAX.ARTISTS }), () =>
-        Artist.create({
-          ticket_id: t.id,
-          name: faker.name.findName(),
-          image: _.sample(ARTIST_IMAGES),
-        })
-      )
-      return Promise.all(artists).then(() => resolve()).catch((err) => reject(err))
-    })
-  )
-  return Promise.all(creatingArtists)
-}).then(() => {
-  console.log('Success')
-  process.exit()
-}).catch((err) => {
-  console.error("Failed", err)
-  process.exit(1)
-})
+module.exports = () => Promise.all(tickets).then(tickets => {
+    console.log('Tickets created')
+    const creatingArtists = _.map(tickets, t =>
+      new Promise((resolve, reject) => {
+        const artists = _.times(faker.random.number({ min: 1, max: MAX.ARTISTS }), () =>
+          Artist.create({
+            ticket_id: t.id,
+            name: faker.name.findName(),
+            image: _.sample(ARTIST_IMAGES),
+          })
+        )
+        return Promise.all(artists).then(() => resolve()).catch((err) => reject(err))
+      })
+    )
+    return Promise.all(creatingArtists)
+  })

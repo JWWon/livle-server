@@ -1,25 +1,26 @@
-'use strict';
+'use strict'
 
 const expect = require('chai').expect
 const handler = require('../handler')
 require('dotenv').config() // .env 파일에서 환경변수 읽어오기
 
-var authToken = ''
-var headers = {}
+let authToken = ''
 
 const test = (func, params, callback) => {
-  func({ headers: { Authorization: authToken }, body: JSON.stringify(params.body),
-    queryStringParameters: params.query, pathParameters: params.path }, {}, callback)
+  func({
+    headers: { Authorization: authToken },
+    body: JSON.stringify(params.body),
+    queryStringParameters: params.query, pathParameters: params.path,
+  }, {}, callback)
 }
 
 const userEmail = 'test@test.com'
 const userPass = 'test'
 
 describe('User', function() {
-
   it('successful creation', function(done) {
     const callback = (error, result) => {
-      if(error) done(error)
+      if (error) done(error)
       expect(result.statusCode).to.equal(200)
       const res = JSON.parse(result.body)
       authToken = res.token
@@ -70,7 +71,7 @@ describe('User', function() {
 
   it('successful retrieval', function(done) {
     const callback = (error, result) => {
-      if(error) done(error)
+      if (error) done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
@@ -83,7 +84,7 @@ describe('User', function() {
 
   it('successful password request', function(done) {
     const callback = (error, result) => {
-      if(error) done(error)
+      if (error) done(error)
       console.log(result)
       expect(result.statusCode).to.equal(200)
       done()
@@ -113,7 +114,7 @@ describe('User', function() {
 
   it('successful signin', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(200)
       const res = JSON.parse(result.body)
       authToken = res.token
@@ -143,14 +144,13 @@ describe('User', function() {
       callback
     )
   }).timeout(5000)
-
 })
 
 let ticket
 describe('Ticket', function() {
   it('successful retrieve of list', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(200)
       const res = JSON.parse(result.body)
       ticket = res[0]
@@ -165,7 +165,7 @@ describe('Ticket', function() {
 
   it('reservation failure with no subscription', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       console.log(result)
       expect(result.statusCode).to.equal(400)
       done()
@@ -185,36 +185,46 @@ describe('Subscription', function() {
   const password = process.env.PASSWORD
 
   it('successful subscription', function(done) {
-    this.timeout(5000)
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
 
     test( handler.subscriptionCreate,
-      { body: { cardNumber: cardNumber, expiry: expiry, birth: birth, password: password} },
-      callback
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        },
+      }, callback
     )
   })
 
   it('subscription fails if already subscribing', function(done) {
-    this.timeout(5000)
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(405)
       done()
     }
 
     test( handler.subscriptionCreate,
-      { body: { cardNumber: cardNumber, expiry: expiry, birth: birth, password: password} },
-      callback
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        },
+      }, callback
     )
   })
 
   it('successful reservation', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       console.log(result)
       expect(result.statusCode).to.equal(200)
       done()
@@ -228,7 +238,7 @@ describe('Subscription', function() {
 
   it('reservation failure on duplicate', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       console.log(result)
       expect(result.statusCode).to.equal(400)
       done()
@@ -243,7 +253,7 @@ describe('Subscription', function() {
   let reservation
   it('successful retrieval of reservation', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(200)
       reservation = JSON.parse(result.body)[0]
       done()
@@ -257,7 +267,7 @@ describe('Subscription', function() {
 
   it('checkin failure with invalid checkin code', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(403)
       done()
     }
@@ -270,7 +280,7 @@ describe('Subscription', function() {
 
   it('successful cancellation of a reservation', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
@@ -283,7 +293,7 @@ describe('Subscription', function() {
 
   it('successful cancellation of a subscription', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
@@ -318,7 +328,7 @@ describe('User deletion', function() {
 describe('Web', () => null)
 
 describe('Partner', function() {
-  var partnerId
+  let partnerId
 
   it('successful creation', function(done) {
     const callback = (error, result) => {
@@ -329,7 +339,9 @@ describe('Partner', function() {
     }
 
     test( handler.partnerCreate,
-      { body: { username: "test@test.com", company: "test", password: "test" } },
+      { body:
+        { username: 'test@test.com', company: 'test', password: 'test' },
+      },
       callback )
   })
 
@@ -367,7 +379,7 @@ describe('Partner', function() {
     }
 
     test( handler.partnerDestroy,
-      { body: { username: "test@test.com", password: "test" } },
+      { body: { username: 'test@test.com', password: 'test' } },
       callback )
   })
 
@@ -408,7 +420,7 @@ describe('Partner', function() {
     }
 
     test( handler.partnerTickets,
-      { path: { partnerId : 1 } }, callback)
+      { path: { partnerId: 1 } }, callback)
     // Under a condition that the admin account's id is 1
   })
 
@@ -450,16 +462,16 @@ describe('File', function() {
 describe('Ticket', function() {
   it('successful creation', function(done) {
     const callback = (error, result) => {
-      if(error) return done(error)
+      if (error) return done(error)
       expect(result.statusCode).to.equal(200)
       done()
     }
 
-    var date = new Date()
+    let date = new Date()
     date.setDate(date.getDate() + 5)
     test( handler.ticketCreate,
       { body: { title: '테스트 콘서트', start_at: date, end_at: date,
-        image: "test", capacity: 100, place: "판교" } },
+        image: 'test', capacity: 100, place: '판교' } },
       callback
     )
   })
@@ -473,12 +485,15 @@ describe('Ticket', function() {
       done()
     }
 
-    var date = new Date()
+    let date = new Date()
     date.setDate(date.getDate() + 5)
     test( handler.ticketCreate,
       { body: { title: '테스트 콘서트', start_at: date, end_at: date,
-        image: "test", capacity: 100, place: "판교",
-        artists: [ { name: '아이유', image: 'iu', }, { name: 'asdf', image: 'qwer' } ],
+        image: 'test', capacity: 100, place: '판교',
+        artists: [
+          { name: '아이유', image: 'iu' },
+          { name: 'asdf', image: 'qwer' },
+        ],
       } },
       callback
     )
@@ -496,13 +511,13 @@ describe('Ticket', function() {
       { path: { ticketId: ticketId },
         body: {
           title: '테스트 콘서트 업데이트',
-          image: "test2", capacity: 50, place: "판교",
+          image: 'test2', capacity: 50, place: '판교',
           artists: [
-            { id: 1, name: '아이유2', image: 'iu', },
+            { id: 1, name: '아이유2', image: 'iu' },
             { name: 'hello', image: 'qwer' },
             { name: '수란', image: 'suran' },
           ],
-        }
+        },
       },
       callback
     )

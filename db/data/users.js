@@ -6,6 +6,12 @@ const User = require('../../src/user/user')
 const Ticket = require('../../src/ticket/ticket')
 const Reservation = require('../../src/reservation/reservation')
 
+const oneMonthLater = () => {
+  let date = new Date()
+  date.setMonth(date.getMonth() + 1)
+  return date
+}
+
 const users = _.times(30, () => {
   return User.create({
     email: faker.internet.email(),
@@ -13,6 +19,7 @@ const users = _.times(30, () => {
     password: 'fakepassword',
     card_name: faker.finance.account(),
     last_four_digits: '1234',
+    valid_by: oneMonthLater(),
   })
 })
 
@@ -20,9 +27,9 @@ module.exports = () => Promise.all(users)
   .then((users) => {
     console.log('User created')
     return Ticket.findAll().then((tickets) => {
-      const creatingReservations = _.map(users, u => {
+      const creatingReservations = _.map(users, (u) =>
         Reservation.make(u, _.sample(tickets).id)
-      })
+      )
       return Promise.all(creatingReservations)
     })
   })

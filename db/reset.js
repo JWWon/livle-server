@@ -14,7 +14,7 @@ const dropTables =
   .then(() => Artist.drop())
   .then(() => Ticket.drop())
   .then(() => Partner.drop())
-  .catch(err => {
+  .catch((err) => {
     console.error('Failed to drop tables', err)
     process.exit(1)
   })
@@ -25,17 +25,17 @@ const migrateTables = () =>
     .then(() => Ticket.sync())
     .then(() => Artist.sync())
     .then(() => Reservation.sync())
-    .catch(err => {
+    .catch((err) => {
       console.error('Failed to migrate tables', err)
       process.exit(1)
     })
 
 dropTables.then(() => migrateTables()).then(() => {
-  console.log("Migration succeeded")
+  console.log('Migration succeeded')
   Partner.create({ username: 'admin@livle.kr',
     password: 'livle',
     company: 'Livle',
-    approved: true
+    approved: true,
   }).then(() => {
     console.log('Admin account created')
     testData().then(() => {

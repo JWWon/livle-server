@@ -1,8 +1,6 @@
 // Libraries
 const faker = require('faker')
 const _ = require('lodash')
-// Require Partner to add partner_id field to Ticket model
-const Partner = require('../../src/partner/partner')
 const Ticket = require('../../src/ticket/ticket')
 const Artist = require('../../src/ticket/artist')
 
@@ -13,7 +11,7 @@ const getNextWeekOf = (date) => {
 }
 
 // Constants
-const TODAY = new Date();
+const TODAY = new Date()
 const WEEK_AFTER = getNextWeekOf(TODAY)
 const PLACES = [
   '잠실 종합운동장 주경기장',
@@ -56,24 +54,27 @@ const tickets = _.times(TICKET_SIZE, () => {
     start_at: startAt,
     end_at: hoursAfter(startAt),
     image: _.sample(IMAGES),
-    capacity: faker.random.number(MAX.VACANCIES),
+    capacity: 20, // faker.random.number(MAX.VACANCIES),
     place: _.sample(PLACES),
     video_id: 'T9fKvVGBBy4',
   })
 })
 
-module.exports = () => Promise.all(tickets).then(tickets => {
+module.exports = () => Promise.all(tickets).then((tickets) => {
     console.log('Tickets created')
-    const creatingArtists = _.map(tickets, t =>
+    const creatingArtists = _.map(tickets, (t) =>
       new Promise((resolve, reject) => {
-        const artists = _.times(faker.random.number({ min: 1, max: MAX.ARTISTS }), () =>
-          Artist.create({
+        const artists = _.times(
+          faker.random.number({ min: 1, max: MAX.ARTISTS }),
+          () => Artist.create({
             ticket_id: t.id,
             name: faker.name.findName(),
             image: _.sample(ARTIST_IMAGES),
           })
         )
-        return Promise.all(artists).then(() => resolve()).catch((err) => reject(err))
+        return Promise.all(artists)
+          .then(() => resolve())
+          .catch((err) => reject(err))
       })
     )
     return Promise.all(creatingArtists)

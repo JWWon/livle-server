@@ -1,7 +1,8 @@
 'use strict'
+const _ = require('lodash')
 const Ticket = require('./ticket')
 const Partner = require('../partner/partner')
-const _ = require('lodash')
+const User = require('../user/user')
 
 module.exports = (params, respond) =>
   Partner.fromHeaders({ Authorization: params.auth })
@@ -16,8 +17,10 @@ module.exports = (params, respond) =>
           return respond(403, '권한이 없습니다.')
         }
 
-        return ticket.getReservations({ paranoid: false }) // 취소된 예약 포함
-          .then((reservations) => {
+        return ticket.getReservations({
+          paranoid: false, // 취소된 예약 포함
+          include: [{ model: User, attributes: ['email', 'nickname'] }],
+        }).then((reservations) => {
             let ticketWithStats = ticket.dataValues
             ticketWithStats.reservations = _.map(reservations,
               (r) => r.dataValues)

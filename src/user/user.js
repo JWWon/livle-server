@@ -13,7 +13,7 @@ const nDaysLater = require('../subscription/n-days-later')
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
   // eslint-disable-next-line new-cap
-  email: { type: S.STRING(32), unique: true, allowNull: false },
+  email: { type: S.STRING(64), unique: true, allowNull: false },
   nickname: S.STRING,
   password: S.STRING, // 페이스북으로 가입한 유저의 경우 null
   password_reset_token: S.STRING,
@@ -179,6 +179,9 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
 
 const Reservation = require('../reservation/reservation')
 User.hasMany(Reservation, {
+  foreignKey: { name: 'user_id', allowNull: false },
+})
+Reservation.belongsTo(User, {
   foreignKey: { name: 'user_id', allowNull: false },
 })
 

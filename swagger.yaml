@@ -923,9 +923,13 @@ definitions:
       id:
         type: integer
         format: int64
-      user_id:
-        type: integer
-        format: int64
+      user:
+        type: object
+        properties:
+          email:
+            type: string
+          nickname:
+            type: string
       ticket_id:
         type: integer
         format: int64

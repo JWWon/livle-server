@@ -121,10 +121,12 @@ paths:
       parameters:
         - name: accessToken
           in: body
-          schema:
-            type: string
           required: true
-          description: access_token from facebook
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
       responses:
         '200':
           description: '기존 계정을 발견, 로그인'

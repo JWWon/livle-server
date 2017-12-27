@@ -34,10 +34,10 @@ module.exports.userRequestPassword = lambda(require('./src/user/request_password
 module.exports.userUpdatePassword = lambda(require('./src/user/update_password'))
 module.exports.userAll = lambda(require('./src/user/get_all'))
 
-module.exports.partnerCreate = require('./src/partner/create')
+module.exports.partnerCreate = lambda(require('./src/partner/create'))
 module.exports.partnerGet = lambda(require('./src/partner/get'))
-module.exports.partnerSignin = require('./src/partner/signin')
-module.exports.partnerDestroy = require('./src/partner/destroy')
+module.exports.partnerSignin = lambda(require('./src/partner/signin'))
+module.exports.partnerDestroy = lambda(require('./src/partner/destroy'))
 module.exports.partnerAll = lambda(require('./src/partner/get_all'))
 module.exports.partnerApprove = lambda(require('./src/partner/approve'))
 module.exports.partnerTickets = lambda(require('./src/partner/tickets'))
@@ -54,7 +54,7 @@ module.exports.reservationGet = lambda(require('./src/reservation/get'))
 module.exports.reservationCheckin = lambda(require('./src/reservation/checkin'))
 module.exports.reservationCancel = lambda(require('./src/reservation/cancel'))
 
-module.exports.fileUpload = require('./src/file/upload')
+module.exports.fileUpload = lambda(require('./src/file/upload'))
 
 module.exports.subscriptionCreate = lambda(require('./src/subscription/create'))
 module.exports.subscriptionDelete = lambda(require('./src/subscription/delete'))

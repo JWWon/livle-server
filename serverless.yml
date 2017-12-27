@@ -99,7 +99,7 @@ functions:
     events:
       - http:
           path: user/password
-          method: patch
+          method: post
           cors: true
   userAll:
     handler: handler.userAll

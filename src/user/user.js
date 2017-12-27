@@ -126,7 +126,7 @@ User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
 User.prototype.updatePassword = function(password) {
   return new Promise((resolve, reject) =>
     bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
-      : this.update({ password: hash })
+      : this.update({ password: hash, password_reset_token: null })
       .then((user) => resolve())
       .catch((err) => reject(err))
     )

@@ -164,7 +164,7 @@ paths:
           description: 이메일이 없거나 잘못된 형식
         '404':
           description: 해당하는 유저가 없음
-    patch:
+    post:
       tags:
         - user
       summary: 비밀번호 재설정하기

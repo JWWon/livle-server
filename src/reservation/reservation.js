@@ -1,5 +1,6 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
+const sendEmail = require('../send-email')
 
 const Reservation = sequelize.define('reservation', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
@@ -33,6 +34,15 @@ Reservation.belongsTo(Ticket, {
   foreignKey: { name: 'ticket_id', allowNull: false },
 })
 
+const formatDate = (date) => {
+  const hour = date.getHours()
+  const minute = date.getMinutes()
+  const h = hour > 12 ? hour - 12 : hour
+  const hh = h < 10 ? '0' + h : h
+
+  return `${hour > 11 ? 'PM' : 'AM'} ${hh}:${minute}`
+}
+
 Reservation.make = (user, ticketId) =>
   new Promise((resolve, reject) =>
     Ticket.findOne({
@@ -57,8 +67,19 @@ Reservation.make = (user, ticketId) =>
               throw new Error(R.NO_VANCANCY)
             }
           })
-        ).then((result) => resolve(result))
-          .catch((err) => reject(err))
+        ).then((result) => {
+          return sendEmail(user.email, '라이블 공연 예약', 'reservation',
+            {
+              nickname: user.nickname,
+              title: ticket.title,
+              place: ticket.place,
+              startAt: formatDate(ticket.start_at),
+            }).then(() => resolve(result))
+            .catch((err) => {
+              console.error(err) // 예약되었으나 이메일만 보내지지 않은 경우
+              return resolve(result)
+            })
+        }).catch((err) => reject(err))
       } else {
         return reject(R.NO_VALID_SUBSCRIPTION)
       }

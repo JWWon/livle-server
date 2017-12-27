@@ -1,7 +1,5 @@
 'use strict'
 const Ticket = require('./ticket')
-const User = require('../user/user')
-const Partner = require('../partner/partner')
 
 module.exports = (params, respond) => {
   let date = new Date()

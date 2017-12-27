@@ -9,6 +9,7 @@ const secret = 'livleusersecret'
 const iamport = require('../config/iamport')
 const PRICE = 100 // TODO change
 const nDaysLater = require('../subscription/n-days-later')
+const sendEmail = require('../send-email')
 
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
@@ -17,6 +18,7 @@ const User = sequelize.define('user', {
   nickname: S.STRING,
   password: S.STRING, // 페이스북으로 가입한 유저의 경우 null
   password_reset_token: S.STRING,
+  email_verification_token: S.STRING, // null if verified
   facebook_token: S.STRING, // unique하게 하고 싶은데 index key length 때문에..
 
   // Subscription
@@ -45,6 +47,15 @@ User.prototype.reservable = function(startsAt) {
 }
 
 User.prototype.pay = function() {
+  const formatDate = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const d = date.getDate()
+
+    const twoDigits = (number) => number < 10 ? '0' + number : number
+    return `${year}.${twoDigits(month)}.${twoDigits(d)}`
+  }
+
   return new Promise( (resolve, reject) => {
     if (this.valid_by > new Date()) {
       return reject('아직 유효한 구독입니다.')
@@ -57,7 +68,20 @@ User.prototype.pay = function() {
     }).then((res) =>
       // 결제일 현재가 1월 1일이라면 2월 1일 23시 59분 59초까지 유효
       this.update({ valid_by: nDaysLater(31) })
-      .then((user) => resolve(user))
+      .then((user) => {
+        return sendEmail(this.email, '라이블 결제 성공', 'payment_success',
+          { nickname: this.nickname,
+            price: PRICE,
+            cardName: this.card_name,
+            lastFourDigits: this.last_four_digits,
+            paidAt: formatDate(this.updated_at),
+            nextPaymentDue: formatDate(this.valid_by),
+          }).then(() => resolve(user))
+          .catch((err) => {
+            console.error(err) // 결제되었으나 이메일만 보내지지 않은 경우
+            return resolve(user)
+          })
+      })
     ).catch((err) => reject(err))
   })
 }

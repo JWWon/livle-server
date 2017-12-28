@@ -7,7 +7,7 @@ module.exports = (params, respond) => {
 
   return Partner.fromHeaders({ Authorization: params.auth })
     .then((partner) => {
-      const getTickets = () => partner.isAdmin ? Ticket.findAll()
+      const getTickets = () => partner.isAdmin() ? Ticket.findAll()
         : Ticket.findAll({
           where: {
             partner_id: partner.id,

@@ -291,6 +291,20 @@ describe('Subscription', function() {
     )
   })
 
+  it('successful reservation after a cancellation', function(done) {
+    const callback = (error, result) => {
+      if (error) return done(error)
+      console.log(result)
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    test( handler.ticketReserve,
+      { path: { ticketId: ticket.id } },
+      callback
+    )
+  })
+
   it('successful cancellation of a subscription', function(done) {
     const callback = (error, result) => {
       if (error) return done(error)

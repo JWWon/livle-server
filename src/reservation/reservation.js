@@ -6,16 +6,15 @@ const Reservation = sequelize.define('reservation', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
   // eslint-disable-next-line new-cap
   status: { type: S.ENUM('valid', 'noshow', 'checked'), allowNull: false },
+  reserved_at: { type: S.DATE, allowNull: false },
   checked_at: S.DATE,
-}, { createdAt: 'created_at', updatedAt: false,
+}, {
   deletedAt: 'cancelled_at', paranoid: true,
   indexes: [{
     unique: true,
     fields: ['user_id', 'ticket_id'],
-    where: {
-      deleted_at: null,
-    },
-  }] })
+  }],
+})
 
 Reservation.REJECTIONS = {
   TICKET_NOT_FOUND: 'ticket_not_found',
@@ -43,6 +42,48 @@ const formatDate = (date) => {
   return `${hour > 11 ? 'PM' : 'AM'} ${hh}:${minute}`
 }
 
+const reserve = (ticket, user) => new Promise((resolve, reject) =>
+  sequelize.transaction((t) =>
+    Reservation.count({
+      where: { ticket_id: ticket.id },
+      transaction: t,
+    }).then((rCount) => {
+      if (rCount < ticket.capacity) {
+        return Reservation.upsert({
+          ticket_id: ticket.id,
+          user_id: user.id,
+          status: 'valid',
+          reserved_at: new Date(),
+          cancelled_at: null,
+        }, {
+          transaction: t,
+        })
+      } else {
+        throw new Error(R.NO_VANCANCY)
+      }
+    })
+  ).then((created) =>
+    Reservation.findOne({
+      where: {
+        ticket_id: ticket.id,
+        user_id: user.id,
+      },
+    })
+  ).then((result) =>
+    sendEmail(user.email, '라이블 공연 예약', 'reservation',
+      {
+        nickname: user.nickname,
+        title: ticket.title,
+        place: ticket.place,
+        startAt: formatDate(ticket.start_at),
+      }).then(() => resolve(result))
+    .catch((err) => {
+      console.error(err) // 예약되었으나 이메일만 보내지지 않은 경우
+      return resolve(result)
+    })
+  ).catch((err) => reject(err) )
+)
+
 Reservation.make = (user, ticketId) =>
   new Promise((resolve, reject) =>
     Ticket.findOne({
@@ -54,38 +95,13 @@ Reservation.make = (user, ticketId) =>
         return reject(R.OVERDUE)
       }
       if (user.reservable(ticket.start_at)) {
-        return sequelize.transaction((t) =>
-          ticket.getReservations({ transaction: t })
-          .then((reservations) => {
-            if (reservations.length < ticket.capacity) {
-              return Reservation.create({
-                ticket_id: ticket.id,
-                user_id: user.id,
-                status: 'valid' },
-                { transaction: t })
-            } else {
-              throw new Error(R.NO_VANCANCY)
-            }
-          })
-        ).then((result) => {
-          return sendEmail(user.email, '라이블 공연 예약', 'reservation',
-            {
-              nickname: user.nickname,
-              title: ticket.title,
-              place: ticket.place,
-              startAt: formatDate(ticket.start_at),
-            }).then(() => resolve(result))
-            .catch((err) => {
-              console.error(err) // 예약되었으나 이메일만 보내지지 않은 경우
-              return resolve(result)
-            })
-        }).catch((err) => reject(err))
+        return reserve(ticket, user)
+          .then((result) => resolve(result))
+          .catch((err) => reject(err))
       } else {
         return reject(R.NO_VALID_SUBSCRIPTION)
       }
-    }).catch((err) => {
-      console.error(err); reject(R.TICKET_NOT_FOUND)
-    })
+    }).catch((err) => reject(R.TICKET_NOT_FOUND))
   )
 
 module.exports = Reservation

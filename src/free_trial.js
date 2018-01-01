@@ -2,8 +2,6 @@ const S = require('sequelize')
 const sequelize = require('./config/sequelize')
 const bcrypt = require('bcryptjs')
 const saltRounds = 5
-const jwt = require('jsonwebtoken')
-const secret = 'livlecardsecret'
 
 const FreeTrial = sequelize.define('free_trial', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },

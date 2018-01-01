@@ -38,11 +38,6 @@ User.prototype.isSubscribing = function() {
   return !!this.last_four_digits
 }
 
-User.prototype.reservable = function(startsAt) {
-  return startsAt < this.valid_by ||
-    (this.isSubscribing() && (new Date() <= this.valid_by))
-}
-
 User.prototype.pay = function() {
   const formatDate = (date) => {
     const year = date.getFullYear()
@@ -205,7 +200,7 @@ User.hasOne(FreeTrial, {
 
 const Subscription = require('../subscription')
 Subscription.belongsTo(User, {
-  foreignKey: { name: 'user_id' }
+  foreignKey: { name: 'user_id' },
 })
 User.hasOne(Subscription, {
   as: 'currentSubscription',
@@ -213,5 +208,25 @@ User.hasOne(Subscription, {
 User.hasOne(Subscription, {
   as: 'nextSubscription',
 })
+
+User.prototype.subscriptionFor = function(date) {
+  return new Promise((resolve, reject) =>
+    this.getCurrentSubscription().then((sub) => {
+      if (!sub) return resolve()
+      if (date < sub.valid_by) return resolve(sub)
+      return this.getNextSubscription().then((sub) => {
+        if (!sub) return resolve()
+        if (date < sub.valid_by) return resolve(sub)
+        return resolve()
+      })
+    }).catch((err) => reject(err))
+  )
+}
+
+const Reservation = require('../reservation/reservation')
+User.hasMany(Reservation, {
+  through: User.associations.subscriptions,
+})
+
 
 module.exports = User

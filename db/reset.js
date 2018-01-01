@@ -1,7 +1,7 @@
 // Use with cautions
 // It forcefully syncs the schema
 
-const migrate = require('./migrate')
+const migrate = require('./_migrate')
 const testData = require('./data')
 const Partner = require('../src/partner/partner')
 

@@ -18,7 +18,6 @@ const User = sequelize.define('user', {
   nickname: S.STRING,
   password: S.STRING, // 페이스북으로 가입한 유저의 경우 null
   password_reset_token: S.STRING,
-  email_verification_token: S.STRING, // null if verified
   facebook_token: S.STRING, // unique하게 하고 싶은데 index key length 때문에..
 
   // Subscription
@@ -26,9 +25,7 @@ const User = sequelize.define('user', {
   last_four_digits: S.STRING, // null if not subscribing at the moment
   cancelled_at: S.DATE,
 
-  valid_by: S.DATE,
   suspended_by: S.DATE,
-  free_trial_started_at: S.DATE,
 }, { createdAt: 'created_at', updatedAt: 'updated_at' })
 
 User.prototype.getToken = function() { // Arrow function cannot access 'this'
@@ -201,12 +198,20 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
   ).catch((err) => reject(err))
 )
 
-const Reservation = require('../reservation/reservation')
-User.hasMany(Reservation, {
-  foreignKey: { name: 'user_id', allowNull: false },
+const FreeTrial = require('../free_trial')
+User.hasOne(FreeTrial, {
+  foreignKey: { name: 'free_trial_id' },
 })
-Reservation.belongsTo(User, {
-  foreignKey: { name: 'user_id', allowNull: false },
+
+const Subscription = require('../subscription')
+Subscription.belongsTo(User, {
+  foreignKey: { name: 'user_id' }
+})
+User.hasOne(Subscription, {
+  as: 'currentSubscription',
+})
+User.hasOne(Subscription, {
+  as: 'nextSubscription',
 })
 
 module.exports = User

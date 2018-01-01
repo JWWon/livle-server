@@ -2,6 +2,7 @@
 // It forcefully syncs the schema
 
 const FreeTrial = require('../src/free_trial')
+const Subscription = require('../src/subscription')
 const User = require('../src/user/user')
 const Ticket = require('../src/ticket/ticket')
 const Artist = require('../src/ticket/artist')
@@ -11,6 +12,7 @@ const Reservation = require('../src/reservation/reservation')
 const dropTables =
   FreeTrial.drop()
   .then(() => Reservation.drop())
+  .then(() => Subscription.drop())
   .then(() => User.drop())
   .then(() => Artist.drop())
   .then(() => Ticket.drop())
@@ -25,6 +27,7 @@ const migrateTables = () =>
     .then(() => Partner.sync())
     .then(() => Ticket.sync())
     .then(() => Artist.sync())
+    .then(() => Subscription.sync())
     .then(() => Reservation.sync())
     .then(() => FreeTrial.sync())
     .catch((err) => {

@@ -204,7 +204,7 @@ describe('Subscription', function() {
         },
       }, callback
     )
-  })
+  }).timeout(5000)
 
   it('subscription fails if already subscribing', function(done) {
     const callback = (error, result) => {
@@ -290,9 +290,11 @@ describe('Subscription', function() {
 
   it('successful cancellation of a reservation', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.reservationCancel,
@@ -303,10 +305,11 @@ describe('Subscription', function() {
 
   it('successful reservation after a cancellation', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketReserve,
@@ -460,8 +463,11 @@ describe('Partner', function() {
 
   it('successfully get ticket details', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketStats,

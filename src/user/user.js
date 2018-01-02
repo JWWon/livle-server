@@ -1,15 +1,11 @@
 const S = require('sequelize')
+const Op = S.Op
 const sequelize = require('../config/sequelize')
 const _ = require('lodash')
 const bcrypt = require('bcryptjs')
 const saltRounds = 10
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'
-
-const iamport = require('../config/iamport')
-const PRICE = 100 // TODO change
-const nDaysLater = require('../subscription/n-days-later')
-const sendEmail = require('../send-email')
 
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
@@ -36,46 +32,6 @@ User.prototype.getToken = function() { // Arrow function cannot access 'this'
 User.prototype.isSubscribing = function() {
   // last_four_digits가 있으면 구독 지속 중인 상태
   return !!this.last_four_digits
-}
-
-User.prototype.pay = function() {
-  const formatDate = (date) => {
-    const year = date.getFullYear()
-    const month = date.getMonth() + 1
-    const d = date.getDate()
-
-    const twoDigits = (number) => number < 10 ? '0' + number : number
-    return `${year}.${twoDigits(month)}.${twoDigits(d)}`
-  }
-
-  return new Promise( (resolve, reject) => {
-    if (this.valid_by > new Date()) {
-      return reject('아직 유효한 구독입니다.')
-    }
-    return iamport.subscribe.again({
-      customer_uid: this.id,
-      merchant_uid: 'livle_subscription' + new Date().getTime(),
-      amount: PRICE,
-      name: '라이블 정기구독권 결제',
-    }).then((res) =>
-      // 결제일 현재가 1월 1일이라면 2월 1일 23시 59분 59초까지 유효
-      this.update({ valid_by: nDaysLater(31) })
-      .then((user) => {
-        return sendEmail(this.email, '라이블 결제 성공', 'payment_success',
-          { nickname: this.nickname,
-            price: PRICE,
-            cardName: this.card_name,
-            lastFourDigits: this.last_four_digits,
-            paidAt: formatDate(this.updated_at),
-            nextPaymentDue: formatDate(this.valid_by),
-          }).then(() => resolve(user))
-          .catch((err) => {
-            console.error(err) // 결제되었으나 이메일만 보내지지 않은 경우
-            return resolve(user)
-          })
-      })
-    ).catch((err) => reject(err))
-  })
 }
 
 User.prototype.cancelReservationsAfter = function(date) {
@@ -202,31 +158,39 @@ const Subscription = require('../subscription')
 Subscription.belongsTo(User, {
   foreignKey: { name: 'user_id' },
 })
-User.hasOne(Subscription, {
-  as: 'currentSubscription',
+User.hasMany(Subscription, {
+  foreignKey: { name: 'user_id' },
 })
 User.hasOne(Subscription, {
-  as: 'nextSubscription',
+  as: 'CurrentSubscription', foreignKey: 'current_subscription_id'
+})
+User.hasOne(Subscription, {
+  as: 'NextSubscription', foreignKey: 'next_subscription_id'
 })
 
 User.prototype.subscriptionFor = function(date) {
   return new Promise((resolve, reject) =>
-    this.getCurrentSubscription().then((sub) => {
-      if (!sub) return resolve()
-      if (date < sub.valid_by) return resolve(sub)
-      return this.getNextSubscription().then((sub) => {
-        if (!sub) return resolve()
-        if (date < sub.valid_by) return resolve(sub)
-        return resolve()
-      })
+    this.getSubscriptions({
+      where: { from: { [Op.lte]: date }, to: { [Op.gte]: date } },
+    }).then((subscriptions) => {
+      if (subscriptions.length === 0) return resolve()
+      return resolve(subscriptions[0])
     }).catch((err) => reject(err))
   )
 }
 
 const Reservation = require('../reservation/reservation')
-User.hasMany(Reservation, {
-  through: User.associations.subscriptions,
-})
-
+User.prototype.getReservations = function(options) {
+  options.include = [
+    {
+      model: Subscription,
+      attributes: [],
+      where: {
+        user_id: this.id
+      }
+    }
+  ]
+  return Reservation.findAll(options)
+}
 
 module.exports = User

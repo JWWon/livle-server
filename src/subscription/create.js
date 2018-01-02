@@ -2,7 +2,19 @@
 
 const User = require('../user/user')
 const iamport = require('../config/iamport')
-const nDaysLater = require('./n-days-later')
+const FreeTrial = require('../free_trial')
+const Subscription = require('../subscription')
+
+const startOfDay = (date) => {
+  date.setHours(0, 0, 0)
+  return date
+}
+
+const nDaysFrom = (n, date) => {
+  date.setDate(date.getDate() + n)
+  date.setHours(23, 59, 59)
+  return date
+}
 
 module.exports = (params, respond) => {
   const data = params.body
@@ -12,28 +24,66 @@ module.exports = (params, respond) => {
     return respond(400, '결제 정보가 누락되었습니다.')
   }
 
+  const now = new Date()
+
   const initialPay = (user) => {
+    const fromDate = startOfDay(now)
+
     // 1주일 무료체험을 한 적이 없는 경우
-    if (!user.free_trial_started_at) {
-      return user.update({
-        free_trial_started_at: new Date(),
-        valid_by: nDaysLater(7),
-      })
+    if (!user.free_trial_id) {
+      return FreeTrial.log(data.cardNumber)
+        .then((ft) =>
+          user.update({
+            free_trial_id: ft.id,
+            cancelled_at: null,
+          })
+        ).then((user) => {
+          return Subscription.create({
+            user_id: user.id,
+            from: fromDate,
+            to: nDaysFrom(7, now),
+          })
+        }).then((newSub) =>
+          newSub.approvePayment(user, now)
+        )
     }
 
     // 1주일 무료체험을 한 적이 있는 경우
-    if (user.valid_by && user.valid_by > new Date()) {
-      // 구독을 취소한 후 유효기간이 만료되기 전에 다시 구독 신청을 한 경우
-      return user
-    } else {
-      return user.pay()
-    }
+    return user.getCurrentSubscription()
+      .then((currSub) => {
+        if (currSub) {
+          // 구독을 취소한 후 유효기간이 만료되기 전에 다시 구독 신청을 한 경우
+          if (!user.cancelled_at) {
+            return Promise.reject(new Error('취소한 적이 없는데 이어지는 구독이 없습니다.'))
+          }
+          return currSub.createNext().then((user) => {
+            user.update({ cancelled_at: null })
+          })
+        } else {
+          // 신규 구독
+          return Subscription.create({
+            user_id: user.id,
+            from: fromDate,
+            to: nDaysFrom(30, now),
+          }).then((newSub) => newSub.pay())
+      }
+    })
   }
 
   const token = params.auth
   return User.fromToken(token)
-    .then((user) => user.isSubscribing() ? respond(405, '이미 구독 중입니다.')
-      : iamport.subscribe_customer.create({ // 빌링 키 발급 프로세스
+    .then((user) => {
+      if (user.isSubscribing()) return respond(405, '이미 구독 중입니다.')
+      if (!user.free_trial_id) {
+        return FreeTrial.check(data.cardNumber)
+          .then((available) => {
+            if (!available) return respond(406, '이미 체험한 카드입니다.')
+            return user
+          })
+      }
+      return user
+    }).then((user) =>
+      iamport.subscribe_customer.create({ // 빌링 키 발급 프로세스
         customer_uid: user.id,
         card_number: data.cardNumber,
         expiry: data.expiry,
@@ -45,8 +95,12 @@ module.exports = (params, respond) => {
           last_four_digits: data.cardNumber.slice(-4),
           cancelled_at: null,
         }).then((user) => initialPay(user)
-        ).then((user) => respond(200, user)
-        ).catch((err) => // 결제 실패 또는 구독 정보 업데이트 실패
+        ).then((subscriptions) => {
+          let user = user.dataValues
+          user.currentSubscription = subscriptions[0].dataValues
+          user.nextSubscription = subscriptions[1].dataValues
+          return respond(200, user)
+        }).catch((err) => // 결제 실패 또는 구독 정보 업데이트 실패
           respond(402, err)
         )
       ).catch((err) => respond(403, err)) // 결제 정보 인증 실패

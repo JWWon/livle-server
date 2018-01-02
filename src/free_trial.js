@@ -22,7 +22,7 @@ FreeTrial.log = (cardNumber) => new Promise((resolve, reject) =>
   bcrypt.hash(password, saltRounds, (err, hash) => {
     if (err) return reject(err)
     return FreeTrial.create({ card_hash: hash })
-      .then(() => resolve(true))
+      .then((record) => resolve(record))
       .catch((err) => reject(err))
   })
 )

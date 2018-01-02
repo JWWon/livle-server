@@ -1,6 +1,7 @@
 'use strict'
 
 const User = require('../user/user')
+const Ticket = require('../ticket/ticket')
 const Reservation = require('../reservation/reservation')
 const sendEmail = require('../send-email')
 
@@ -84,6 +85,10 @@ module.exports = (params, respond) => {
                 .then((sent) => respond(200, reservation))
               ).catch((err) => respond(405, err))
           })
-      }).catch((err) => respond(500, err))
+      }).catch((err) => {
+        console.log('------------------')
+        console.error(err)
+        respond(500, err)
+      })
     ).catch((err) => respond(401, '로그인되지 않았습니다.'))
 }

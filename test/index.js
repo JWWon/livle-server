@@ -242,10 +242,11 @@ describe('Subscription', function() {
 
   it('reservation failure on duplicate', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(400)
-      done()
+      if (result.statusCode === 405) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketReserve,

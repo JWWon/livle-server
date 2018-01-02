@@ -21,24 +21,32 @@ const reserve = (ticket, subscription) => new Promise((resolve, reject) =>
       }).then((usedCount) => { // 현재 구독에서 이용한 예약 기회
         if (usedCount >= 2) throw new Error('used up')
 
-        return Reservation.upsert({
-          ticket_id: ticket.id,
-          subscription_id: subscription.id,
-          reserved_at: new Date(),
-          cancelled_at: null,
-        }, {
+        return Reservation.findOrCreate({
+          where: {
+            ticket_id: ticket.id,
+            subscription_id: subscription.id,
+          },
+          defaults: {
+            reserved_at: new Date(),
+            cancelled_at: null,
+          },
+          paranoid: false,
           transaction: t,
+        }).spread((reservation, created) => {
+          if (reservation.isSoftDeleted()) {
+            return reservation.update({
+              cancelled_at: null,
+              reserved_at: new Date(),
+            })
+          } else if (created) {
+            return reservation
+          } else {
+            throw new Error('already reserved')
+          }
         })
     })
     })
-  ).then((created) =>
-    Reservation.findOne({
-      where: {
-        ticket_id: ticket.id,
-        subscription_id: subscription.id,
-      },
-    })
-  ).then((result) => resolve(result)
+  ).then((reservation) => resolve(reservation)
   ).catch((err) => reject(err))
 )
 

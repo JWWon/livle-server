@@ -184,6 +184,7 @@ User.prototype.subscriptionFor = function(date) {
 
 const Reservation = require('../reservation/reservation')
 User.prototype.getReservations = function(options) {
+  options = options || { }
   options.include = [
     {
       model: Subscription,

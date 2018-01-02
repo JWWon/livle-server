@@ -11,7 +11,8 @@ module.exports = (params, respond) => {
       .then((reservations) =>
         respond(200, reservations)
       ).catch((err) => respond(500, err))
-    ).catch((err) =>
+    ).catch((err) => {
+      console.error(err)
       respond(401, '로그인이 필요합니다.')
-    )
+    })
 }

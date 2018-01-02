@@ -75,11 +75,13 @@ module.exports = (params, respond) => {
     .then((user) => {
       if (user.isSubscribing()) return respond(405, '이미 구독 중입니다.')
       if (!user.free_trial_id) {
-        return FreeTrial.check(data.cardNumber)
+        return new Promise((resolve, reject) =>
+          FreeTrial.check(data.cardNumber)
           .then((available) => {
             if (!available) return respond(406, '이미 체험한 카드입니다.')
-            return user
+            return resolve(user)
           })
+        )
       }
       return user
     }).then((user) =>
@@ -96,13 +98,17 @@ module.exports = (params, respond) => {
           cancelled_at: null,
         }).then((user) => initialPay(user)
         ).then((subscriptions) => {
-          let user = user.dataValues
-          user.currentSubscription = subscriptions[0].dataValues
-          user.nextSubscription = subscriptions[1].dataValues
-          return respond(200, user)
-        }).catch((err) => // 결제 실패 또는 구독 정보 업데이트 실패
+          let userData = user.dataValues
+          userData.currentSubscription = subscriptions[0].dataValues
+          userData.nextSubscription = subscriptions[1].dataValues
+          return respond(200, userData)
+        }).catch((err) => { // 결제 실패 또는 구독 정보 업데이트 실패
+          console.error(err)
           respond(402, err)
-        )
+        })
       ).catch((err) => respond(403, err)) // 결제 정보 인증 실패
-    ).catch((err) => respond(401, '로그인이 필요합니다.'))
+    ).catch((err) => {
+      console.error(err)
+      respond(401, '로그인이 필요합니다.')
+    })
 }

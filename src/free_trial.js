@@ -10,7 +10,7 @@ const FreeTrial = sequelize.define('free_trial', {
 }, { createdAt: 'created_at' })
 
 FreeTrial.check = (cardNumber) => new Promise((resolve, reject) =>
-  bcrypt.hash(password, saltRounds, (err, hash) => {
+  bcrypt.hash(cardNumber, saltRounds, (err, hash) => {
     if (err) return reject(err)
     return FreeTrial.findOne({ where: { card_hash: hash } })
     .then((record) => record ? resolve(false) : resolve(true))
@@ -19,7 +19,7 @@ FreeTrial.check = (cardNumber) => new Promise((resolve, reject) =>
 )
 
 FreeTrial.log = (cardNumber) => new Promise((resolve, reject) =>
-  bcrypt.hash(password, saltRounds, (err, hash) => {
+  bcrypt.hash(cardNumber, saltRounds, (err, hash) => {
     if (err) return reject(err)
     return FreeTrial.create({ card_hash: hash })
       .then((record) => resolve(record))

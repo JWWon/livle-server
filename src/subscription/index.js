@@ -29,10 +29,10 @@ const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
       lastFourDigits: user.last_four_digits,
       paidAt: formatDate(paidAt),
       nextPaymentDue: formatDate(nextPaymentDue),
-    }).then(() => resolve(true))
+    }).then(() => Promise.resolve(true))
     .catch((err) => {
       console.error(err)
-      return resolve(false)
+      return Promise.resolve(false)
     })
 }
 
@@ -64,11 +64,14 @@ Subscription.prototype.createNext = function() {
   const nextFromDate = getNextFromDate(this.to)
   const nextToDate = getToDate(nextFromDate)
 
-  return Subscription.create({
-    user_id: this.user_id,
-    from: nextFromDate,
-    to: nextToDate,
-  }).then((newSub) => Promise.resolve([this, newSub]))
+  return new Promise((resolve, reject) =>
+    Subscription.create({
+      user_id: this.user_id,
+      from: nextFromDate,
+      to: nextToDate,
+    }).then((newSub) => resolve([this, newSub]))
+    .catch((err) => reject(err))
+  )
 }
 
 Subscription.prototype.approvePayment = function(user, at) {
@@ -76,14 +79,16 @@ Subscription.prototype.approvePayment = function(user, at) {
 
   return new Promise((resolve, reject) =>
     this.update({ paid_at: now })
-    .then((updatedSub) => updatedSub.createNext())
-    .then((nextSub) =>
-      user.update({
-        current_subscription_id: updatedSub.id,
+    .then((updatedSub) => updatedSub.createNext()
+    ).then((subscriptions) => {
+      const currSub = subscriptions[0]
+      const nextSub = subscriptions[1]
+      return user.update({
+        current_subscription_id: currSub.id,
         next_subscription_id: nextSub.id,
       }).then((user) => sendPaymentEmail(user, now, nextSub.from))
-      .then((sent) => resolve([updatedSub, nextSub]))
-    ).catch((err) => {
+        .then((sent) => resolve([currSub, nextSub]))
+    }).catch((err) => {
       console.error(`User ${user.id}: 결제되었으나 정상적으로 업데이트되지 않음`)
       console.error(err)
       return reject(err)

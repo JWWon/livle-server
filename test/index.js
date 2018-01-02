@@ -227,10 +227,11 @@ describe('Subscription', function() {
 
   it('successful reservation', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketReserve,

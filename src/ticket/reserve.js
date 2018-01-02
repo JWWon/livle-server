@@ -1,5 +1,6 @@
 'use strict'
 
+const sequelize = require('../config/sequelize')
 const User = require('../user/user')
 const Ticket = require('../ticket/ticket')
 const Reservation = require('../reservation/reservation')
@@ -79,11 +80,14 @@ module.exports = (params, respond) => {
           .then((sub) => {
             if (!sub) return respond(403, '유효한 구독이 없습니다.')
 
-            return reserve(ticket, user, sub)
+            return reserve(ticket, sub)
               .then((reservation) =>
                 sendReservationEmail(user, ticket)
                 .then((sent) => respond(200, reservation))
-              ).catch((err) => respond(405, err))
+              ).catch((err) => {
+                console.error(err)
+                respond(405, err)
+              })
           })
       }).catch((err) => {
         console.log('------------------')

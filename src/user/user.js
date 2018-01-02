@@ -173,6 +173,9 @@ User.prototype.subscriptionFor = function(date) {
     this.getSubscriptions({
       where: { from: { [Op.lte]: date }, to: { [Op.gte]: date } },
     }).then((subscriptions) => {
+      if (subscriptions.length > 1) {
+        console.error(`User ${this.id}: subscriptions overlapping`)
+      }
       if (subscriptions.length === 0) return resolve()
       return resolve(subscriptions[0])
     }).catch((err) => reject(err))

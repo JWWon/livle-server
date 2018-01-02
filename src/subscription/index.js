@@ -38,27 +38,17 @@ const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
 
 Subscription.prototype.createNext = function() {
   const getNextFromDate = (currTo) => {
-    const tomorrowOf = (date) => {
-      date.setDate(date.getDate() + 1)
-      return date
-    }
-    const startOfDay = (date) => {
-      date.setHours(0, 0, 0)
-      return date
-    }
-    return startOfDay( tomorrowOf(currTo) )
+    let date = new Date(currTo)
+    date.setDate(date.getDate() + 1)
+    date.setHours(0, 0, 0)
+    return date
   }
 
   const getToDate = (fromDate) => {
-    const endOfDay = (date) => {
-      date.setHours(23, 59, 59)
-      return date
-    }
-    const thirtyDaysFrom = (date) => {
-      date.setDate(date.getDate() + 30)
-      return date
-    }
-    return endOfDay( thirtyDaysFrom(fromDate) )
+    let date = new Date(fromDate)
+    date.setHours(23, 59, 59)
+    date.setDate(date.getDate() + 30)
+    return date
   }
 
   const nextFromDate = getNextFromDate(this.to)

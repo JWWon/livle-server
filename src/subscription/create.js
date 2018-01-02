@@ -5,12 +5,14 @@ const iamport = require('../config/iamport')
 const FreeTrial = require('../free_trial')
 const Subscription = require('../subscription')
 
-const startOfDay = (date) => {
+const startOfDay = (d) => {
+  let date = new Date(d)
   date.setHours(0, 0, 0)
   return date
 }
 
-const nDaysFrom = (n, date) => {
+const nDaysFrom = (n, from) => {
+  let date = new Date(from)
   date.setDate(date.getDate() + n)
   date.setHours(23, 59, 59)
   return date
@@ -41,7 +43,7 @@ module.exports = (params, respond) => {
           return Subscription.create({
             user_id: user.id,
             from: fromDate,
-            to: nDaysFrom(7, now),
+            to: nDaysFrom(6, now),
           })
         }).then((newSub) =>
           newSub.approvePayment(user, now)

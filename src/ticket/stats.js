@@ -30,12 +30,16 @@ module.exports = (params, respond) =>
           let ticketWithStats = ticket.dataValues
           ticketWithStats.reservations = _.map(reservations,
             (r) => {
+              if (!r.subscription.user) {
+                console.log('@@@@@@@@@@@@found')
+                console.log(r.subscription)
+              }
               let data = r.dataValues
-              data.subscription = undefined
               data.user = r.subscription.user.dataValues
+              data.subscription = undefined
               return data
             })
           return respond(200, ticketWithStats)
         })
       })
-    ).catch((err) => respond(401, err))
+    ).catch((err) => { console.error(err); respond(401, err) })

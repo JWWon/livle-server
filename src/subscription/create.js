@@ -102,7 +102,9 @@ module.exports = (params, respond) => {
         ).then((subscriptions) => {
           let userData = user.dataValues
           userData.currentSubscription = subscriptions[0].dataValues
+          userData.currentSubscription.used = 0
           userData.nextSubscription = subscriptions[1].dataValues
+          userData.nextSubscription.used = 0
           return respond(200, userData)
         }).catch((err) => { // 결제 실패 또는 구독 정보 업데이트 실패
           console.error(err)

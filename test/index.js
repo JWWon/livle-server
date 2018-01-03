@@ -20,12 +20,13 @@ const userPass = 'test'
 describe('User', function() {
   it('successful creation', function(done) {
     const callback = (error, result) => {
-      if (error) done(error)
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      authToken = res.token
-      expect(result).to.exist
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        authToken = body.token
+        if (authToken) return done()
+      }
+      done(new Error(body))
     }
 
     test(handler.userCreate,
@@ -35,8 +36,8 @@ describe('User', function() {
 
   it('creation failure when no password', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(400)
-        done()
+      if (result.statusCode === 400) return done()
+      done(new Error(result))
     }
 
     test( handler.userCreate,
@@ -47,8 +48,8 @@ describe('User', function() {
 
   it('creation failure on duplicate email', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(403)
-      done()
+      if (result.statusCode === 403) return done()
+      done(new Error(result))
     }
 
     test( handler.userCreate,
@@ -59,8 +60,8 @@ describe('User', function() {
 
   it('creation failure on invalid email', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(405)
-      done()
+      if (result.statusCode === 405) return done()
+      done(new Error(result))
     }
 
     test( handler.userCreate,
@@ -71,9 +72,12 @@ describe('User', function() {
 
   it('successful retrieval', function(done) {
     const callback = (error, result) => {
-      if (error) done(error)
-      expect(result.statusCode).to.equal(200)
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        return done()
+      }
+      done(new Error(body))
     }
 
     test( handler.userGet,
@@ -84,10 +88,8 @@ describe('User', function() {
 
   it('successful password request', function(done) {
     const callback = (error, result) => {
-      if (error) done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) return done()
+      done(new Error(result))
     }
 
     test( handler.userRequestPassword,
@@ -114,11 +116,13 @@ describe('User', function() {
 
   it('successful signin', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      authToken = res.token
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        authToken = body.token
+        if (authToken) return done()
+      }
+      done(new Error(body))
     }
 
     test( handler.userSignin,
@@ -133,7 +137,7 @@ describe('User', function() {
       if (code === 200 || code === 201) {
         return done()
       }
-      return done(new Error(`invalid statusCode ${code}`))
+      return done(new Error(code))
     }
 
     /* 토큰 구하는 곳
@@ -150,11 +154,13 @@ let ticket
 describe('Ticket', function() {
   it('successful retrieve of list', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      ticket = res[0]
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        ticket = body[0]
+        return done()
+      }
+      done(new Error(body))
     }
 
     test( handler.ticketGet,
@@ -187,7 +193,9 @@ describe('Subscription', function() {
 
   it('successful subscription', function(done) {
     const callback = (error, result) => {
+      const body = JSON.parse(result.body)
       if (result.statusCode === 200) {
+        console.log(body)
         done()
       } else {
         done(new Error(result.body))
@@ -320,9 +328,13 @@ describe('Subscription', function() {
 
   it('successful cancellation of a subscription', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        done()
+      } else {
+        done(new Error(body))
+      }
     }
 
     test( handler.subscriptionDelete,

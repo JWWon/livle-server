@@ -9,6 +9,7 @@ const Reservation = sequelize.define('reservation', {
   // 서버에서 자동 취소 및 노쇼 패널티 부여
 }, {
   deletedAt: 'cancelled_at', paranoid: true,
+  createdAt: 'created_at', updatedAt: 'updated_at',
   indexes: [{
     unique: true,
     fields: ['subscription_id', 'ticket_id'],

@@ -12,7 +12,10 @@ module.exports = (params, respond) => {
       respond(404, '구독 정보가 없습니다.')
       : iamport.subscribe_customer.delete({
         customer_uid: user.id,
-      }).then((res) =>
+      }).then((res) => {
+        if (!user.next_subscription_id) {
+          return respond(404, '구독 정보가 없습니다.')
+        }
         Subscription.destroy({
           where: { id: user.next_subscription_id },
         }).then((deleted) =>
@@ -22,6 +25,6 @@ module.exports = (params, respond) => {
             cancelled_at: new Date(),
           })
         ).then((user) => respond(200, user))
-      ).catch((err) => respond(500, err))
-    ).catch((err) => respond(401, err))
+      }).catch((err) => respond(500, err))
+    ).catch((err) => { console.error(err); respond(401, err) })
 }

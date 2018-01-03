@@ -1,6 +1,7 @@
 const S = require('sequelize')
 const Op = S.Op
 const sequelize = require('../config/sequelize')
+const _ = require('lodash')
 const bcrypt = require('bcryptjs')
 const saltRounds = 10
 const jwt = require('jsonwebtoken')
@@ -61,6 +62,12 @@ User.REJECTIONS = {
   SUSPENDED: 'suspended',
 }
 
+User.prototype.sessionData = function() {
+  let userData = _.pick(this.dataValues, ['email', 'nickname'])
+  userData.token = this.getToken()
+  return userData
+}
+
 User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
   bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
     : User.create({
@@ -68,10 +75,7 @@ User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
       password: hash,
       nickname: nickname,
     }).then((user) => {
-      let userData = user.dataValues
-      userData.password = undefined
-      userData.token = user.getToken()
-      return resolve(userData)
+      return resolve(user.sessionData())
     }).catch((err) => reject(err))
   )
 )
@@ -95,10 +99,7 @@ User.signIn = (email, password) => new Promise((resolve, reject) =>
     bcrypt.compare(password, user.password, (err, res) => {
       if (err) return reject(err)
       if (res) {
-        let userData = user.dataValues
-        userData.password = undefined
-        userData.token = user.getToken()
-        return resolve(userData)
+        return resolve(user.sessionData())
       } else {
         reject(User.REJECTIONS.WRONG_PASSWORD)
       }
@@ -137,10 +138,10 @@ User.hasOne(FreeTrial, {
 
 const Subscription = require('../subscription')
 Subscription.belongsTo(User, {
-  foreignKey: { name: 'user_id' },
+  foreignKey: { name: 'user_id', allowNull: false },
 })
 User.hasMany(Subscription, {
-  foreignKey: { name: 'user_id' },
+  foreignKey: { name: 'user_id', allowNull: false },
 })
 User.hasOne(Subscription, {
   as: 'CurrentSubscription', foreignKey: 'current_subscription_id',

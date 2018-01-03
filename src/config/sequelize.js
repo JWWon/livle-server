@@ -17,4 +17,5 @@ module.exports =
     define: {
       charset: 'utf8mb4',
     },
+    logging: false,
   })

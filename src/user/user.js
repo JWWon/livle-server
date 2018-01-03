@@ -131,23 +131,12 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
   ).catch((err) => reject(err))
 )
 
-const FreeTrial = require('../free_trial')
-User.hasOne(FreeTrial, {
-  foreignKey: { name: 'free_trial_id' },
-})
-
 const Subscription = require('../subscription')
 Subscription.belongsTo(User, {
   foreignKey: { name: 'user_id', allowNull: false },
 })
 User.hasMany(Subscription, {
   foreignKey: { name: 'user_id', allowNull: false },
-})
-User.hasOne(Subscription, {
-  as: 'CurrentSubscription', foreignKey: 'current_subscription_id',
-})
-User.hasOne(Subscription, {
-  as: 'NextSubscription', foreignKey: 'next_subscription_id',
 })
 
 User.prototype.subscriptionFor = function(date) {

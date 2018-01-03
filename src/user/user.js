@@ -168,4 +168,13 @@ User.prototype.getReservations = function(options) {
   return Reservation.findAll(options)
 }
 
+User.prototype.getActiveSubscriptions = function() {
+  return Subscription.findOne({
+    where: {
+      id: [this.current_subscription_id, this.next_subscription_id]
+    },
+    order: [ ['id', 'asc'] ],
+  })
+}
+
 module.exports = User

@@ -9,7 +9,7 @@ module.exports = (params, respond) => {
 
   return User.fromToken(token)
     .then((user) =>
-      user.getReservations({where: { id: rId } })
+      user.getReservations({ where: { id: rId } })
       .then((reservations) => {
         if (reservations.length === 0) {
           return respond(404, '해당 예약을 찾을 수 없습니다.')

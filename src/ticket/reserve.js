@@ -38,7 +38,6 @@ const reserve = (ticket, subscription) => new Promise((resolve, reject) =>
             reserved_at: new Date(),
             cancelled_at: null,
           }, { transaction: t })
-
         })
       })
     })
@@ -46,8 +45,8 @@ const reserve = (ticket, subscription) => new Promise((resolve, reject) =>
     Reservation.findOne({
       where: {
         ticket_id: ticket.id,
-        subscription_id: subscription.id
-      }
+        subscription_id: subscription.id,
+      },
     })
   ).then((reservation) => resolve(reservation)
   ).catch((err) => reject(err))

@@ -14,7 +14,7 @@ module.exports = (params, respond) => {
         customer_uid: user.id,
       }).then((res) =>
         Subscription.destroy({
-          where: { id: user.next_subscription_id }
+          where: { id: user.next_subscription_id },
         }).then((deleted) =>
           user.update({
             card_name: null,

@@ -21,10 +21,10 @@ module.exports = (params, respond) =>
         return ticket.getReservations({
           paranoid: false, // 취소된 예약 포함
           include: [{ model: Subscription,
-              attributes: [ 'user_id' ],
+              attributes: ['user_id'],
               include: [
-              { model: User, attributes: ['email', 'nickname'] }
-              ]
+              { model: User, attributes: ['email', 'nickname'] },
+              ],
             }],
         }).then((reservations) => {
           let ticketWithStats = ticket.dataValues
@@ -38,4 +38,4 @@ module.exports = (params, respond) =>
           return respond(200, ticketWithStats)
         })
       })
-    ).catch((err) => { console.log(err); respond(401, err) })
+    ).catch((err) => respond(401, err))

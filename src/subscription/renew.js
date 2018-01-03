@@ -20,7 +20,8 @@ const yesterday = () => {
 const log = (subs) => {
   const curr = subs[0]
   const next = subs[1]
-  console.log(`User ${curr.user_id} : 재구독 성공 (${curr.id} 결제된 구독 / ${next.id} 다음구독)`)
+  console.log(`User ${curr.user_id} : 재구독 성공 \
+  (${curr.id} 결제된 구독 / ${next.id} 다음구독)`)
 }
 
 const renew = (subscription) => new Promise((resolve, reject) =>

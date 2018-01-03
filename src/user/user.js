@@ -1,7 +1,6 @@
 const S = require('sequelize')
 const Op = S.Op
 const sequelize = require('../config/sequelize')
-const _ = require('lodash')
 const bcrypt = require('bcryptjs')
 const saltRounds = 10
 const jwt = require('jsonwebtoken')
@@ -144,10 +143,10 @@ User.hasMany(Subscription, {
   foreignKey: { name: 'user_id' },
 })
 User.hasOne(Subscription, {
-  as: 'CurrentSubscription', foreignKey: 'current_subscription_id'
+  as: 'CurrentSubscription', foreignKey: 'current_subscription_id',
 })
 User.hasOne(Subscription, {
-  as: 'NextSubscription', foreignKey: 'next_subscription_id'
+  as: 'NextSubscription', foreignKey: 'next_subscription_id',
 })
 
 User.prototype.subscriptionFor = function(date) {
@@ -172,9 +171,9 @@ User.prototype.getReservations = function(options) {
       model: Subscription,
       attributes: [],
       where: {
-        user_id: this.id
-      }
-    }
+        user_id: this.id,
+      },
+    },
   ]
   return Reservation.findAll(options)
 }

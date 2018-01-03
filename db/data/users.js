@@ -7,9 +7,16 @@ const Subscription = require('../../src/subscription')
 const Ticket = require('../../src/ticket/ticket')
 const Reservation = require('../../src/reservation/reservation')
 
-const oneMonthLater = () => {
-  let date = new Date()
-  date.setMonth(date.getMonth() + 1)
+const startOfDay = (d) => {
+  let date = new Date(d)
+  date.setHours(0, 0, 0)
+  return date
+}
+
+const nDaysFrom = (n, from) => {
+  let date = new Date(from)
+  date.setDate(date.getDate() + n)
+  date.setHours(23, 59, 59)
   return date
 }
 
@@ -23,16 +30,25 @@ const users = _.times(30, () => {
   })
 })
 
-module.exports = () => Promise.all(users)
+module.exports = () => new Promise((resolve, reject) =>
+  Promise.all(users)
   .then((users) => {
     console.log('Users created')
 
+    const now = new Date()
+    const fromDate = startOfDay(now)
+    const toDate = nDaysFrom(30, now)
+
     const creatingSubscriptions = _.map(users, (user) =>
-      Subscription.create({
-        user_id: user.id,
-        paid_at: new Date(),
-        valid_by: oneMonthLater(),
-      })
+      new Promise((resolve, reject) =>
+        Subscription.create({
+          user_id: user.id,
+          from: fromDate,
+          to: toDate,
+        }).then((newSub) => newSub.approvePayment(user, now))
+        .then((subs) => resolve(subs))
+        .catch((err) => reject(err))
+      )
     )
 
     Promise.all(creatingSubscriptions).then((subs) => {
@@ -42,11 +58,13 @@ module.exports = () => Promise.all(users)
         const creatingReservations = _.map(subs, (s) =>
           Reservation.create({
             ticket_id: _.sample(tickets).id,
-            subscription_id: s.id,
+            subscription_id: s[0].id,
             reserved_at: new Date(),
           })
         )
         return Promise.all(creatingReservations)
+          .then((reservations) => resolve(reservations))
       })
     })
-  })
+  }).catch((err) => reject(err))
+)

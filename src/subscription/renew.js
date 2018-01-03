@@ -2,13 +2,8 @@
 
 const _ = require('lodash')
 const Op = require('sequelize').Op
-const User = require('../user/user')
-
-const tomorrow = () => {
-  let date = new Date()
-  date.setHours(24, 0, 0)
-  return date
-}
+const Subscription = require('.')
+const Reservation = require('../reservation/reservation')
 
 const startOfToday = () => {
   let date = new Date()
@@ -16,37 +11,51 @@ const startOfToday = () => {
   return date
 }
 
-const renew = (user) => new Promise((resolve, reject) =>
-  user.pay().then((user) => {
-    console.log(`${user.email} 유저 재구독 성공`)
+const yesterday = () => {
+  let date = startOfToday()
+  date.setHours(0, 0, -1)
+  return date
+}
+
+const log = (subs) => {
+  const curr = subs[0]
+  const next = subs[1]
+  console.log(`User ${curr.user_id} : 재구독 성공 (${curr.id} 결제된 구독 / ${next.id} 다음구독)`)
+}
+
+const renew = (subscription) => new Promise((resolve, reject) =>
+  subscription.pay().then((subs) => {
+    log(subs)
     return resolve()
   }).catch((err) => {
-    console.error(`${user.email} 유저 재구독 실패`)
-    if (user.valid_by < startOfToday()) {
-      // 어제까지 유효한 경우 = n번째 결제 실패 ( n > 1 )
-      return user.cancelReservationsAfter(user.valid_by)
-        .then(() => {
-          console.log(`${user.email} 유저의 예약이 취소됨`)
-          return resolve()
-        })
+    if (subscription.from > yesterday()) {
+      console.error(`User ${subscription.user_id} : 재구독 실패 (첫 번째)`)
+      // TODO push notification
+      // TODO send failure mail
     } else {
-      // 오늘까지 유효한 경우 = 첫번째 결제 실패
-      // TODO 푸시 알림
-      return resolve()
+      console.error(`User ${subscription.user_id} : 재구독 실패`)
+      Reservation.destroy({
+        where: { subscription_id: subscription.id },
+      }).then((cancelledCount) => {
+        if (cancelledCount > 0) {
+          console.error(`User ${subscription.user_id} : 재구독 두번째 실패로 예약 취소`)
+        }
+        // TODO push notification
+        // TODO send failure mail
+      })
     }
   })
 )
 
 module.exports = (params, respond) =>
-  User.findAll({
+  Subscription.findAll({
     where: {
-      last_four_digits: { [Op.ne]: null },
-      cancelled_at: null,
-      // 유효기간이 오늘 혹은 그 이전까지인 구독유저들 찾기
-      valid_by: { [Op.lt]: tomorrow() },
+      // 결제되지 않은 모델 중 시작 기간이 오늘 혹은 그 이전인 것들
+      paid_at: null,
+      from: { [Op.lte]: startOfToday() },
     },
-  }).then((users) => {
-    const renewal = _.map(users, (user) => renew(user))
+  }).then((subscriptions) => {
+    const renewal = _.map(subscriptions, (s) => renew(s))
     return Promise.all(renewal)
   }).then(() => respond(200))
     .catch((err) => console.error(err))

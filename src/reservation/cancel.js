@@ -1,7 +1,6 @@
 'use strict'
 
 const User = require('../user/user')
-const Reservation = require('./reservation')
 
 const hoursLeft = (until) => {
   const now = new Date()
@@ -20,7 +19,9 @@ module.exports = (params, respond) => {
         const reservation = reservations[0]
         if (reservation.checked_at) return respond(405)
         return reservation.getTicket()
-        .then((ticket) => ticket.start_at < new Date() ? respond(405)
+          .then((ticket) =>
+            // 4시간 전까지만 취소 가능
+            hoursLeft(ticket.start_at) < 4 ? respond(405)
           : reservation.destroy().then(() => respond(200))
         )
       }).catch((err) => respond(500, err))

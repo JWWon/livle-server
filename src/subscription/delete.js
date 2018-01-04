@@ -21,7 +21,11 @@ module.exports = (params, respond) => {
             last_four_digits: null,
             cancelled_at: new Date(),
           })
-          ).then((user) => respond(200, user))
+          ).then((user) => {
+            let userData = user.userData()
+            userData.currentSubscription = currSub.dataValues
+            return respond(200, userData)
+          })
           .catch((err) => {
             console.error(err)
             respond(500, err)

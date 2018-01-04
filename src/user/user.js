@@ -72,6 +72,13 @@ User.prototype.sessionData = function() {
   return userData
 }
 
+User.prototype.userData = function() {
+  return _.pick(this.dataValues, [
+    'email', 'nickname', 'card_name', 'last_four_digits',
+    'cancelled_at', 'valid_by', 'suspended_by', 'free_trial_id',
+  ])
+}
+
 User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
   bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
     : User.create({

@@ -100,7 +100,7 @@ module.exports = (params, respond) => {
           cancelled_at: null,
         }).then((user) => initialPay(user)
         ).then((subscriptions) => {
-          let userData = user.dataValues
+          let userData = user.userData()
           userData.currentSubscription = subscriptions[0].dataValues
           userData.currentSubscription.used = 0
           userData.nextSubscription = subscriptions[1].dataValues

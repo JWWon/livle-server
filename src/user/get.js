@@ -1,6 +1,5 @@
 'use strict'
 
-const _ = require('lodash')
 const User = require('./user')
 const Reservation = require('../reservation/reservation')
 
@@ -9,10 +8,7 @@ module.exports = (params, respond) => {
 
   return User.fromToken(params.auth)
     .then((user) => {
-      let userData = _.pick(user.dataValues, [
-        'email', 'nickname', 'card_name', 'last_four_digits',
-        'cancelled_at', 'valid_by', 'suspended_by', 'free_trial_id',
-      ])
+      let userData = user.userData()
       return user.getActiveSubscriptions()
         .then((subs) => {
           return userData

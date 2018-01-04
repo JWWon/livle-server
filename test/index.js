@@ -384,13 +384,32 @@ describe('Subscription', function() {
     )
   }).timeout(5000)
 
+  it('successful cancellation of a subscription', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        done()
+      } else {
+        done(new Error(body))
+      }
+    }
+
+    test( handler.subscriptionDelete,
+      { },
+      callback
+    )
+  })
 })
 
 describe('User deletion', function() {
   it('successful deletion', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.userDestroy,

@@ -31,7 +31,7 @@ module.exports = (params, respond) =>
           ticketWithStats.reservations = _.map(reservations,
             (r) => {
               let data = r.dataValues
-              data.user = r.subscription.user && r.subscription.user.dataValues
+              data.user = r.subscription && r.subscription.user.dataValues
               data.subscription = undefined
               return data
             })

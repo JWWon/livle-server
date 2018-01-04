@@ -55,12 +55,15 @@ module.exports = (params, respond) => {
       .then(([currSub, nextSub]) => {
         if (currSub) {
           // 구독을 취소한 후 유효기간이 만료되기 전에 다시 구독 신청을 한 경우
-          if (!user.cancelled_at) {
-            return Promise.reject(new Error('취소한 적이 없는데 이어지는 구독이 없습니다.'))
+          if (nextSub) {
+            return Promise.reject(new Error('취소했는데 이어지는 구독이 있습니다.'))
           }
-          return currSub.createNext().then((user) => {
-            user.update({ cancelled_at: null })
-          })
+          return currSub.createNext().then(([curr, next]) =>
+            user.update({
+              cancelled_at: null,
+              next_subscription_id: next.id,
+            }).then(() => [curr, next])
+          )
         } else {
           // 신규 구독
           return Subscription.create({
@@ -68,8 +71,8 @@ module.exports = (params, respond) => {
             from: fromDate,
             to: nDaysFrom(30, now),
           }).then((newSub) => newSub.pay())
-      }
-    })
+        }
+      })
   }
 
   const token = params.auth
@@ -99,11 +102,11 @@ module.exports = (params, respond) => {
           last_four_digits: data.cardNumber.slice(-4),
           cancelled_at: null,
         }).then((user) => initialPay(user)
-        ).then((subscriptions) => {
+        ).then(([currSub, nextSub]) => {
           let userData = user.userData()
-          userData.currentSubscription = subscriptions[0].dataValues
+          userData.currentSubscription = currSub.dataValues
           userData.currentSubscription.used = 0
-          userData.nextSubscription = subscriptions[1].dataValues
+          userData.nextSubscription = nextSub.dataValues
           userData.nextSubscription.used = 0
           return respond(200, userData)
         }).catch((err) => { // 결제 실패 또는 구독 정보 업데이트 실패

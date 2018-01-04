@@ -202,4 +202,6 @@ User.prototype.getActiveSubscriptions = function() {
   })
 }
 
+User.prototype.subscribe = require('./subscribe')
+
 module.exports = User

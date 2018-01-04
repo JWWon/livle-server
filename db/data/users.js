@@ -38,20 +38,7 @@ const subscriptionTesters = () => {
       .then((user) => User.findOne({ where: { email: 'freeTrialDone' } }))
       .then((user) => user.update({ free_trial_id: ft.id }))
     )
-  const shouldPayToday = User.signUp('shouldPayToday', 'fakepassword')
-    .then((user) => User.findOne({ where: { email: 'shouldPayToday' } })
-    ).then((user) => user.update({
-      card_name: faker.finance.account(),
-      last_four_digits: '1234',
-    })
-    ).then((user) =>
-      Subscription.create({
-        from: startOfDay(now),
-        to: nDaysFrom(30, now),
-        user_id: user.id,
-      }).then((next) => user.update({ next_subscription_id: next.id }))
-    )
-  return Promise.all([freeTrialDone, shouldPayToday])
+  return freeTrialDone
 }
 
 module.exports = () => new Promise((resolve, reject) =>

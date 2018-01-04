@@ -1,5 +1,6 @@
 'use strict'
 
+const User = require('../src/user/user')
 const expect = require('chai').expect
 const handler = require('../handler')
 require('dotenv').config() // .env 파일에서 환경변수 읽어오기
@@ -387,6 +388,47 @@ describe('Subscription', function() {
     )
   }).timeout(5000)
 
+})
+
+
+/*
+ *
+ * 구독 테스트
+ *
+ */
+
+
+describe('Subscription renew', function() {
+  it('successful renewal', function(done) {
+    const callback = (error, result) => {
+      expect(result.statusCode).to.equal(200)
+      done()
+    }
+
+    const startOfToday = () => {
+      let date = new Date()
+      date.setHours(0, 0, 0)
+      return date
+    }
+    const thirtyDaysFromNow = () => {
+      let date = new Date()
+      date.setDate(date.getDate() + 30)
+      date.setHours(23, 59, 59)
+      return date
+    }
+    User.findOne({ where: { email: userEmail } })
+      .then((user) => user.getActiveSubscriptions())
+      .then(([curr, next]) => next.update({
+        from: startOfToday(),
+        to: thirtyDaysFromNow(),
+      })).then(() => {
+        test( handler.subscriptionRenew,
+          {},
+          callback
+        )
+      })
+  })
+
   it('successful cancellation of a subscription', function(done) {
     const callback = (error, result) => {
       const body = JSON.parse(result.body)
@@ -403,6 +445,58 @@ describe('Subscription', function() {
       callback
     )
   })
+})
+
+describe('Paid subscription', function() {
+  it('successful signin', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        authToken = body.token
+        if (authToken) return done()
+      }
+      done(new Error(body))
+    }
+
+    test( handler.userSignin,
+      { body: { email: 'freeTrialDone', password: 'fakepassword' } },
+      callback
+    )
+  })
+
+  it('successful subscription', function(done) {
+    const callback = (error, result) => {
+      const user = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(user)
+        if (!user.currentSubscription || !user.nextSubscription) {
+          return done(new Error("Failed to return subscription data"))
+        }
+        const from = new Date(user.currentSubscription.from)
+        const to = new Date(user.currentSubscription.to)
+        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
+        if (daysBetween < 30) {
+          return done(new Error("Subscription shorter than 30 days"))
+        }
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    }
+
+    test( handler.subscriptionCreate,
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        },
+      }, callback
+    )
+  }).timeout(5000)
+
 })
 
 describe('User deletion', function() {
@@ -638,78 +732,6 @@ describe('Ticket', function() {
 
     test( handler.ticketDestroy,
       { path: { ticketId: ticketId } },
-      callback
-    )
-  })
-})
-
-/*
- *
- * 구독 테스트
- *
- */
-
-describe('Paid subscription', function() {
-  it('successful signin', function(done) {
-    const callback = (error, result) => {
-      const body = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(body)
-        authToken = body.token
-        if (authToken) return done()
-      }
-      done(new Error(body))
-    }
-
-    test( handler.userSignin,
-      { body: { email: 'freeTrialDone', password: 'fakepassword' } },
-      callback
-    )
-  })
-
-  it('successful subscription', function(done) {
-    const callback = (error, result) => {
-      const user = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(user)
-        if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error("Failed to return subscription data"))
-        }
-        const from = new Date(user.currentSubscription.from)
-        const to = new Date(user.currentSubscription.to)
-        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
-        if (daysBetween < 30) {
-          return done(new Error("Subscription shorter than 30 days"))
-        }
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.subscriptionCreate,
-      { body:
-        {
-          cardNumber: cardNumber,
-          expiry: expiry,
-          birth: birth,
-          password: password,
-        },
-      }, callback
-    )
-  }).timeout(5000)
-
-})
-
-describe('Subscription renew', function() {
-  it('successful renewal', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.subscriptionRenew,
-      {},
       callback
     )
   })

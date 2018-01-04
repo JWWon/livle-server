@@ -203,5 +203,6 @@ User.prototype.getActiveSubscriptions = function() {
 }
 
 User.prototype.subscribe = require('./subscribe')
+User.prototype.unsubscribe = require('./unsubscribe')
 
 module.exports = User

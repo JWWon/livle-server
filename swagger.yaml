@@ -824,6 +824,10 @@ definitions:
       suspended_by:
         type: string
         description: 패널티로 라이블을 이용할 수 없는 기간
+      free_trial_id:
+        type: integer
+        format: int64
+        description: '무료 체험 일련번호, 체험한 적이 없으면 null'
       currentSubscription:
         $ref: '#/definitions/Subscription'
       nextSubscription:

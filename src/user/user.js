@@ -163,7 +163,17 @@ User.prototype.subscriptionFor = function(date) {
         console.error(`User ${this.id}: subscriptions overlapping`)
       }
       if (subscriptions.length === 0) return resolve()
-      return resolve(subscriptions[0])
+      const s = subscriptions[0]
+      if (!s.paid_at) {
+        // 결제가 아직 안 된 구독인 경우
+        const now = new Date()
+        const unpaidHours = ( now - s.from ) / 1000 / 60 / 60
+        // 24시간 이상 결제가 안 되고 있는 경우 Invalid
+        if (unpaidHours > 24) {
+          return resolve()
+        }
+      }
+      return resolve(s)
     }).catch((err) => reject(err))
   )
 }

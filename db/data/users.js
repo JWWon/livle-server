@@ -20,7 +20,7 @@ const nDaysFrom = (n, from) => {
   return date
 }
 
-const users = _.times(30, () => {
+const users = _.times(100, () => {
   return User.create({
     email: faker.internet.email(),
     nickname: faker.name.findName(),

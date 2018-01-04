@@ -1,7 +1,6 @@
 'use strict'
 
 const User = require('./user')
-const Reservation = require('../reservation/reservation')
 
 module.exports = (params, respond) => {
   if (!params.auth) return respond(401, '로그인되지 않았습니다.')

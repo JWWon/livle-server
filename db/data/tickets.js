@@ -46,6 +46,9 @@ const hoursAfter = (date) => {
   return date
 }
 
+const randomCode = (digits) => digits > 0 ?
+  parseInt(Math.random() * 10).toString() + randomCode(digits - 1) : ''
+
 const tickets = _.times(TICKET_SIZE, () => {
   const startAt = faker.date.between(TODAY, WEEK_AFTER)
   return Ticket.create({
@@ -54,6 +57,7 @@ const tickets = _.times(TICKET_SIZE, () => {
     start_at: startAt,
     end_at: hoursAfter(startAt),
     image: _.sample(IMAGES),
+    checkin_code: randomCode(4),
     capacity: 20, // faker.random.number(MAX.VACANCIES),
     place: _.sample(PLACES),
     video_id: 'T9fKvVGBBy4',

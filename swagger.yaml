@@ -713,7 +713,7 @@ paths:
     patch:
       tags:
         - subscription
-      summary: '구독 정보 변경 [미구현]'
+      summary: 구독 정보 변경
       parameters:
         - name: Authorization
           in: header

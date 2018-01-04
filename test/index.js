@@ -339,6 +339,30 @@ describe('Subscription', function() {
     )
   })
 
+  // TODO successful checkin
+
+  it('successful update of payment information', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        done()
+      } else {
+        done(new Error(body))
+      }
+    }
+
+    test( handler.subscriptionUpdate,
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        }
+      }, callback )
+  })
+
   it('successful cancellation of a subscription', function(done) {
     const callback = (error, result) => {
       const body = JSON.parse(result.body)

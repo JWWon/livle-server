@@ -105,7 +105,14 @@ Subscription.prototype.pay = function() {
       amount: PRICE,
       name: '라이블 정기구독권 결제',
     }).then((res) => this.approvePayment(user, now)
-    ).catch((err) => Promise.reject(err))
+      // 결제에 실패해도 다음 구독 모델은 생성해 놓아야 함
+    ).catch((err) => this.createNext()
+      .then(([currSub, nextSub]) => user.update({
+        current_subscription_id: currSub.id,
+        next_subscription_id: nextSub.id,
+      })
+      ).then(() => Promise.reject(err))
+    )
   })
 }
 

@@ -31,7 +31,9 @@ const User = sequelize.define('user', {
 })
 
 User.prototype.getToken = function() { // Arrow function cannot access 'this'
-  const token = jwt.sign(this.dataValues, secret)
+  const userData = _.pick(this.dataValues,
+    ['id', 'email', 'password', 'facebook_token'])
+  const token = jwt.sign(userData, secret)
   return token
 }
 
@@ -40,14 +42,15 @@ User.prototype.isSubscribing = function() {
   return !!this.last_four_digits
 }
 
-User.fromToken = (token) =>
-  new Promise( (resolve, reject) => !token ? reject() :
+User.fromToken = (token) => {
+  return new Promise( (resolve, reject) => !token ? reject() :
     jwt.verify(token, secret,
       (err, decoded) => err ? reject(err) :
       User.findById(decoded.id)
       .then((user) => user ? resolve(user) : reject(new Error('Not found')))
     )
-)
+  )
+}
 
 User.checkSession = (event) => {
   const token = event.headers.Authorization

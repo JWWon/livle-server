@@ -1,6 +1,6 @@
 const S = require('sequelize')
 const sequelize = require('./config/sequelize')
-const sha512 = require("crypto-js/sha512")
+const sha512 = require('crypto-js/sha512')
 
 const hash = (str) => sha512(str).toString()
 

@@ -40,6 +40,11 @@ const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
 }
 
 Subscription.prototype.createNext = function() {
+  const now = new Date()
+  if (now < this.from) {
+    return Promise.reject('아직 다음 구독을 만들 시기가 아닙니다.')
+  }
+
   const getNextFromDate = (currTo) => {
     let date = new Date(currTo)
     date.setDate(date.getDate() + 1)
@@ -72,14 +77,24 @@ Subscription.prototype.approvePayment = function(user, at) {
 
   return new Promise((resolve, reject) =>
     this.update({ paid_at: now })
-    .then((updatedSub) => updatedSub.createNext()
-    ).then(([currSub, nextSub]) => {
-      return user.update({
-        current_subscription_id: currSub.id,
-        next_subscription_id: nextSub.id,
-      }).then((user) => sendPaymentEmail(user, now, nextSub.from))
+    .then((updatedSub) => {
+      if (user.current_subscription_id === this.id) {
+        return user
+      } else {
+        return updatedSub.createNext().then(([currSub, nextSub]) =>
+          user.update({
+            current_subscription_id: currSub.id,
+            next_subscription_id: nextSub.id,
+          })
+        )
+      }
+    }).then((user) =>
+      user.getActiveSubscriptions()
+      .then(([currSub, nextSub]) =>
+        sendPaymentEmail(user, now, nextSub.from)
         .then((sent) => resolve([currSub, nextSub]))
-    }).catch((err) => {
+      )
+    ).catch((err) => {
       console.error(`User ${user.id}: 결제되었으나 정상적으로 업데이트되지 않음`)
       console.error(err)
       return reject(err)
@@ -106,13 +121,18 @@ Subscription.prototype.pay = function() {
       name: '라이블 정기구독권 결제',
     }).then((res) => this.approvePayment(user, now)
       // 결제에 실패해도 다음 구독 모델은 생성해 놓아야 함
-    ).catch((err) => this.createNext()
-      .then(([currSub, nextSub]) => user.update({
-        current_subscription_id: currSub.id,
-        next_subscription_id: nextSub.id,
-      })
-      ).then(() => Promise.reject(err))
-    )
+    ).catch((err) => {
+      if (this.id === user.current_subscription_id) {
+        return Promise.reject(err)
+      } else {
+        return this.createNext()
+          .then(([currSub, nextSub]) => user.update({
+            current_subscription_id: currSub.id,
+            next_subscription_id: nextSub.id,
+          })
+          ).then(() => Promise.reject(err))
+      }
+    })
   })
 }
 

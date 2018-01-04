@@ -191,11 +191,20 @@ describe('Subscription', function() {
   const birth = process.env.BIRTH
   const password = process.env.PASSWORD
 
-  it('successful subscription', function(done) {
+  it('successful free trial', function(done) {
     const callback = (error, result) => {
-      const body = JSON.parse(result.body)
+      const user = JSON.parse(result.body)
       if (result.statusCode === 200) {
-        console.log(body)
+        console.log(user)
+        if (!user.currentSubscription || !user.nextSubscription) {
+          return done(new Error("Failed to return subscription data"))
+        }
+        const from = new Date(user.currentSubscription.from)
+        const to = new Date(user.currentSubscription.to)
+        const daysBetween = (from - to) / 1000 / 60 / 60 / 24
+        if (daysBetween > 7) {
+          return done(new Error("Free trial longer than 7 days"))
+        }
         done()
       } else {
         done(new Error(result.body))
@@ -342,6 +351,39 @@ describe('Subscription', function() {
       callback
     )
   })
+
+  it('successful resubscription within a valid period after a cancellation', function(done) {
+    const callback = (error, result) => {
+      const user = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(user)
+        if (!user.currentSubscription || !user.nextSubscription) {
+          return done(new Error("Failed to return subscription data"))
+        }
+        const from = new Date(user.currentSubscription.from)
+        const to = new Date(user.currentSubscription.to)
+        const daysBetween = (from - to) / 1000 / 60 / 60 / 24
+        if (daysBetween > 7) {
+          return done(new Error("Free trial longer than 7 days"))
+        }
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    }
+
+    test( handler.subscriptionCreate,
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        },
+      }, callback
+    )
+  }).timeout(5000)
+
 })
 
 describe('User deletion', function() {

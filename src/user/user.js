@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs')
 const saltRounds = 10
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'
+const uuid = require('uuid/v1')
 
 const User = sequelize.define('user', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
@@ -23,6 +24,7 @@ const User = sequelize.define('user', {
   current_subscription_id: S.INTEGER,
   next_subscription_id: S.INTEGER,
 
+  free_trial_id: S.INTEGER,
   suspended_by: S.DATE,
 }, { deletedAt: 'deleted_at', paranoid: true,
   createdAt: 'created_at', updatedAt: 'updated_at',
@@ -130,11 +132,10 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
         if (user.isSubscribing()) {
           return reject(User.REJECTIONS.SUBSCRIBING)
         }
-        return User.destroy({
-          where: {
-            email: email,
-          },
-        }).then(() => resolve())
+        return user.update({
+          email: `${user.email}#${uuid()}`,
+        }).then((user) => user.destroy())
+          .then(() => resolve())
       } else {
         return reject(User.REJECTIONS.WRONG_PASSWORD)
       }

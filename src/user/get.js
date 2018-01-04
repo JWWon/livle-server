@@ -14,26 +14,24 @@ module.exports = (params, respond) => {
           return userData
           if (subs.length > 0) {
             const currSub = subs[0]
-            return Reservation.count({
-              where: { subscription_id: currSub.id },
-            }).then((used) => {
-              let s = currSub.dataValues
-              s.used = used
-              userData.currentSubscription = s
-              if (subs.length > 1) {
-                const nextSub = subs[1]
-                return Reservation.count({
-                  where: { subscription_id: nextSub.id },
-                }).then((used) => {
-                  let s = nextSub.dataValues
-                  s.used = used
-                  userData.nextSubscription = s
+            currSub.getUsedCount()
+              .then((used) => {
+                let s = currSub.dataValues
+                s.used = used
+                userData.currentSubscription = s
+                if (subs.length > 1) {
+                  const nextSub = subs[1]
+                  return nextSub.getUsedCount()
+                    .then((used) => {
+                      let s = nextSub.dataValues
+                      s.used = used
+                      userData.nextSubscription = s
+                      return userData
+                    })
+                } else {
                   return userData
-                })
-              } else {
-                return userData
-              }
-            })
+                }
+              })
           }
         }).then((userData) => respond(200, userData)
         ).catch((err) => respond(500, err))

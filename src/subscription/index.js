@@ -129,4 +129,10 @@ Subscription.prototype.cancel = function() {
   })
 }
 
+Subscription.prototype.getUsedCount = function() {
+  return Reservation.count({
+    where: { subscription_id: this.id },
+  })
+}
+
 module.exports = Subscription

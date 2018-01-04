@@ -23,8 +23,13 @@ module.exports = (params, respond) => {
           })
           ).then((user) => {
             let userData = user.userData()
-            userData.currentSubscription = currSub.dataValues
-            return respond(200, userData)
+            return currSub.getUsedCount()
+              .then((count) => {
+                let sub = currSub.dataValues
+                sub.used = count
+                userData.currentSubscription = sub
+                return respond(200, userData)
+              })
           })
           .catch((err) => {
             console.error(err)

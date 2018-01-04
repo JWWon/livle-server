@@ -4,6 +4,13 @@ const expect = require('chai').expect
 const handler = require('../handler')
 require('dotenv').config() // .env 파일에서 환경변수 읽어오기
 
+// 테스트에 사용되는 환경변수들
+const fbToken = process.env.FB_TOKEN
+const cardNumber = process.env.CARD_NUMBER
+const expiry = process.env.EXPIRY
+const birth = process.env.BIRTH
+const password = process.env.PASSWORD
+
 let authToken = ''
 
 const test = (func, params, callback) => {
@@ -144,7 +151,7 @@ describe('User', function() {
      * https://developers.facebook.com/tools/explorer
      */
     test( handler.userFacebook,
-      { body: { accessToken: process.env.FB_TOKEN } },
+      { body: { accessToken: fbToken } },
       callback
     )
   }).timeout(5000)
@@ -186,10 +193,6 @@ describe('Ticket', function() {
 })
 
 describe('Subscription', function() {
-  const cardNumber = process.env.CARD_NUMBER
-  const expiry = process.env.EXPIRY
-  const birth = process.env.BIRTH
-  const password = process.env.PASSWORD
 
   it('successful free trial', function(done) {
     const callback = (error, result) => {
@@ -201,7 +204,7 @@ describe('Subscription', function() {
         }
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
-        const daysBetween = (from - to) / 1000 / 60 / 60 / 24
+        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
         if (daysBetween > 7) {
           return done(new Error("Free trial longer than 7 days"))
         }
@@ -362,7 +365,7 @@ describe('Subscription', function() {
         }
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
-        const daysBetween = (from - to) / 1000 / 60 / 60 / 24
+        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
         if (daysBetween > 7) {
           return done(new Error("Free trial longer than 7 days"))
         }
@@ -642,9 +645,61 @@ describe('Ticket', function() {
 
 /*
  *
- * 구독 업데이트
+ * 구독 테스트
  *
  */
+
+describe('Paid subscription', function() {
+  it('successful signin', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        authToken = body.token
+        if (authToken) return done()
+      }
+      done(new Error(body))
+    }
+
+    test( handler.userSignin,
+      { body: { email: 'freeTrialDone', password: 'fakepassword' } },
+      callback
+    )
+  })
+
+  it('successful subscription', function(done) {
+    const callback = (error, result) => {
+      const user = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(user)
+        if (!user.currentSubscription || !user.nextSubscription) {
+          return done(new Error("Failed to return subscription data"))
+        }
+        const from = new Date(user.currentSubscription.from)
+        const to = new Date(user.currentSubscription.to)
+        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
+        if (daysBetween < 30) {
+          return done(new Error("Subscription shorter than 30 days"))
+        }
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    }
+
+    test( handler.subscriptionCreate,
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        },
+      }, callback
+    )
+  }).timeout(5000)
+
+})
 
 describe('Subscription renew', function() {
   it('successful renewal', function(done) {

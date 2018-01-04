@@ -1,11 +1,11 @@
 // Libraries
 const faker = require('faker')
 const _ = require('lodash')
-// Require Partner to add partner_id field to Ticket model
 const User = require('../../src/user/user')
 const Subscription = require('../../src/subscription')
 const Ticket = require('../../src/ticket/ticket')
 const Reservation = require('../../src/reservation/reservation')
+const FreeTrial = require('../../src/free_trial')
 
 const startOfDay = (d) => {
   let date = new Date(d)
@@ -30,12 +30,36 @@ const users = _.times(100, () => {
   })
 })
 
+const now = new Date()
+
+const subscriptionTesters = () => {
+  const freeTrialDone = FreeTrial.create({ card_hash: 'test' })
+    .then((ft) => User.signUp('freeTrialDone', 'fakepassword')
+      .then((user) => User.findOne({ where: { email: 'freeTrialDone' } }))
+      .then((user) => user.update({ free_trial_id: ft.id }))
+    )
+  const shouldPayToday = User.signUp('shouldPayToday', 'fakepassword')
+    .then((user) => User.findOne({ where: { email: 'shouldPayToday' } })
+    ).then((user) => user.update({
+      card_name: faker.finance.account(),
+      last_four_digits: '1234',
+    })
+    ).then((user) =>
+      Subscription.create({
+        from: startOfDay(now),
+        to: nDaysFrom(30, now),
+        user_id: user.id,
+      }).then((next) => user.update({ next_subscription_id: next.id }))
+    )
+  return Promise.all([freeTrialDone, shouldPayToday])
+}
+
 module.exports = () => new Promise((resolve, reject) =>
-  Promise.all(users)
-  .then((users) => {
+  subscriptionTesters().then(() =>
+    Promise.all(users)
+  ).then((users) => {
     console.log('Users created')
 
-    const now = new Date()
     const fromDate = startOfDay(now)
     const toDate = nDaysFrom(30, now)
 

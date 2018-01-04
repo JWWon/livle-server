@@ -84,6 +84,36 @@ User.prototype.userData = function() {
   ])
 }
 
+User.prototype.deepUserData = function() {
+  let userData = this.userData()
+  return this.getActiveSubscriptions()
+    .then((subs) => {
+      if (subs.length > 0) {
+        const currSub = subs[0]
+        return currSub.getUsedCount()
+          .then((used) => {
+            let s = currSub.dataValues
+            s.used = used
+            userData.currentSubscription = s
+            if (subs.length > 1) {
+              const nextSub = subs[1]
+              return nextSub.getUsedCount()
+                .then((used) => {
+                  let s = nextSub.dataValues
+                  s.used = used
+                  userData.nextSubscription = s
+                  return userData
+                })
+            } else {
+              return userData
+            }
+          })
+      } else {
+        return userData
+      }
+    })
+}
+
 User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
   bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
     : User.create({

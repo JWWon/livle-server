@@ -175,9 +175,9 @@ User.prototype.getReservations = function(options) {
 User.prototype.getActiveSubscriptions = function() {
   return Subscription.findAll({
     where: {
-      id: [this.current_subscription_id, this.next_subscription_id]
+      id: [this.current_subscription_id, this.next_subscription_id],
     },
-    order: [ ['id', 'asc'] ],
+    order: [['id', 'asc']],
   })
 }
 

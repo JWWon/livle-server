@@ -1,7 +1,6 @@
 'use strict'
 
 const User = require('../user/user')
-const Subscription = require('.')
 const iamport = require('../config/iamport')
 
 module.exports = (params, respond) => {

@@ -20,9 +20,13 @@ const User = sequelize.define('user', {
   card_name: S.STRING,
   last_four_digits: S.STRING, // null if not subscribing at the moment
   cancelled_at: S.DATE,
+  current_subscription_id: S.INTEGER,
+  next_subscription_id: S.INTEGER,
 
   suspended_by: S.DATE,
-}, { createdAt: 'created_at', updatedAt: 'updated_at' })
+}, { deletedAt: 'deleted_at', paranoid: true,
+  createdAt: 'created_at', updatedAt: 'updated_at',
+})
 
 User.prototype.getToken = function() { // Arrow function cannot access 'this'
   const token = jwt.sign(this.dataValues, secret)
@@ -169,7 +173,7 @@ User.prototype.getReservations = function(options) {
 }
 
 User.prototype.getActiveSubscriptions = function() {
-  return Subscription.findOne({
+  return Subscription.findAll({
     where: {
       id: [this.current_subscription_id, this.next_subscription_id]
     },

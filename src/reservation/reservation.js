@@ -25,12 +25,4 @@ Reservation.belongsTo(Ticket, {
 })
 
 
-const Subscription = require('../subscription')
-Reservation.belongsTo(Subscription, {
-  foreignKey: { name: 'subscription_id', allowNull: false },
-})
-Subscription.hasMany(Reservation, {
-  foreignKey: { name: 'subscription_id', allowNull: false },
-})
-
 module.exports = Reservation

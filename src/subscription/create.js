@@ -51,8 +51,8 @@ module.exports = (params, respond) => {
     }
 
     // 1주일 무료체험을 한 적이 있는 경우
-    return user.getCurrentSubscription()
-      .then((currSub) => {
+    return user.getActiveSubscriptions()
+      .then(([currSub, nextSub]) => {
         if (currSub) {
           // 구독을 취소한 후 유효기간이 만료되기 전에 다시 구독 신청을 한 경우
           if (!user.cancelled_at) {

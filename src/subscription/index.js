@@ -10,7 +10,10 @@ const Subscription = sequelize.define('subscription', {
   // 이 구독이 커버하는 기간
   from: { type: S.DATE, allowNull: false }, // n월 n일 00:00:00
   to: { type: S.DATE, allowNull: false }, // n월 n+30일 23:59:59
-}, { createdAt: 'created_at' })
+}, {
+  deletedAt: 'cancelled_at', paranoid: true,
+  createdAt: 'created_at', updatedAt: 'updated_at',
+})
 
 const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
   const formatDate = (date) => {
@@ -70,9 +73,7 @@ Subscription.prototype.approvePayment = function(user, at) {
   return new Promise((resolve, reject) =>
     this.update({ paid_at: now })
     .then((updatedSub) => updatedSub.createNext()
-    ).then((subscriptions) => {
-      const currSub = subscriptions[0]
-      const nextSub = subscriptions[1]
+    ).then(([currSub, nextSub]) => {
       return user.update({
         current_subscription_id: currSub.id,
         next_subscription_id: nextSub.id,
@@ -105,6 +106,26 @@ Subscription.prototype.pay = function() {
       name: '라이블 정기구독권 결제',
     }).then((res) => this.approvePayment(user, now)
     ).catch((err) => Promise.reject(err))
+  })
+}
+
+const Reservation = require('../reservation/reservation')
+Reservation.belongsTo(Subscription, {
+  foreignKey: { name: 'subscription_id', allowNull: false },
+})
+Subscription.hasMany(Reservation, {
+  foreignKey: { name: 'subscription_id', allowNull: false },
+})
+Subscription.prototype.cancel = function() {
+  return new Promise((resolve, reject) => {
+    if (this.paid_at) {
+      return reject(new Error('이미 결제된 구독을 취소할 수 없습니다.'))
+    }
+    return Reservation.destroy({
+      where: { subscription_id: this.id },
+    }).then((count) => this.destroy())
+      .then((count) => resolve())
+      .catch((err) => reject(err))
   })
 }
 

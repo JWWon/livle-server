@@ -222,6 +222,13 @@ functions:
           path: subscription
           method: delete
           cors: true
+  subscriptionRestore:
+    handler: handler.subscriptionRestore
+    events:
+      - http:
+          path: subscription/restore
+          method: post
+          cors: true
   subscriptionRenew:
     handler: handler.subscriptionRenew
     events:

@@ -759,6 +759,28 @@ paths:
           description: 로그인되지 않음
         '404':
           description: 구독 중인 내역이 없음
+  /subscription/restore:
+    post:
+      tags:
+        - subscription
+      summary: 취소한 구독을 복원
+      parameters:
+        - name: Authorization
+          in: header
+          description: 세션토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: '업데이트 성공, 결제는 이루어지지 않음'
+          schema:
+            $ref: '#/definitions/UserData'
+        '401':
+          description: 로그인되지 않음
+        '403':
+          description: 복구할 수 있는 상태가 아님 (미납이거나 취소한 적이 없음)
+        '404':
+          description: 복구할 구독이 없음
   /file:
     get:
       tags:

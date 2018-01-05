@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs')
 const saltRounds = 10
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'
+const FreeTrial = require('../free_trial')
 const uuid = require('uuid/v1')
 
 const User = sequelize.define('user', {
@@ -20,9 +21,7 @@ const User = sequelize.define('user', {
   // Subscription
   card_name: S.STRING,
   last_four_digits: S.STRING, // null if not subscribing at the moment
-  cancelled_at: S.DATE,
-  current_subscription_id: S.INTEGER,
-  next_subscription_id: S.INTEGER,
+  subscription_id: S.INTEGER,
 
   free_trial_id: S.INTEGER,
   suspended_by: S.DATE,
@@ -35,11 +34,6 @@ User.prototype.getToken = function() { // Arrow function cannot access 'this'
     ['id', 'email', 'password', 'facebook_token'])
   const token = jwt.sign(userData, secret)
   return token
-}
-
-User.prototype.isSubscribing = function() {
-  // last_four_digits가 있으면 구독 지속 중인 상태
-  return !!this.last_four_digits
 }
 
 User.fromToken = (token) => {
@@ -77,41 +71,57 @@ User.prototype.sessionData = function() {
   return userData
 }
 
+const pick = (data) => _.pick(data, [
+  'email', 'nickname', 'cardName', 'lastFourDigits',
+  'suspendedBy', 'freeTrial', 'currentSubscription', 'nextSubscription',
+])
+
 User.prototype.userData = function() {
-  return _.pick(this.dataValues, [
-    'email', 'nickname', 'card_name', 'last_four_digits',
-    'cancelled_at', 'valid_by', 'suspended_by', 'free_trial_id',
-  ])
+  return pick(this.dataValues)
 }
 
 User.prototype.deepUserData = function() {
-  let userData = this.userData()
-  return this.getActiveSubscriptions()
-    .then((subs) => {
-      if (subs.length > 0) {
-        const currSub = subs[0]
-        return currSub.getUsedCount()
-          .then((used) => {
-            let s = currSub.dataValues
-            s.used = used
-            userData.currentSubscription = s
-            if (subs.length > 1) {
-              const nextSub = subs[1]
-              return nextSub.getUsedCount()
-                .then((used) => {
+  return new Promise((resolve, reject) =>
+    this.reload({
+      attributes: [
+        'email',
+        'nickname',
+        ['card_name', 'cardName'],
+        ['last_four_digits', 'lastFourDigits'],
+        ['suspended_by', 'suspendedBy'],
+        'free_trial_id',
+        'subscription_id',
+      ],
+    }).then(() => {
+      let userData = this.dataValues
+      FreeTrial.findOne({
+        where: { id: this.free_trial_id },
+        attributes: [ ['created_at', 'createdAt' ] ],
+      }).then((ft) => {
+        if (ft) {
+          userData.freeTrial = ft.dataValues
+        }
+        this.getSubscription()
+          .then((currSub) => {
+            if (!currSub) return resolve(pick(userData))
+            currSub.getUsedCount().then((used) => {
+              let s = currSub.dataValues
+              s.used = used
+              userData.currentSubscription = s
+            }).then(() => currSub.getNext())
+              .then((nextSub) => {
+                if (!nextSub) return resolve(pick(userData))
+                nextSub.getUsedCount().then((used) => {
                   let s = nextSub.dataValues
                   s.used = used
                   userData.nextSubscription = s
-                  return userData
+                  resolve(pick(userData))
                 })
-            } else {
-              return userData
-            }
+              })
           })
-      } else {
-        return userData
-      }
+      })
     })
+  )
 }
 
 User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
@@ -162,13 +172,16 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
     bcrypt.compare(password, user.password, (err, res) => {
       if (err) return reject(err)
       if (res) {
-        if (user.isSubscribing()) {
-          return reject(User.REJECTIONS.SUBSCRIBING)
-        }
-        return user.update({
-          email: `${user.email}#${uuid()}`,
-        }).then((user) => user.destroy())
-          .then(() => resolve())
+        user.getSubscription().then((sub) => {
+          if (sub) {
+            return reject(User.REJECTIONS.SUBSCRIBING)
+          } else {
+            return user.update({
+              email: `${user.email}#${uuid()}`,
+            }).then((user) => user.destroy())
+              .then(() => resolve())
+          }
+        })
       } else {
         return reject(User.REJECTIONS.WRONG_PASSWORD)
       }
@@ -223,13 +236,11 @@ User.prototype.getReservations = function(options) {
   return Reservation.findAll(options)
 }
 
-User.prototype.getActiveSubscriptions = function() {
-  return Subscription.findAll({
-    where: {
-      id: [this.current_subscription_id, this.next_subscription_id],
-    },
-    order: [['id', 'asc']],
-  })
+User.prototype.getSubscription = function(options) {
+  options = options || { }
+  options.where = options.where || { }
+  options.where = { id: this.subscription_id }
+  return Subscription.findOne(options)
 }
 
 User.prototype.subscribe = require('./subscribe')

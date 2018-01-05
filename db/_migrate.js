@@ -16,10 +16,7 @@ const migrateTables = () =>
         foreignKey: 'free_trial_id',
       })
       Subscription.hasOne(User, {
-        as: 'CurrentSubscription', foreignKey: 'current_subscription_id',
-      })
-      Subscription.hasOne(User, {
-        as: 'NextSubscription', foreignKey: 'next_subscription_id',
+        as: 'Subscription', foreignKey: 'subscription_id',
       })
       return User.sync({ alter: true })
     })

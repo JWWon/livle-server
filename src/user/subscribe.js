@@ -1,8 +1,8 @@
 'use strict'
 
-const iamport = require('../config/iamport')
 const Subscription = require('../subscription')
 const FreeTrial = require('../free_trial')
+const Billing = require('../billing')
 
 const startOfDay = (d) => {
   let date = new Date(d)
@@ -17,78 +17,75 @@ const thirtyDaysFrom = (from) => {
   return date
 }
 
-const startTrial = (user, cardNumber) => {
-  const now = new Date()
-  return FreeTrial.log(cardNumber)
-    .then((ft) =>
-      user.update({
-        free_trial_id: ft.id,
-        cancelled_at: null,
-      })
-    ).then((user) => {
-      return Subscription.create({
-        user_id: user.id,
-        from: startOfDay(now),
-        to: thirtyDaysFrom(now),
-      })
-    }).then((newSub) =>
-      newSub.approvePayment(user, now)
-    )
-}
-
-const startSubscription = (user) => {
-  const now = new Date()
-  return user.getActiveSubscriptions()
-    .then(([currSub, nextSub]) => {
-      if (currSub) {
-        // 구독을 취소한 후 유효기간이 만료되기 전에 다시 구독 신청을 한 경우
-        if (nextSub) {
-          return Promise.reject(new Error('취소했는데 이어지는 구독이 있습니다.'))
+const auth = (user, cardNumber) => {
+  const createInitial = (trial) => {
+    const now = new Date()
+    return new Promise((resolve, reject) =>
+      user.getSubscription().then((sub) => {
+        if (sub) {
+          reject(new Error('이미 구독 중입니다.'))
+        } else {
+          return Subscription.create({
+            user_id: user.id,
+            paid_at: trial ? now : null,
+            from: startOfDay(now),
+            to: thirtyDaysFrom(now),
+          })
         }
-        return currSub.createNext().then(([curr, next]) =>
-          user.update({
-            cancelled_at: null,
-            next_subscription_id: next.id,
-          }).then(() => [curr, next])
-        )
-      } else {
-        // 신규 구독
-        return Subscription.create({
-          user_id: user.id,
-          from: startOfDay(now),
-          to: thirtyDaysFrom(now),
-        }).then((newSub) => newSub.pay())
-      }
-    })
+      }).then((sub) => {
+        if (trial) {
+          return sub.createNext()
+        } else {
+          return sub.pay().catch((err) =>
+            sub.destroy().then(() =>
+              reject(new Error('결제에 실패했습니다.'))
+            )
+          )
+        }
+      })
+      .then(([curr, next]) => {
+        if (trial) {
+          // TODO send mail
+        }
+        resolve(user)
+      })
+      .catch((err) => reject(err))
+    )
+  }
+
+  if (!user.free_trial_id) {
+    // FreeTrial 로그를 남김
+    return FreeTrial.log(cardNumber).then((ft) =>
+      user.update({ free_trial_id: ft.id })
+    ).then((user) => createInitial(true))
+  } else {
+    // 결제를 요청함
+    return createInitial()
+  }
 }
 
 module.exports = function(paymentInfo) {
   return new Promise((resolve, reject) =>
-    iamport.subscribe_customer.create({ // 빌링 키 발급 프로세스
-      customer_uid: this.id,
-      card_number: paymentInfo.cardNumber,
-      expiry: paymentInfo.expiry,
-      birth: paymentInfo.birth,
-      pwd_2digit: paymentInfo.password,
-    }).then((payRes) => // 빌링키 발급 성공 - User 모델에 구독 정보 업데이트
-      this.update({
-        card_name: payRes.card_name,
-        last_four_digits: paymentInfo.cardNumber.slice(-4),
-        cancelled_at: null,
-      }).then((user) => {
-        if (!user.free_trial_id) {
-          // 1주일 무료체험을 한 적이 없는 경우
-          return startTrial(user, paymentInfo.cardNumber)
-        } else {
-          return startSubscription(user)
-        }
-      })
-      .then((subs) => resolve(subs))
-      // resolving value: [currentSubscription, nextSubscription]
-      .catch((err) => {
-        console.error(err)
-        reject({ code: 402, err: err })
-      })
-    ).catch((err) => reject({ code: 403, err: err }))
+    this.getSubscription().then((currSub) => {
+      if (currSub) reject({ code: 409, err: '이미 구독 중입니다.' })
+      Billing.create(this.id, paymentInfo).then((payRes) =>
+        // 빌링키 발급 성공
+        auth(this, paymentInfo.cardNumber).catch((err) =>
+          Billing.delete(this.id).then(() =>
+            reject({ code: 402, err: '결제에 실패했습니다.' })
+          )
+        ).then(() =>
+          // Successfully logged (free trial) or paid
+          this.update({
+            card_name: payRes.card_name,
+            last_four_digits: paymentInfo.cardNumber.slice(-4),
+          }).then((user) => resolve(user))
+          .catch((err) => {
+            console.error(err)
+            reject(err)
+          })
+        )
+      ).catch((err) => reject({ code: 403, err: err }))
+    })
   )
 }

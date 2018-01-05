@@ -7,8 +7,10 @@ module.exports = (params, respond) => {
 
   return User.fromToken(token)
     .then((user) =>
-      user.unsubscribe().then((user) => respond(200, user))
-      .catch((err) => {
+      user.unsubscribe().then(() =>
+        user.deepUserData()
+        .then((userData) => respond(200, userData))
+      ).catch((err) => {
         if (err.code === 404) {
           respond(404, err.err)
         } else {

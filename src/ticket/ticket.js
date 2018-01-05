@@ -44,7 +44,14 @@ Ticket.getList = () => new Promise((resolve, reject) => {
       start_at: { [S.Op.gt]: new Date(), [S.Op.lt]: until },
     },
     attributes: [
-      'id', 'title', 'start_at', 'end_at', 'image', 'place', 'video_id', 'capacity',
+      'id',
+      'title',
+      ['start_at', 'startAt'],
+      ['end_at', 'endAt'],
+      'image',
+      'place',
+      ['video_id', 'videoId'],
+      'capacity',
     ],
     include: [{ model: Artist }],
   }).then((tickets) => {

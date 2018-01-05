@@ -75,6 +75,21 @@ const pick = (data) => _.pick(data, [
   'email', 'nickname', 'cardName', 'lastFourDigits',
   'suspendedBy', 'freeTrial', 'currentSubscription', 'nextSubscription',
 ])
+const subscriptionPick = (data) => _.reduce(data, (result, value, key) => {
+  switch (key) {
+    case 'paid_at':
+      result.paidAt = value
+      break
+    case 'from':
+    case 'to':
+    case 'used':
+      result[key] = value
+      break
+    default:
+      break
+  }
+  return result
+}, {})
 
 User.prototype.userData = function() {
   return pick(this.dataValues)
@@ -96,7 +111,7 @@ User.prototype.deepUserData = function() {
       let userData = this.dataValues
       FreeTrial.findOne({
         where: { id: this.free_trial_id },
-        attributes: [ ['created_at', 'createdAt' ] ],
+        attributes: [['created_at', 'createdAt']],
       }).then((ft) => {
         if (ft) {
           userData.freeTrial = ft.dataValues
@@ -107,14 +122,14 @@ User.prototype.deepUserData = function() {
             currSub.getUsedCount().then((used) => {
               let s = currSub.dataValues
               s.used = used
-              userData.currentSubscription = s
+              userData.currentSubscription = subscriptionPick(s)
             }).then(() => currSub.getNext())
               .then((nextSub) => {
                 if (!nextSub) return resolve(pick(userData))
                 nextSub.getUsedCount().then((used) => {
                   let s = nextSub.dataValues
                   s.used = used
-                  userData.nextSubscription = s
+                  userData.nextSubscription = subscriptionPick(s)
                   resolve(pick(userData))
                 })
               })

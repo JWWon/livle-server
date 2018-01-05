@@ -1,6 +1,7 @@
 'use strict'
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
+const _ = require('lodash')
 
 const Ticket = sequelize.define('ticket', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
@@ -26,6 +27,14 @@ const oneWeekLater = () => {
   return date
 }
 
+const Reservation = require('../reservation/reservation')
+Ticket.hasMany(Reservation, {
+  foreignKey: { name: 'ticket_id', allowNull: false },
+})
+Reservation.belongsTo(Ticket, {
+  foreignKey: { name: 'ticket_id', allowNull: false },
+})
+
 Ticket.getList = () => new Promise((resolve, reject) => {
   // 시작일 기준 지금으로부터 일주일 후까지의 공연 검색
   const until = oneWeekLater()
@@ -35,13 +44,24 @@ Ticket.getList = () => new Promise((resolve, reject) => {
       start_at: { [S.Op.gt]: new Date(), [S.Op.lt]: until },
     },
     attributes: [
-      'id', 'title', 'start_at', 'end_at', 'image', 'place', 'video_id',
+      'id', 'title', 'start_at', 'end_at', 'image', 'place', 'video_id', 'capacity',
     ],
     include: [{ model: Artist }],
-  }).then((tickets) =>
-    // TODO : 잔여 좌석 수
-    resolve(tickets)
-  ).catch((err) => {
+  }).then((tickets) => {
+    const reserved = _.map(tickets, (ticket) =>
+      Reservation.count({ where: { ticket_id: ticket.id } })
+    )
+    Promise.all(reserved).then((countArray) => {
+      const result = _.map(tickets, (ticket, index) => {
+        let values = _.omit(ticket.dataValues, 'capacity')
+        values.vacancies = ticket.capacity - countArray[index]
+        return values
+      })
+      resolve(result)
+    }).catch((err) => {
+      console.error(err)
+    })
+  }).catch((err) => {
     console.error(err)
     reject(err)
   })

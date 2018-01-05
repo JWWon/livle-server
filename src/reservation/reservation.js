@@ -17,14 +17,6 @@ const Reservation = sequelize.define('reservation', {
   }],
 })
 
-const Ticket = require('../ticket/ticket')
-Ticket.hasMany(Reservation, {
-  foreignKey: { name: 'ticket_id', allowNull: false },
-})
-Reservation.belongsTo(Ticket, {
-  foreignKey: { name: 'ticket_id', allowNull: false },
-})
-
 const pushVacancies = (ticket, reservedCount) =>
   new Promise((resolve, reject) =>
     Reservation.count({ where: { ticket_id: ticket.id } })

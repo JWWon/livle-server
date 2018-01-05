@@ -452,9 +452,9 @@ paths:
           required: true
           description: >-
             Required: partner_id, title, start_at, end_at, image, capacity /
-            vacancies는 유저에게 보여질 계산된 값입니다. 생성 시에는 총 할당 좌석 수인 capacity를 넘겨주세요.
+            Forbidden: id와 reservations는 없어야 합니다.
           schema:
-            $ref: '#/definitions/Ticket'
+            $ref: '#/definitions/TicketDetail'
       responses:
         '200':
           description: 성공
@@ -710,6 +710,8 @@ paths:
           description: 결제 정보 인증에 실패
         '405':
           description: 이미 구독 중
+        '406':
+          description: 이미 무료 체험을 시도한 카드
     patch:
       tags:
         - subscription
@@ -905,19 +907,13 @@ definitions:
         description: 카드 메인 이미지 주소
       capacity:
         type: number
-        description: 'capacity - # of reservations'
+        description: 예약할 수 있는 전체 좌석 수
       place:
         type: string
         example: 판교 스타트업캠퍼스
-      music_id:
-        type: string
-        description: 음악 주소나 아이디... 아직 모름
       video_id:
         type: string
         description: 영상 주소나 아이디... 아직 모름
-      article:
-        type: string
-        description: 웹 뷰로 보여줄 추가 정보가 있을 경우 웹 주소
       reservations:
         type: array
         items:
@@ -951,16 +947,10 @@ definitions:
         description: 카드 메인 이미지 주소
       vacancies:
         type: number
-        description: 'capacity - # of reservations'
+        description: 남은 좌석 수
       place:
         type: string
         example: 판교 스타트업캠퍼스
-      music_id:
-        type: string
-        description: 음악 주소나 아이디... 아직 모름
-      video_id:
-        type: string
-        description: 영상 주소나 아이디... 아직 모름
       article:
         type: string
         description: 웹 뷰로 보여줄 추가 정보가 있을 경우 웹 주소

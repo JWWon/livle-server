@@ -284,6 +284,7 @@ describe('Subscription', function() {
       if (result.statusCode === 200) {
         const reservations = JSON.parse(result.body)
         reservation = reservations[0]
+        console.log(reservations)
         done()
       } else {
         done(new Error(result.body))

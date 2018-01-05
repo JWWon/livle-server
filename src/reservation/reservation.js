@@ -75,6 +75,11 @@ Reservation.reserve = (ticket, subscription) =>
           ticket_id: ticket.id,
           subscription_id: subscription.id,
         },
+        attributes: [
+          'id',
+          'ticket_id',
+          ['reserved_at', 'reservedAt'],
+        ],
       })
     ).then((reservation) =>
       pushVacancies(ticket).then((pushed) => resolve(reservation))

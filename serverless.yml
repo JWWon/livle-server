@@ -33,6 +33,8 @@ provider:
     DB_PASS: ${file(./keys.yml):DB_PASS}
     IMP_KEY: ${file(./keys.yml):IMP_KEY}
     IMP_SECRET: ${file(./keys.yml):IMP_SECRET}
+    PUSHER_KEY: ${file(./keys.yml):PUSHER_KEY}
+    PUSHER_SECRET: ${file(./keys.yml):PUSHER_SECRET}
   vpc:
     securityGroupIds:
       - "Fn::GetAtt": LivleSecurityGroup.GroupId

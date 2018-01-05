@@ -29,8 +29,11 @@ const renew = (subscription) => new Promise((resolve, reject) => {
   subscription.getNext().then((next) => {
     if (!next) {
       // 갱신할 구독이 없음 : 빌링 키 삭제
-      Billing.delete(subscription.user_id).then(() => resolve())
-        .catch((err) => reject(err))
+      subscription.getUser((user) => {
+        Billing.delete(user.id).then(() =>
+          user.update({ card_name: null, last_four_digits: null }))
+          .then(() => resolve())
+      }).catch((err) => reject(err))
     } else {
       next.pay().then((subs) => {
         log(subs)

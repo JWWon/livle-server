@@ -10,9 +10,9 @@ const startOfDay = (d) => {
   return date
 }
 
-const nDaysFrom = (n, from) => {
+const thirtyDaysFrom = (from) => {
   let date = new Date(from)
-  date.setDate(date.getDate() + n)
+  date.setDate(date.getDate() + 30)
   date.setHours(23, 59, 59)
   return date
 }
@@ -29,7 +29,7 @@ const startTrial = (user, cardNumber) => {
       return Subscription.create({
         user_id: user.id,
         from: startOfDay(now),
-        to: nDaysFrom(6, now),
+        to: thirtyDaysFrom(now),
       })
     }).then((newSub) =>
       newSub.approvePayment(user, now)
@@ -56,7 +56,7 @@ const startSubscription = (user) => {
         return Subscription.create({
           user_id: user.id,
           from: startOfDay(now),
-          to: nDaysFrom(30, now),
+          to: thirtyDaysFrom(now),
         }).then((newSub) => newSub.pay())
       }
     })

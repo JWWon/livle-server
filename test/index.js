@@ -206,8 +206,8 @@ describe('Subscription', function() {
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
-        if (daysBetween > 7) {
-          return done(new Error("Free trial longer than 7 days"))
+        if (daysBetween < 30) {
+          return done(new Error("Subscription shorter than 30 days"))
         }
         done()
       } else {
@@ -391,8 +391,8 @@ describe('Subscription', function() {
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
-        if (daysBetween > 7) {
-          return done(new Error("Free trial longer than 7 days"))
+        if (daysBetween < 30) {
+          return done(new Error("Subscription shorter than 30 days"))
         }
         done()
       } else {

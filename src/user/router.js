@@ -6,17 +6,16 @@ const destroy = require('./destroy')
 
 module.exports = (params, respond) => {
   switch (params.httpMethod) {
-    case 'post':
+    case 'POST':
       create(params, respond)
       break
-    case 'get':
+    case 'GET':
       get(params, respond)
       break
-    case 'delete':
+    case 'DELETE':
       destroy(params, respond)
       break
     default:
-      console.error('method is')
-      console.error(params.httpMethod)
+      console.error(`Invalid method: ${params.httpMethod}`)
   }
 }

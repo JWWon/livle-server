@@ -978,26 +978,23 @@ definitions:
         format: int64
       user:
         type: object
+        description: 파트너 페이지에서만 오는 데이터
         properties:
           email:
             type: string
           nickname:
             type: string
-      ticket_id:
+      ticketId:
         type: integer
         format: int64
-      status:
+      createdAt:
         type: string
-        example: valid
-        description: 'valid, cancelled, noshow 중 하나'
-      created_at:
+      checkedAt:
         type: string
-      checked_at:
+        description: '체크인한 시간, 체크인하지 않았으면 null'
+      cancelledAt:
         type: string
-        description: '체크인한 시간 (js Date type), null if not checked in'
-      cancelled_at:
-        type: string
-        description: '취소한 시간, null if not cancelled'
+        description: '파트너 페이지에서만 옴, 유저의 경우 취소한 예약은 오지 않습니다.'
   PaymentParams:
     type: object
     properties:

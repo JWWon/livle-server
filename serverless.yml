@@ -54,23 +54,17 @@ custom:
     createRoute53Record: true
 
 functions:
-  userCreate:
-    handler: handler.userCreate
+  userRouter:
+    handler: handler.userRouter
     events:
       - http:
           path: user
           method: post
           cors: true
-  userGet:
-    handler: handler.userGet
-    events:
       - http:
           path: user
           method: get
           cors: true
-  userDestroy:
-    handler: handler.userDestroy
-    events:
       - http:
           path: user
           method: delete

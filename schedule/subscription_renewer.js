@@ -2,9 +2,9 @@
 
 const _ = require('lodash')
 const Op = require('sequelize').Op
-const Subscription = require('.')
-const Reservation = require('../reservation/reservation')
-const Billing = require('../billing')
+const Subscription = require('../src/subscription')
+const Reservation = require('../src/reservation/reservation')
+const Billing = require('../src/billing')
 
 const startOfToday = () => {
   let date = new Date()

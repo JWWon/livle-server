@@ -213,7 +213,11 @@ User.hasMany(Subscription, {
 })
 
 User.prototype.subscriptionFor = function(date) {
-  return new Promise((resolve, reject) =>
+  return new Promise((resolve, reject) => {
+    const now = new Date()
+    if (this.suspended_by && this.suspended_by < now) {
+      return resolve()
+    }
     this.getSubscriptions({
       where: { from: { [Op.lte]: date }, to: { [Op.gte]: date } },
     }).then((subscriptions) => {
@@ -233,7 +237,7 @@ User.prototype.subscriptionFor = function(date) {
       }
       return resolve(s)
     }).catch((err) => reject(err))
-  )
+  })
 }
 
 const Reservation = require('../reservation/reservation')

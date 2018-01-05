@@ -251,6 +251,8 @@ describe('Subscription', function() {
   it('successful reservation', function(done) {
     const callback = (error, result) => {
       if (result.statusCode === 200) {
+        const reservation = JSON.parse(result.body)
+        console.log(reservation)
         done()
       } else {
         done(new Error(result.body))
@@ -330,6 +332,8 @@ describe('Subscription', function() {
   it('successful reservation after a cancellation', function(done) {
     const callback = (error, result) => {
       if (result.statusCode === 200) {
+        const reservation = JSON.parse(result.body)
+        console.log(reservation)
         done()
       } else {
         done(new Error(result.body))

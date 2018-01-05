@@ -77,7 +77,7 @@ Reservation.reserve = (ticket, subscription) =>
         },
         attributes: [
           'id',
-          'ticket_id',
+          ['ticket_id', 'ticketId'],
           ['reserved_at', 'reservedAt'],
         ],
       })

@@ -27,9 +27,8 @@ Reservation.belongsTo(Ticket, {
 
 const pushVacancies = (ticket, reservedCount) =>
   new Promise((resolve, reject) =>
-    Reservation.count({
-      where: { ticket_id: ticket.id }
-    }).then((reservedCount) => {
+    Reservation.count({ where: { ticket_id: ticket.id } })
+    .then((reservedCount) => {
       const callback = (err) => {
         if (err) {
           console.error(err)

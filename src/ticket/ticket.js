@@ -11,10 +11,9 @@ const Ticket = sequelize.define('ticket', {
   image: { type: S.STRING, allowNull: false },
   capacity: { type: S.INTEGER, allowNull: false },
   place: { type: S.STRING, allowNull: false },
-  music_id: S.STRING,
   video_id: S.STRING,
-  article: S.STRING,
-  checkin_code: S.STRING,
+  // eslint-disable-next-line new-cap
+  checkin_code: S.STRING(4),
 },
   { timestamps: false }
 )

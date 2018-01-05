@@ -1,35 +1,81 @@
 // Libraries
 const faker = require('faker')
 const _ = require('lodash')
-// Require Partner to add partner_id field to Ticket model
 const User = require('../../src/user/user')
+const Subscription = require('../../src/subscription')
 const Ticket = require('../../src/ticket/ticket')
 const Reservation = require('../../src/reservation/reservation')
+const FreeTrial = require('../../src/free_trial')
 
-const oneMonthLater = () => {
-  let date = new Date()
-  date.setMonth(date.getMonth() + 1)
+const startOfDay = (d) => {
+  let date = new Date(d)
+  date.setHours(0, 0, 0)
   return date
 }
 
-const users = _.times(30, () => {
+const nDaysFrom = (n, from) => {
+  let date = new Date(from)
+  date.setDate(date.getDate() + n)
+  date.setHours(23, 59, 59)
+  return date
+}
+
+const users = _.times(100, () => {
   return User.create({
     email: faker.internet.email(),
     nickname: faker.name.findName(),
     password: 'fakepassword',
     card_name: faker.finance.account(),
     last_four_digits: '1234',
-    valid_by: oneMonthLater(),
   })
 })
 
-module.exports = () => Promise.all(users)
-  .then((users) => {
-    console.log('User created')
-    return Ticket.findAll().then((tickets) => {
-      const creatingReservations = _.map(users, (u) =>
-        Reservation.make(u, _.sample(tickets).id)
+const now = new Date()
+
+const subscriptionTesters = () => {
+  const freeTrialDone = FreeTrial.create({ card_hash: 'test' })
+    .then((ft) => User.signUp('freeTrialDone', 'fakepassword')
+      .then((user) => User.findOne({ where: { email: 'freeTrialDone' } }))
+      .then((user) => user.update({ free_trial_id: ft.id }))
+    )
+  return freeTrialDone
+}
+
+module.exports = () => new Promise((resolve, reject) =>
+  subscriptionTesters().then(() =>
+    Promise.all(users)
+  ).then((users) => {
+    console.log('Users created')
+
+    const fromDate = startOfDay(now)
+    const toDate = nDaysFrom(30, now)
+
+    const creatingSubscriptions = _.map(users, (user) =>
+      new Promise((resolve, reject) =>
+        Subscription.create({
+          user_id: user.id,
+          from: fromDate,
+          to: toDate,
+        }).then((newSub) => newSub.approvePayment(user, now))
+        .then((subs) => resolve(subs))
+        .catch((err) => reject(err))
       )
-      return Promise.all(creatingReservations)
+    )
+
+    Promise.all(creatingSubscriptions).then((subs) => {
+      console.log('Subscriptions created')
+
+      return Ticket.findAll().then((tickets) => {
+        const creatingReservations = _.map(subs, (s) =>
+          Reservation.create({
+            ticket_id: _.sample(tickets).id,
+            subscription_id: s[0].id,
+            reserved_at: new Date(),
+          })
+        )
+        return Promise.all(creatingReservations)
+          .then((reservations) => resolve(reservations))
+      })
     })
-  })
+  }).catch((err) => reject(err))
+)

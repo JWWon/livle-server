@@ -1,7 +1,6 @@
 'use strict'
 
 const User = require('../user/user')
-const Reservation = require('./reservation')
 
 module.exports = (params, respond) => {
   const token = params.auth
@@ -10,10 +9,12 @@ module.exports = (params, respond) => {
 
   return User.fromToken(token)
     .then((user) =>
-      Reservation.findOne({ where: { id: rId } })
-      .then((r) => {
-        if (!r) return respond(404, '해당 예약을 찾을 수 없습니다.')
-        if (r.user_id !== user.id) return respond(404, '권한이 없습니다.')
+      user.getReservations({ where: { id: rId } })
+      .then((reservations) => {
+        if (reservations.length === 0) {
+          return respond(404, '해당 예약을 찾을 수 없습니다.')
+        }
+        const r = reservations[0]
         if (r.checked_at) return respond(405, '이미 체크인되었습니다.')
 
         return r.getTicket()
@@ -26,8 +27,8 @@ module.exports = (params, respond) => {
             }
           })
       }).catch((err) => {
- console.error(err); respond(500)
-})
+        console.error(err); respond(500)
+      })
     ).catch((err) =>
       respond(401, '로그인이 필요합니다.')
     )

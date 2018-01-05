@@ -9,7 +9,7 @@ module.exports = (params, respond) => {
 
   return Partner.fromHeaders({ Authorization: params.auth })
     .then((partner) => {
-      if (!partner.isAdmin) return respond(403, '권한이 없습니다.')
+      if (!partner.isAdmin()) return respond(403, '권한이 없습니다.')
 
       return User.findAll().then((users) => {
         const userList = _.map(users, (u) => {

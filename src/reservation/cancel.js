@@ -1,7 +1,6 @@
 'use strict'
 
 const User = require('../user/user')
-const Reservation = require('./reservation')
 
 const hoursLeft = (until) => {
   const now = new Date()
@@ -14,16 +13,15 @@ module.exports = (params, respond) => {
 
   return User.fromToken(token)
     .then((user) =>
-      Reservation.findOne({
-        where: {
-          id: reservationId,
-          user_id: user.id,
-        },
-      }).then((reservation) => {
-        if (!reservation) return respond(404)
+      user.getReservations({ where: { id: reservationId } })
+      .then((reservations) => {
+        if (reservations.length === 0) return respond(404)
+        const reservation = reservations[0]
         if (reservation.checked_at) return respond(405)
         return reservation.getTicket()
-        .then((ticket) => hoursLeft(ticket.start_at) < 24 ? respond(405)
+          .then((ticket) =>
+            // 4시간 전까지만 취소 가능
+            hoursLeft(ticket.start_at) < 4 ? respond(405)
           : reservation.destroy().then(() => respond(200))
         )
       }).catch((err) => respond(500, err))

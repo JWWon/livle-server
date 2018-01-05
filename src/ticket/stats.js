@@ -3,6 +3,7 @@ const _ = require('lodash')
 const Ticket = require('./ticket')
 const Partner = require('../partner/partner')
 const User = require('../user/user')
+const Subscription = require('../subscription')
 
 module.exports = (params, respond) =>
   Partner.fromHeaders({ Authorization: params.auth })
@@ -19,12 +20,25 @@ module.exports = (params, respond) =>
 
         return ticket.getReservations({
           paranoid: false, // 취소된 예약 포함
-          include: [{ model: User, attributes: ['email', 'nickname'] }],
+          include: [{ model: Subscription,
+              attributes: ['user_id'],
+              include: [
+              { model: User, attributes: ['email', 'nickname'] },
+              ],
+            }],
         }).then((reservations) => {
-            let ticketWithStats = ticket.dataValues
-            ticketWithStats.reservations = _.map(reservations,
-              (r) => r.dataValues)
-            return respond(200, ticketWithStats)
-          })
+          let ticketWithStats = ticket.dataValues
+          ticketWithStats.reservations = _.map(reservations,
+            (r) => {
+              let data = r.dataValues
+              data.user = r.subscription && r.subscription.user.dataValues
+              data.subscription = undefined
+              return data
+            })
+          return respond(200, ticketWithStats)
+        })
       })
-    ).catch((err) => respond(401, err))
+    ).catch((err) => {
+      console.error(err)
+      respond(401, err)
+    })

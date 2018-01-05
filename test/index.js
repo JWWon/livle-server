@@ -1,8 +1,16 @@
 'use strict'
 
+const User = require('../src/user/user')
 const expect = require('chai').expect
 const handler = require('../handler')
 require('dotenv').config() // .env 파일에서 환경변수 읽어오기
+
+// 테스트에 사용되는 환경변수들
+const fbToken = process.env.FB_TOKEN
+const cardNumber = process.env.CARD_NUMBER
+const expiry = process.env.EXPIRY
+const birth = process.env.BIRTH
+const password = process.env.PASSWORD
 
 let authToken = ''
 
@@ -20,12 +28,13 @@ const userPass = 'test'
 describe('User', function() {
   it('successful creation', function(done) {
     const callback = (error, result) => {
-      if (error) done(error)
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      authToken = res.token
-      expect(result).to.exist
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        authToken = body.token
+        if (authToken) return done()
+      }
+      done(new Error(body))
     }
 
     test(handler.userCreate,
@@ -35,8 +44,8 @@ describe('User', function() {
 
   it('creation failure when no password', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(400)
-        done()
+      if (result.statusCode === 400) return done()
+      done(new Error(result))
     }
 
     test( handler.userCreate,
@@ -47,8 +56,8 @@ describe('User', function() {
 
   it('creation failure on duplicate email', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(403)
-      done()
+      if (result.statusCode === 403) return done()
+      done(new Error(result))
     }
 
     test( handler.userCreate,
@@ -59,8 +68,8 @@ describe('User', function() {
 
   it('creation failure on invalid email', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(405)
-      done()
+      if (result.statusCode === 405) return done()
+      done(new Error(result))
     }
 
     test( handler.userCreate,
@@ -71,9 +80,12 @@ describe('User', function() {
 
   it('successful retrieval', function(done) {
     const callback = (error, result) => {
-      if (error) done(error)
-      expect(result.statusCode).to.equal(200)
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        return done()
+      }
+      done(new Error(body))
     }
 
     test( handler.userGet,
@@ -84,10 +96,8 @@ describe('User', function() {
 
   it('successful password request', function(done) {
     const callback = (error, result) => {
-      if (error) done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) return done()
+      done(new Error(result))
     }
 
     test( handler.userRequestPassword,
@@ -114,11 +124,13 @@ describe('User', function() {
 
   it('successful signin', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      authToken = res.token
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        authToken = body.token
+        if (authToken) return done()
+      }
+      done(new Error(body))
     }
 
     test( handler.userSignin,
@@ -133,14 +145,14 @@ describe('User', function() {
       if (code === 200 || code === 201) {
         return done()
       }
-      return done(new Error(`invalid statusCode ${code}`))
+      return done(new Error(code))
     }
 
     /* 토큰 구하는 곳
      * https://developers.facebook.com/tools/explorer
      */
     test( handler.userFacebook,
-      { body: { accessToken: process.env.FB_TOKEN } },
+      { body: { accessToken: fbToken } },
       callback
     )
   }).timeout(5000)
@@ -150,11 +162,13 @@ let ticket
 describe('Ticket', function() {
   it('successful retrieve of list', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      ticket = res[0]
-      done()
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        ticket = body[0]
+        return done()
+      }
+      done(new Error(body))
     }
 
     test( handler.ticketGet,
@@ -165,10 +179,11 @@ describe('Ticket', function() {
 
   it('reservation failure with no subscription', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(400)
-      done()
+      if (result.statusCode === 403) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketReserve,
@@ -179,16 +194,25 @@ describe('Ticket', function() {
 })
 
 describe('Subscription', function() {
-  const cardNumber = process.env.CARD_NUMBER
-  const expiry = process.env.EXPIRY
-  const birth = process.env.BIRTH
-  const password = process.env.PASSWORD
 
-  it('successful subscription', function(done) {
+  it('successful free trial', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      done()
+      const user = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(user)
+        if (!user.currentSubscription || !user.nextSubscription) {
+          return done(new Error("Failed to return subscription data"))
+        }
+        const from = new Date(user.currentSubscription.from)
+        const to = new Date(user.currentSubscription.to)
+        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
+        if (daysBetween > 7) {
+          return done(new Error("Free trial longer than 7 days"))
+        }
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.subscriptionCreate,
@@ -201,7 +225,7 @@ describe('Subscription', function() {
         },
       }, callback
     )
-  })
+  }).timeout(5000)
 
   it('subscription fails if already subscribing', function(done) {
     const callback = (error, result) => {
@@ -224,10 +248,11 @@ describe('Subscription', function() {
 
   it('successful reservation', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketReserve,
@@ -238,10 +263,11 @@ describe('Subscription', function() {
 
   it('reservation failure on duplicate', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(400)
-      done()
+      if (result.statusCode === 405) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketReserve,
@@ -253,10 +279,13 @@ describe('Subscription', function() {
   let reservation
   it('successful retrieval of reservation', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      reservation = JSON.parse(result.body)[0]
-      done()
+      if (result.statusCode === 200) {
+        const reservations = JSON.parse(result.body)
+        reservation = reservations[0]
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.reservationGet,
@@ -267,9 +296,11 @@ describe('Subscription', function() {
 
   it('checkin failure with invalid checkin code', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(403)
-      done()
+      if (result.statusCode === 403) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.reservationCheckin,
@@ -280,9 +311,11 @@ describe('Subscription', function() {
 
   it('successful cancellation of a reservation', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.reservationCancel,
@@ -293,10 +326,11 @@ describe('Subscription', function() {
 
   it('successful reservation after a cancellation', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
-      console.log(result)
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketReserve,
@@ -305,11 +339,129 @@ describe('Subscription', function() {
     )
   })
 
+  // TODO successful checkin
+
+  it('successful update of payment information', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        done()
+      } else {
+        done(new Error(body))
+      }
+    }
+
+    test( handler.subscriptionUpdate,
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        }
+      }, callback )
+  })
+
   it('successful cancellation of a subscription', function(done) {
     const callback = (error, result) => {
-      if (error) return done(error)
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        done()
+      } else {
+        done(new Error(body))
+      }
+    }
+
+    test( handler.subscriptionDelete,
+      { },
+      callback
+    )
+  })
+
+  it('successful resubscription within a valid period after a cancellation', function(done) {
+    const callback = (error, result) => {
+      const user = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(user)
+        if (!user.currentSubscription || !user.nextSubscription) {
+          return done(new Error("Failed to return subscription data"))
+        }
+        const from = new Date(user.currentSubscription.from)
+        const to = new Date(user.currentSubscription.to)
+        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
+        if (daysBetween > 7) {
+          return done(new Error("Free trial longer than 7 days"))
+        }
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    }
+
+    test( handler.subscriptionCreate,
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        },
+      }, callback
+    )
+  }).timeout(5000)
+
+})
+
+
+/*
+ *
+ * 구독 테스트
+ *
+ */
+
+
+describe('Subscription renew', function() {
+  it('successful renewal', function(done) {
+    const callback = (error, result) => {
       expect(result.statusCode).to.equal(200)
       done()
+    }
+
+    const startOfToday = () => {
+      let date = new Date()
+      date.setHours(0, 0, 0)
+      return date
+    }
+    const thirtyDaysFromNow = () => {
+      let date = new Date()
+      date.setDate(date.getDate() + 30)
+      date.setHours(23, 59, 59)
+      return date
+    }
+    User.findOne({ where: { email: userEmail } })
+      .then((user) => user.getActiveSubscriptions())
+      .then(([curr, next]) => next.update({
+        from: startOfToday(),
+        to: thirtyDaysFromNow(),
+      })).then(() => {
+        test( handler.subscriptionRenew,
+          {},
+          callback
+        )
+      })
+  })
+
+  it('successful cancellation of a subscription', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        done()
+      } else {
+        done(new Error(body))
+      }
     }
 
     test( handler.subscriptionDelete,
@@ -319,11 +471,66 @@ describe('Subscription', function() {
   })
 })
 
+describe('Paid subscription', function() {
+  it('successful signin', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(body)
+        authToken = body.token
+        if (authToken) return done()
+      }
+      done(new Error(body))
+    }
+
+    test( handler.userSignin,
+      { body: { email: 'freeTrialDone', password: 'fakepassword' } },
+      callback
+    )
+  })
+
+  it('successful subscription', function(done) {
+    const callback = (error, result) => {
+      const user = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(user)
+        if (!user.currentSubscription || !user.nextSubscription) {
+          return done(new Error("Failed to return subscription data"))
+        }
+        const from = new Date(user.currentSubscription.from)
+        const to = new Date(user.currentSubscription.to)
+        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
+        if (daysBetween < 30) {
+          return done(new Error("Subscription shorter than 30 days"))
+        }
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    }
+
+    test( handler.subscriptionCreate,
+      { body:
+        {
+          cardNumber: cardNumber,
+          expiry: expiry,
+          birth: birth,
+          password: password,
+        },
+      }, callback
+    )
+  }).timeout(5000)
+
+})
+
 describe('User deletion', function() {
   it('successful deletion', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.userDestroy,
@@ -450,8 +657,12 @@ describe('Partner', function() {
 
   it('successfully get ticket details', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        //const body = JSON.parse(result.body)
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketStats,
@@ -545,26 +756,6 @@ describe('Ticket', function() {
 
     test( handler.ticketDestroy,
       { path: { ticketId: ticketId } },
-      callback
-    )
-  })
-})
-
-/*
- *
- * 구독 업데이트
- *
- */
-
-describe('Subscription renew', function() {
-  it('successful renewal', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.subscriptionRenew,
-      {},
       callback
     )
   })

@@ -206,12 +206,12 @@ functions:
           path: subscription
           method: post
           cors: true
-  subscriptionGet:
-    handler: handler.subscriptionGet
+  subscriptionUpdate:
+    handler: handler.subscriptionUpdate
     events:
       - http:
           path: subscription
-          method: get
+          method: patch
           cors: true
   subscriptionDelete:
     handler: handler.subscriptionDelete

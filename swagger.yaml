@@ -51,7 +51,7 @@ paths:
         '200':
           description: 가입 성공
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/UserSession'
         '400':
           description: 잘못된 요청 (이메일이나 비밀번호가 없음)
         '403':
@@ -108,7 +108,7 @@ paths:
         '200':
           description: 성공
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/UserData'
         '401':
           description: 헤더에 토큰이 없음
         '403':
@@ -131,11 +131,11 @@ paths:
         '200':
           description: '기존 계정을 발견, 로그인'
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/UserSession'
         '201':
           description: '기존 유저가 아님, 신규가입됨'
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/UserSession'
         '400':
           description: access_token이 없음
         '401':
@@ -220,7 +220,7 @@ paths:
         '200':
           description: 로그인 성공
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/UserSession'
         '400':
           description: 이메일 또는 비밀번호가 없거나 잘못됨
         '403':
@@ -254,7 +254,7 @@ paths:
           description: 성공
           schema:
             items:
-              $ref: '#/definitions/User'
+              $ref: '#/definitions/UserData'
         '401':
           description: 헤더에 토큰이 없음
         '403':
@@ -694,28 +694,12 @@ paths:
           in: body
           required: true
           schema:
-            type: object
-            properties:
-              cardNumber:
-                type: string
-                example: 1111-2222-3333-4444
-              expiry:
-                type: string
-                example: 2018-03
-                description: 카드 유효기간
-              birth:
-                type: string
-                example: '920723'
-                description: 카드 소유자 생년월일 (주민번호 앞 6자리)
-              password:
-                type: string
-                description: 카드 비밀번호 앞 두자리
-                example: '12'
+            $ref: '#/definitions/PaymentParams'
       responses:
         '200':
           description: 구독 성공
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/UserData'
         '400':
           description: 결제 정보 중 누락된 것이 있음
         '401':
@@ -726,6 +710,40 @@ paths:
           description: 결제 정보 인증에 실패
         '405':
           description: 이미 구독 중
+    patch:
+      tags:
+        - subscription
+      summary: 구독 정보 변경
+      parameters:
+        - name: Authorization
+          in: header
+          description: 세션토큰
+          required: true
+          type: string
+        - name: payment
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PaymentParams'
+      responses:
+        '200':
+          description: '업데이트 성공, 결제는 이루어지지 않음'
+          schema:
+            $ref: '#/definitions/UserData'
+        '201':
+          description: '업데이트 성공, 결제 실패 내용 결제됨'
+          schema:
+            $ref: '#/definitions/UserData'
+        '400':
+          description: 결제 정보 중 누락된 것이 있음
+        '401':
+          description: 로그인되지 않음
+        '402':
+          description: 결제 정보 인증은 되었으나 결제 실패
+        '403':
+          description: 결제 정보 인증에 실패
+        '404':
+          description: 구독 중이 아님
     delete:
       tags:
         - subscription
@@ -734,7 +752,7 @@ paths:
         '200':
           description: 구독 취소 성공
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/UserData'
         '401':
           description: 로그인되지 않음
         '404':
@@ -770,13 +788,9 @@ paths:
         '403':
           description: 권한이 없음 (admin@livle.kr만 가능)
 definitions:
-  User:
+  UserSession:
     type: object
-    description: 'password, password_reset_token, customer_uid는 리턴되지 않음'
     properties:
-      id:
-        type: integer
-        format: int64
       email:
         type: string
         example: test@test.com
@@ -788,15 +802,56 @@ definitions:
         description: >-
           회원가입 또는 로그인 시에만 전달됨. 클라이언트에 저장해두고 요청보낼 때 header에 Authorization이라는 이름으로
           포함하기.
+  UserData:
+    type: object
+    properties:
+      email:
+        type: string
+        example: test@test.com
+      nickname:
+        type: string
+        example: 라이블
       card_name:
         type: string
         example: 신한카드
       last_four_digits:
         type: string
         example: '1234'
-      valid_by:
+        description: 카드 마지막 4자리
+      cancelled_at:
         type: string
-        example: '2017-12-19T08:21:03.000Z'
+        description: '구독을 취소한 날짜, 구독 중이거나 구독을 시작한 적이 없는 경우 null'
+      suspended_by:
+        type: string
+        description: 패널티로 라이블을 이용할 수 없는 기간
+      free_trial_id:
+        type: integer
+        format: int64
+        description: '무료 체험 일련번호, 체험한 적이 없으면 null'
+      currentSubscription:
+        $ref: '#/definitions/Subscription'
+      nextSubscription:
+        $ref: '#/definitions/Subscription'
+  Subscription:
+    type: object
+    properties:
+      from:
+        type: string
+        example: '2018-01-03T15:00:00.467Z'
+        description: 이 구독 유효기간의 시작
+      to:
+        type: string
+        example: '2018-01-10T14:59:59.467Z'
+        description: 이 구독 유효기간의 끝
+      paid_at:
+        type: string
+        example: '2018-01-04T10:12:20.467Z'
+        description: '결제가 이루어진 시기, 결제 예정 구독의 경우 null'
+      used:
+        type: integer
+        format: int64
+        example: 1
+        description: 이 기간 동안 예약된 공연의 수
   Partner:
     type: object
     description: password는 리턴되지 않음
@@ -937,3 +992,21 @@ definitions:
       cancelled_at:
         type: string
         description: '취소한 시간, null if not cancelled'
+  PaymentParams:
+    type: object
+    properties:
+      cardNumber:
+        type: string
+        example: 1111-2222-3333-4444
+      expiry:
+        type: string
+        example: 2018-03
+        description: 카드 유효기간
+      birth:
+        type: string
+        example: '920723'
+        description: 카드 소유자 생년월일 (주민번호 앞 6자리)
+      password:
+        type: string
+        description: 카드 비밀번호 앞 두자리
+        example: '12'

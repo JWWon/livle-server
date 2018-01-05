@@ -3,7 +3,7 @@
 const User = require('../user/user')
 const _ = require('lodash')
 
-const sanitize = (reservation) => _.reduce(reservation,
+const sanitize = (reservation) => _.reduce(reservation.dataValues,
   (result, value, key) => {
     switch (key) {
       case 'reserved_at':
@@ -21,7 +21,7 @@ const sanitize = (reservation) => _.reduce(reservation,
         break
     }
     return result
-  })
+  }, { })
 
 module.exports = (params, respond) => {
   const token = params.auth

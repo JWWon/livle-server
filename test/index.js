@@ -40,7 +40,7 @@ describe('User', function() {
     }
 
     test(handler.userRouter,
-      { httpMethod: 'post', body: { email: userEmail, password: userPass, nickname: 'hi' } },
+      { httpMethod: 'POST', body: { email: userEmail, password: userPass, nickname: 'hi' } },
       callback)
   })
 

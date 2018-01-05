@@ -20,11 +20,13 @@ const lambda = (func) => {
     params.query = event.queryStringParameters
     params.auth = event.headers && event.headers.Authorization
     params.path = event.pathParameters
+    params.httpMethod = event.httpMethod
 
     func(params, respond)
   }
 }
 
+module.exports.userRouter = lambda(require('./src/user/router'))
 module.exports.userCreate = lambda(require('./src/user/create'))
 module.exports.userGet = lambda(require('./src/user/get'))
 module.exports.userDestroy = lambda(require('./src/user/destroy'))

@@ -18,7 +18,9 @@ const test = (func, params, callback) => {
   func({
     headers: { Authorization: authToken },
     body: JSON.stringify(params.body),
-    queryStringParameters: params.query, pathParameters: params.path,
+    queryStringParameters: params.query,
+    pathParameters: params.path,
+    httpMethod: params.httpMethod,
   }, {}, callback)
 }
 
@@ -37,8 +39,8 @@ describe('User', function() {
       done(new Error(body))
     }
 
-    test(handler.userCreate,
-      { body: { email: userEmail, password: userPass, nickname: 'hi' } },
+    test(handler.userRouter,
+      { httpMethod: 'post', body: { email: userEmail, password: userPass, nickname: 'hi' } },
       callback)
   })
 

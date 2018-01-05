@@ -636,8 +636,13 @@ describe('Partner', function() {
 
   it('successfully get one\'s own concerts list', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        const body = JSON.parse(result.body)
+        console.log(body)
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.partnerTickets,
@@ -647,8 +652,13 @@ describe('Partner', function() {
 
   it('successfully get concerts list', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        const body = JSON.parse(result.body)
+        console.log(body)
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketAll,

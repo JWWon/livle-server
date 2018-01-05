@@ -1,6 +1,5 @@
 'use strict'
 
-const sequelize = require('../config/sequelize')
 const User = require('../user/user')
 const Ticket = require('../ticket/ticket')
 const Reservation = require('../reservation/reservation')

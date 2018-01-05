@@ -1,7 +1,6 @@
 'use strict'
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
-const _ = require('lodash')
 
 const Ticket = sequelize.define('ticket', {
   id: { type: S.INTEGER, autoIncrement: true, primaryKey: true },
@@ -21,32 +20,31 @@ const Ticket = sequelize.define('ticket', {
 const Artist = require('./artist')
 Ticket.hasMany(Artist, { foreignKey: { name: 'ticket_id', allowNull: false } })
 
-Ticket.withArtists = (tickets, showCode) => new Promise((resolve, reject) =>
-  Promise.all(
-    _.map(tickets, (t) => t.getArtists())
-  ).then((artistsArray) => resolve(
-    _.zipWith(
-      tickets, artistsArray,
-      (t, aArr) => {
-        let ticket = t.dataValues
-        if (!showCode) ticket.checkin_code = undefined // Hide
-        let artists = _.map(aArr, (a) => a.dataValues)
-        ticket.artists = artists
-        return ticket
-      }
-    )
-  )).catch((err) => reject(err))
-)
+const oneWeekLater = () => {
+  let date = new Date()
+  date.setDate(date.getDate() + 7)
+  return date
+}
 
-Ticket.until = (until) => new Promise((resolve, reject) =>
+Ticket.getList = () => new Promise((resolve, reject) => {
+  // 시작일 기준 지금으로부터 일주일 후까지의 공연 검색
+  const until = oneWeekLater()
+
   Ticket.findAll({
     where: {
       start_at: { [S.Op.gt]: new Date(), [S.Op.lt]: until },
     },
+    attributes: [
+      'id', 'title', 'start_at', 'end_at', 'image', 'place', 'video_id',
+    ],
+    include: [{ model: Artist }],
   }).then((tickets) =>
-    Ticket.withArtists(tickets)
-    .then((tickets) => resolve(tickets))
-  ).catch((err) => reject(err))
-)
+    // TODO : 잔여 좌석 수
+    resolve(tickets)
+  ).catch((err) => {
+    console.error(err)
+    reject(err)
+  })
+})
 
 module.exports = Ticket

@@ -1,6 +1,7 @@
 'use strict'
 const _ = require('lodash')
 const Ticket = require('./ticket')
+const Artist = require('./artist')
 const Partner = require('../partner/partner')
 const User = require('../user/user')
 const Subscription = require('../subscription')
@@ -12,6 +13,7 @@ module.exports = (params, respond) =>
         where: {
           id: params.path.ticketId,
         },
+        include: [{ model: Artist }],
       }).then((ticket) => {
         if (!ticket) return respond(404, '해당 공연을 찾을 수 없습니다.')
         if (partner.id !== ticket.partner_id && !partner.isAdmin()) {

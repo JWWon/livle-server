@@ -45,7 +45,10 @@ module.exports = (toAddress, title, templateName, markupData) =>
         Source: 'no-reply@livle.co.kr',
       }
 
+      resolve()
+        /* Temporarily not sending (on suspension)
       return ses.sendEmail(sesParams,
         (err, data) => err ? reject(err) : resolve())
+        */
     })
   )

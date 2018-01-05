@@ -18,7 +18,9 @@ const test = (func, params, callback) => {
   func({
     headers: { Authorization: authToken },
     body: JSON.stringify(params.body),
-    queryStringParameters: params.query, pathParameters: params.path,
+    queryStringParameters: params.query,
+    pathParameters: params.path,
+    httpMethod: params.httpMethod,
   }, {}, callback)
 }
 
@@ -37,8 +39,8 @@ describe('User', function() {
       done(new Error(body))
     }
 
-    test(handler.userCreate,
-      { body: { email: userEmail, password: userPass, nickname: 'hi' } },
+    test(handler.userRouter,
+      { httpMethod: 'POST', body: { email: userEmail, password: userPass, nickname: 'hi' } },
       callback)
   })
 
@@ -206,8 +208,8 @@ describe('Subscription', function() {
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
-        if (daysBetween > 7) {
-          return done(new Error("Free trial longer than 7 days"))
+        if (daysBetween < 30) {
+          return done(new Error("Subscription shorter than 30 days"))
         }
         done()
       } else {
@@ -282,6 +284,7 @@ describe('Subscription', function() {
       if (result.statusCode === 200) {
         const reservations = JSON.parse(result.body)
         reservation = reservations[0]
+        console.log(reservations)
         done()
       } else {
         done(new Error(result.body))
@@ -365,8 +368,8 @@ describe('Subscription', function() {
 
   it('successful cancellation of a subscription', function(done) {
     const callback = (error, result) => {
-      const body = JSON.parse(result.body)
       if (result.statusCode === 200) {
+        const body = JSON.parse(result.body)
         console.log(body)
         done()
       } else {
@@ -374,26 +377,15 @@ describe('Subscription', function() {
       }
     }
 
-    test( handler.subscriptionDelete,
+    test( handler.subscriptionCancel,
       { },
       callback
     )
   })
 
-  it('successful resubscription within a valid period after a cancellation', function(done) {
+  it('subscription failure within a valid period after a cancellation', function(done) {
     const callback = (error, result) => {
-      const user = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(user)
-        if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error("Failed to return subscription data"))
-        }
-        const from = new Date(user.currentSubscription.from)
-        const to = new Date(user.currentSubscription.to)
-        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
-        if (daysBetween > 7) {
-          return done(new Error("Free trial longer than 7 days"))
-        }
+      if (result.statusCode === 405) {
         done()
       } else {
         done(new Error(result.body))
@@ -411,6 +403,30 @@ describe('Subscription', function() {
       }, callback
     )
   }).timeout(5000)
+
+  it('successful restoration of subscription', function(done) {
+    const callback = (error, result) => {
+      const user = JSON.parse(result.body)
+      if (result.statusCode === 200) {
+        console.log(user)
+        if (!user.currentSubscription || !user.nextSubscription) {
+          return done(new Error("Failed to return subscription data"))
+        }
+        const from = new Date(user.currentSubscription.from)
+        const to = new Date(user.currentSubscription.to)
+        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
+        if (daysBetween < 30) {
+          return done(new Error("Subscription shorter than 30 days"))
+        }
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    }
+
+    test( handler.subscriptionRestore,
+      { }, callback)
+  })
 
 })
 
@@ -441,7 +457,7 @@ describe('Subscription renew', function() {
       return date
     }
     User.findOne({ where: { email: userEmail } })
-      .then((user) => user.getActiveSubscriptions())
+      .then((user) => user.getActiveSubscriptions()) // TODO change
       .then(([curr, next]) => next.update({
         from: startOfToday(),
         to: thirtyDaysFromNow(),
@@ -464,7 +480,7 @@ describe('Subscription renew', function() {
       }
     }
 
-    test( handler.subscriptionDelete,
+    test( handler.subscriptionCancel,
       { },
       callback
     )
@@ -636,8 +652,13 @@ describe('Partner', function() {
 
   it('successfully get one\'s own concerts list', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        const body = JSON.parse(result.body)
+        console.log(body)
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.partnerTickets,
@@ -647,8 +668,13 @@ describe('Partner', function() {
 
   it('successfully get concerts list', function(done) {
     const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
+      if (result.statusCode === 200) {
+        const body = JSON.parse(result.body)
+        console.log(body)
+        done()
+      } else {
+        done(new Error(result.body))
+      }
     }
 
     test( handler.ticketAll,

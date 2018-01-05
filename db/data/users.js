@@ -54,9 +54,10 @@ module.exports = () => new Promise((resolve, reject) =>
       new Promise((resolve, reject) =>
         Subscription.create({
           user_id: user.id,
+          paid_at: now,
           from: fromDate,
           to: toDate,
-        }).then((newSub) => newSub.approvePayment(user, now))
+        }).then((newSub) => newSub.createNext())
         .then((subs) => resolve(subs))
         .catch((err) => reject(err))
       )

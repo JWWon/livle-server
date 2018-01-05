@@ -20,11 +20,13 @@ const lambda = (func) => {
     params.query = event.queryStringParameters
     params.auth = event.headers && event.headers.Authorization
     params.path = event.pathParameters
+    params.httpMethod = event.httpMethod
 
     func(params, respond)
   }
 }
 
+module.exports.userRouter = lambda(require('./src/user/router'))
 module.exports.userCreate = lambda(require('./src/user/create'))
 module.exports.userGet = lambda(require('./src/user/get'))
 module.exports.userDestroy = lambda(require('./src/user/destroy'))
@@ -58,5 +60,6 @@ module.exports.fileUpload = lambda(require('./src/file/upload'))
 
 module.exports.subscriptionCreate = lambda(require('./src/subscription/create'))
 module.exports.subscriptionUpdate = lambda(require('./src/subscription/update'))
-module.exports.subscriptionDelete = lambda(require('./src/subscription/delete'))
+module.exports.subscriptionCancel = lambda(require('./src/subscription/cancel'))
+module.exports.subscriptionRestore = lambda(require('./src/subscription/restore'))
 module.exports.subscriptionRenew = lambda(require('./src/subscription/renew'))

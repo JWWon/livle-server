@@ -1,7 +1,6 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
-const iamport = require('../config/iamport')
-const PRICE = 100 // TODO change
+const Billing = require('../billing')
 const sendEmail = require('../send-email')
 
 const Subscription = sequelize.define('subscription', {
@@ -10,9 +9,14 @@ const Subscription = sequelize.define('subscription', {
   // 이 구독이 커버하는 기간
   from: { type: S.DATE, allowNull: false }, // n월 n일 00:00:00
   to: { type: S.DATE, allowNull: false }, // n월 n+30일 23:59:59
+  expired: { type: S.BOOLEAN, defaultValue: false },
 }, {
   deletedAt: 'cancelled_at', paranoid: true,
   createdAt: 'created_at', updatedAt: 'updated_at',
+})
+
+Subscription.hasOne(Subscription, {
+  as: 'Next', foreignKey: 'next_subscription_id',
 })
 
 const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
@@ -27,7 +31,7 @@ const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
 
   return sendEmail(user.email, '라이블 결제 성공', 'payment_success',
     { nickname: user.nickname,
-      price: PRICE,
+      price: Billing.price,
       cardName: user.card_name,
       lastFourDigits: user.last_four_digits,
       paidAt: formatDate(paidAt),
@@ -40,6 +44,10 @@ const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
 }
 
 Subscription.prototype.createNext = function() {
+  if (!this.paid_at) {
+    return Promise.reject(new Error('결제 후에 연장이 가능합니다.'))
+  }
+
   const getNextFromDate = (currTo) => {
     let date = new Date(currTo)
     date.setDate(date.getDate() + 1)
@@ -58,63 +66,72 @@ Subscription.prototype.createNext = function() {
   const nextToDate = getToDate(nextFromDate)
 
   return new Promise((resolve, reject) =>
-    Subscription.create({
-      user_id: this.user_id,
-      from: nextFromDate,
-      to: nextToDate,
-    }).then((newSub) => resolve([this, newSub]))
-    .catch((err) => reject(err))
+    this.getNext().then((nextSub) => {
+      if (nextSub) reject(new Error('이미 다음 구독이 있습니다.'))
+      return Subscription.create({
+        user_id: this.user_id,
+        from: nextFromDate,
+        to: nextToDate,
+      })
+    }).then((nextSub) =>
+      this.update({ next_subscription_id: nextSub.id })
+      .then(() => this.getUser())
+      .then((user) => user.update({ subscription_id: this.id }))
+      .then((user) => resolve([this, nextSub]))
+    ).catch((err) => reject(err))
   )
 }
 
-Subscription.prototype.approvePayment = function(user, at) {
-  const now = at
+const startOfDay = (d) => {
+  let date = new Date(d)
+  date.setHours(0, 0, 0)
+  return date
+}
 
-  return new Promise((resolve, reject) =>
-    this.update({ paid_at: now })
-    .then((updatedSub) => updatedSub.createNext()
-    ).then(([currSub, nextSub]) => {
-      return user.update({
-        current_subscription_id: currSub.id,
-        next_subscription_id: nextSub.id,
-      }).then((user) => sendPaymentEmail(user, now, nextSub.from))
-        .then((sent) => resolve([currSub, nextSub]))
-    }).catch((err) => {
-      console.error(`User ${user.id}: 결제되었으나 정상적으로 업데이트되지 않음`)
-      console.error(err)
-      return reject(err)
-    })
-  )
+const thirtyDaysFrom = (from) => {
+  let date = new Date(from)
+  date.setDate(date.getDate() + 30)
+  date.setHours(23, 59, 59)
+  return date
 }
 
 Subscription.prototype.pay = function() {
   const now = new Date()
 
-  if (this.paid_at) return Promise.reject('이미 결제된 구독입니다.')
-  if (now < this.from) return Promise.reject('아직 결제할 시기가 아닙니다.')
+  return new Promise((resolve, reject) => {
+    if (this.paid_at) reject('이미 결제된 구독입니다.')
+    if (now < this.from) reject('아직 결제할 시기가 아닙니다.')
 
-  return this.getUser().then((user) => {
-    if (user.cancelled_at) {
-      console.error(`User ${user.id}: 구독을 취소하였으나 재결제 시도됨`)
-      return Promise.reject('구독을 취소한 유저입니다.')
-    }
+    const fromDate = startOfDay(now)
+    const toDate = thirtyDaysFrom(now)
 
-    return iamport.subscribe.again({
-      customer_uid: user.id,
-      merchant_uid: 'livle_subscription' + now.getTime(),
-      amount: PRICE,
-      name: '라이블 정기구독권 결제',
-    }).then((res) => this.approvePayment(user, now)
-      // 결제에 실패해도 다음 구독 모델은 생성해 놓아야 함
-    ).catch((err) => this.createNext()
-      .then(([currSub, nextSub]) => user.update({
-        current_subscription_id: currSub.id,
-        next_subscription_id: nextSub.id,
-      })
-      ).then(() => Promise.reject(err))
+    this.getUser().then((user) =>
+      Billing.charge(user.id).then((res) =>
+        this.update({
+          paid_at: now,
+          from: fromDate,
+          to: toDate,
+        }).then((sub) =>
+          sub.createNext().then(([curr, next]) =>
+            sendPaymentEmail(user, now, next.from)
+            .then((sent) => resolve([curr, next]))
+          ).catch((err) => {
+            // 현재 구독 모델을 업데이트했으나
+            // 구독을 연장하거나 메일을 보내는 데 실패함
+            console.error(err)
+            resolve(sub)
+          })
+        ).catch((err) => {
+          // fatal case
+          // 결제는 되었으나 결제 정보를 업데이트하는데 실패함
+          console.error(err)
+          reject(err)
+        })
+      ).catch((err) => reject(new Error('결제 실패')))
     )
   })
 }
+
 
 const Reservation = require('../reservation/reservation')
 Reservation.belongsTo(Subscription, {
@@ -123,6 +140,7 @@ Reservation.belongsTo(Subscription, {
 Subscription.hasMany(Reservation, {
   foreignKey: { name: 'subscription_id', allowNull: false },
 })
+
 Subscription.prototype.cancel = function() {
   return new Promise((resolve, reject) => {
     if (this.paid_at) {
@@ -140,6 +158,13 @@ Subscription.prototype.getUsedCount = function() {
   return Reservation.count({
     where: { subscription_id: this.id },
   })
+}
+
+Subscription.prototype.getNext = function(options) {
+  options = options || { }
+  options.where = options.where || { }
+  options.where = { id: this.next_subscription_id }
+  return Subscription.findOne(options)
 }
 
 module.exports = Subscription

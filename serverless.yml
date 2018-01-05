@@ -33,6 +33,8 @@ provider:
     DB_PASS: ${file(./keys.yml):DB_PASS}
     IMP_KEY: ${file(./keys.yml):IMP_KEY}
     IMP_SECRET: ${file(./keys.yml):IMP_SECRET}
+    PUSHER_KEY: ${file(./keys.yml):PUSHER_KEY}
+    PUSHER_SECRET: ${file(./keys.yml):PUSHER_SECRET}
   vpc:
     securityGroupIds:
       - "Fn::GetAtt": LivleSecurityGroup.GroupId
@@ -52,23 +54,17 @@ custom:
     createRoute53Record: true
 
 functions:
-  userCreate:
-    handler: handler.userCreate
+  userRouter:
+    handler: handler.userRouter
     events:
       - http:
           path: user
           method: post
           cors: true
-  userGet:
-    handler: handler.userGet
-    events:
       - http:
           path: user
           method: get
           cors: true
-  userDestroy:
-    handler: handler.userDestroy
-    events:
       - http:
           path: user
           method: delete
@@ -213,12 +209,19 @@ functions:
           path: subscription
           method: patch
           cors: true
-  subscriptionDelete:
-    handler: handler.subscriptionDelete
+  subscriptionCancel:
+    handler: handler.subscriptionCancel
     events:
       - http:
           path: subscription
           method: delete
+          cors: true
+  subscriptionRestore:
+    handler: handler.subscriptionRestore
+    events:
+      - http:
+          path: subscription/restore
+          method: post
           cors: true
   subscriptionRenew:
     handler: handler.subscriptionRenew

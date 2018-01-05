@@ -1,56 +1,9 @@
 'use strict'
 
-const sequelize = require('../config/sequelize')
 const User = require('../user/user')
 const Ticket = require('../ticket/ticket')
 const Reservation = require('../reservation/reservation')
 const sendEmail = require('../send-email')
-
-const reserve = (ticket, subscription) => new Promise((resolve, reject) =>
-  sequelize.transaction((t) =>
-    Reservation.count({
-      where: { ticket_id: ticket.id },
-      transaction: t,
-    }).then((reservedCount) => { // 해당 공연에 예약된 좌석 수
-      // TODO : push vacancies
-      if (reservedCount >= ticket.capacity) throw new Error('no vacancy')
-
-      return Reservation.count({
-        where: { subscription_id: subscription.id },
-        transaction: t,
-      }).then((usedCount) => { // 현재 구독에서 이용한 예약 기회
-        if (usedCount >= 2) throw new Error('used up')
-
-        return Reservation.findOne({
-          where: {
-            ticket_id: ticket.id,
-            subscription_id: subscription.id,
-          },
-          paranoid: false,
-          transaction: t,
-        }).then((reservation) => {
-          if (reservation && !reservation.isSoftDeleted()) {
-            throw new Error('already reserved')
-          }
-          return Reservation.upsert({
-            ticket_id: ticket.id,
-            subscription_id: subscription.id,
-            reserved_at: new Date(),
-            cancelled_at: null,
-          }, { transaction: t })
-        })
-      })
-    })
-  ).then((created) =>
-    Reservation.findOne({
-      where: {
-        ticket_id: ticket.id,
-        subscription_id: subscription.id,
-      },
-    })
-  ).then((reservation) => resolve(reservation)
-  ).catch((err) => reject(err))
-)
 
 module.exports = (params, respond) => {
   const token = params.auth
@@ -90,7 +43,7 @@ module.exports = (params, respond) => {
           .then((sub) => {
             if (!sub) return respond(403, '유효한 구독이 없습니다.')
 
-            return reserve(ticket, sub)
+            return Reservation.reserve(ticket, sub)
               .then((reservation) =>
                 sendReservationEmail(user, ticket)
                 .then((sent) => respond(200, reservation))

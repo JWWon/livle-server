@@ -1,33 +1,27 @@
 'use strict'
 
-const iamport = require('../config/iamport')
-
 module.exports = function() {
   return new Promise((resolve, reject) =>
-    this.getActiveSubscriptions()
-    .then(([currSub, nextSub]) => {
-      if (!nextSub) {
+    this.getSubscription()
+    .then((currSub) => {
+      if (!currSub) {
         return reject({ code: 404, err: '구독 정보가 없습니다.' })
+      } else {
+        if (currSub.paid_at) {
+          // 결제된 구독
+          currSub.getNext().then((nextSub) => {
+            if (!nextSub) {
+              return reject({ code: 405, err: '이미 구독을 취소했습니다.' })
+            }
+            return nextSub.destroy()
+          })
+        } else {
+          // 결제되지 않은 구독
+          return currSub.destroy()
+        }
       }
-      return iamport.subscribe_customer.delete({
-        customer_uid: this.id,
-      }).then((res) => nextSub.cancel())
-        .then(() => this.update({
-          card_name: null,
-          last_four_digits: null,
-          cancelled_at: new Date(),
-        })
-        ).then((user) => {
-          let userData = user.userData()
-          return currSub.getUsedCount()
-            .then((count) => {
-              let sub = currSub.dataValues
-              sub.used = count
-              userData.currentSubscription = sub
-              return resolve(userData)
-            })
-        })
-    }).catch((err) => {
+    }).then(() => resolve())
+    .catch((err) => {
       console.error(err)
       reject(err)
     })

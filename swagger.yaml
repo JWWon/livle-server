@@ -452,9 +452,9 @@ paths:
           required: true
           description: >-
             Required: partner_id, title, start_at, end_at, image, capacity /
-            vacancies는 유저에게 보여질 계산된 값입니다. 생성 시에는 총 할당 좌석 수인 capacity를 넘겨주세요.
+            Forbidden: id와 reservations는 없어야 합니다.
           schema:
-            $ref: '#/definitions/Ticket'
+            $ref: '#/definitions/TicketDetail'
       responses:
         '200':
           description: 성공
@@ -710,6 +710,8 @@ paths:
           description: 결제 정보 인증에 실패
         '405':
           description: 이미 구독 중
+        '406':
+          description: 이미 무료 체험을 시도한 카드
     patch:
       tags:
         - subscription
@@ -757,6 +759,28 @@ paths:
           description: 로그인되지 않음
         '404':
           description: 구독 중인 내역이 없음
+  /subscription/restore:
+    post:
+      tags:
+        - subscription
+      summary: 취소한 구독을 복원
+      parameters:
+        - name: Authorization
+          in: header
+          description: 세션토큰
+          required: true
+          type: string
+      responses:
+        '200':
+          description: '업데이트 성공, 결제는 이루어지지 않음'
+          schema:
+            $ref: '#/definitions/UserData'
+        '401':
+          description: 로그인되지 않음
+        '403':
+          description: 복구할 수 있는 상태가 아님 (미납이거나 취소한 적이 없음)
+        '404':
+          description: 복구할 구독이 없음
   /file:
     get:
       tags:
@@ -811,22 +835,21 @@ definitions:
       nickname:
         type: string
         example: 라이블
-      card_name:
+      cardName:
         type: string
         example: 신한카드
-      last_four_digits:
+      lastFourDigits:
         type: string
         example: '1234'
         description: 카드 마지막 4자리
-      cancelled_at:
-        type: string
-        description: '구독을 취소한 날짜, 구독 중이거나 구독을 시작한 적이 없는 경우 null'
-      suspended_by:
+      suspendedBy:
         type: string
         description: 패널티로 라이블을 이용할 수 없는 기간
-      free_trial_id:
-        type: integer
-        format: int64
+      freeTrial:
+        type: object
+        properties:
+          createdAt:
+            type: string
         description: '무료 체험 일련번호, 체험한 적이 없으면 null'
       currentSubscription:
         $ref: '#/definitions/Subscription'
@@ -843,7 +866,7 @@ definitions:
         type: string
         example: '2018-01-10T14:59:59.467Z'
         description: 이 구독 유효기간의 끝
-      paid_at:
+      paidAt:
         type: string
         example: '2018-01-04T10:12:20.467Z'
         description: '결제가 이루어진 시기, 결제 예정 구독의 경우 null'
@@ -905,34 +928,23 @@ definitions:
         description: 카드 메인 이미지 주소
       capacity:
         type: number
-        description: 'capacity - # of reservations'
+        description: 예약할 수 있는 전체 좌석 수
       place:
         type: string
         example: 판교 스타트업캠퍼스
-      music_id:
-        type: string
-        description: 음악 주소나 아이디... 아직 모름
       video_id:
         type: string
         description: 영상 주소나 아이디... 아직 모름
-      article:
-        type: string
-        description: 웹 뷰로 보여줄 추가 정보가 있을 경우 웹 주소
       reservations:
         type: array
         items:
           $ref: '#/definitions/Reservation'
   Ticket:
     type: object
-    description: 'capacity, checkin_code는 리턴되지 않음'
     properties:
       id:
         type: integer
         format: int64
-      partner_id:
-        type: integer
-        format: int64
-        description: 이 공연의 사장님 아이디
       title:
         type: string
         example: 댕댕이 페스티벌
@@ -940,30 +952,24 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Artist'
-      start_at:
-        type: number
+      startAt:
+        type: string
         description: 시작시간
-      end_at:
-        type: number
+      endAt:
+        type: string
         description: 종료시간
       image:
         type: string
         description: 카드 메인 이미지 주소
       vacancies:
         type: number
-        description: 'capacity - # of reservations'
+        description: 남은 좌석 수
       place:
         type: string
         example: 판교 스타트업캠퍼스
-      music_id:
+      videoId:
         type: string
-        description: 음악 주소나 아이디... 아직 모름
-      video_id:
-        type: string
-        description: 영상 주소나 아이디... 아직 모름
-      article:
-        type: string
-        description: 웹 뷰로 보여줄 추가 정보가 있을 경우 웹 주소
+        description: 동영상 ID
   Reservation:
     type: object
     properties:
@@ -972,26 +978,23 @@ definitions:
         format: int64
       user:
         type: object
+        description: 파트너 페이지에서만 오는 데이터
         properties:
           email:
             type: string
           nickname:
             type: string
-      ticket_id:
+      ticketId:
         type: integer
         format: int64
-      status:
+      createdAt:
         type: string
-        example: valid
-        description: 'valid, cancelled, noshow 중 하나'
-      created_at:
+      checkedAt:
         type: string
-      checked_at:
+        description: '체크인한 시간, 체크인하지 않았으면 null'
+      cancelledAt:
         type: string
-        description: '체크인한 시간 (js Date type), null if not checked in'
-      cancelled_at:
-        type: string
-        description: '취소한 시간, null if not cancelled'
+        description: '파트너 페이지에서만 옴, 유저의 경우 취소한 예약은 오지 않습니다.'
   PaymentParams:
     type: object
     properties:

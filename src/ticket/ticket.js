@@ -21,32 +21,57 @@ const Ticket = sequelize.define('ticket', {
 const Artist = require('./artist')
 Ticket.hasMany(Artist, { foreignKey: { name: 'ticket_id', allowNull: false } })
 
-Ticket.withArtists = (tickets, showCode) => new Promise((resolve, reject) =>
-  Promise.all(
-    _.map(tickets, (t) => t.getArtists())
-  ).then((artistsArray) => resolve(
-    _.zipWith(
-      tickets, artistsArray,
-      (t, aArr) => {
-        let ticket = t.dataValues
-        if (!showCode) ticket.checkin_code = undefined // Hide
-        let artists = _.map(aArr, (a) => a.dataValues)
-        ticket.artists = artists
-        return ticket
-      }
-    )
-  )).catch((err) => reject(err))
-)
+const oneWeekLater = () => {
+  let date = new Date()
+  date.setDate(date.getDate() + 7)
+  return date
+}
 
-Ticket.until = (until) => new Promise((resolve, reject) =>
+const Reservation = require('../reservation/reservation')
+Ticket.hasMany(Reservation, {
+  foreignKey: { name: 'ticket_id', allowNull: false },
+})
+Reservation.belongsTo(Ticket, {
+  foreignKey: { name: 'ticket_id', allowNull: false },
+})
+
+Ticket.getList = () => new Promise((resolve, reject) => {
+  // 시작일 기준 지금으로부터 일주일 후까지의 공연 검색
+  const until = oneWeekLater()
+
   Ticket.findAll({
     where: {
       start_at: { [S.Op.gt]: new Date(), [S.Op.lt]: until },
     },
-  }).then((tickets) =>
-    Ticket.withArtists(tickets)
-    .then((tickets) => resolve(tickets))
-  ).catch((err) => reject(err))
-)
+    attributes: [
+      'id',
+      'title',
+      ['start_at', 'startAt'],
+      ['end_at', 'endAt'],
+      'image',
+      'place',
+      ['video_id', 'videoId'],
+      'capacity',
+    ],
+    include: [{ model: Artist }],
+  }).then((tickets) => {
+    const reserved = _.map(tickets, (ticket) =>
+      Reservation.count({ where: { ticket_id: ticket.id } })
+    )
+    Promise.all(reserved).then((countArray) => {
+      const result = _.map(tickets, (ticket, index) => {
+        let values = _.omit(ticket.dataValues, 'capacity')
+        values.vacancies = ticket.capacity - countArray[index]
+        return values
+      })
+      resolve(result)
+    }).catch((err) => {
+      console.error(err)
+    })
+  }).catch((err) => {
+    console.error(err)
+    reject(err)
+  })
+})
 
 module.exports = Ticket

@@ -215,8 +215,8 @@ functions:
           path: subscription
           method: patch
           cors: true
-  subscriptionDelete:
-    handler: handler.subscriptionDelete
+  subscriptionCancel:
+    handler: handler.subscriptionCancel
     events:
       - http:
           path: subscription

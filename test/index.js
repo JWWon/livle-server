@@ -374,7 +374,7 @@ describe('Subscription', function() {
       }
     }
 
-    test( handler.subscriptionDelete,
+    test( handler.subscriptionCancel,
       { },
       callback
     )
@@ -464,7 +464,7 @@ describe('Subscription renew', function() {
       }
     }
 
-    test( handler.subscriptionDelete,
+    test( handler.subscriptionCancel,
       { },
       callback
     )

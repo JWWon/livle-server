@@ -1,38 +1,25 @@
 @@header@@
-<div class="content">
-  <table width="100%" border="0" cellpadding="0" cellspacing="0"
-                                                 style="background: #082123; padding: 22px 25px; min-width: 500px;
-                                                 font-weight: 400; font-size: 22px">
-    <tr>
-      <td align="center" style="line-height: 1.73; letter-spacing: -1.2px;">
-        <p style="text-align: center;
-        color: white;
-        margin-top: 0px; margin-bottom: 66px">
-        {{nickname}}님의 결제가<br/>
-        안전하게 완료되었습니다.
-        </p>
-        <p style="border-radius: 8px;
-        background-color: #47efb2; margin-left: 60px; margin-right: 60px; padding: 27px 21px;">
-        <strong>결제금액</strong> : {{price}}원<br/>
-        <strong>결제 수단</strong> : {{cardName}} xxxx-xxxx-xxxx-{{lastFourDigits}}<br/>
-        <strong>결제일시</strong> : {{paidAt}}<br/>
-        <strong>다음 자동 결제일</strong> : {{nextPaymentDue}}
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td align="center">
-        구글 플레이 앱스토어
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="font-size: 18px; color: white">
-        <p style="margin: 74px 0">
-        자, 축제를 시작하세요,
-        당신의 삶은 라이브 그 자체입니다.
-        LIFE IS LIVE
-        </p>
-      </td>
-    </tr>
-  </table>
-  @@footer@@
+<table width="100%" border="0" cellpadding="0" cellspacing="0"
+                                               style="background: #082123; padding: 40px 25px 0 25px; min-width: 500px;
+                                               font-weight: 400; font-size: 22px">
+  <tr>
+    <td align="center" style="line-height: 1.73; letter-spacing: -1.2px; padding-bottom: 65px">
+      <p style="text-align: center;
+      color: white;
+      margin-top: 0px; margin-bottom: 66px">
+      {{nickname}}님의 결제가<br/>
+      안전하게 완료되었습니다.
+      </p>
+      <p style="border-radius: 8px;
+      background-color: #47efb2; width: 386px; padding: 27px 21px;">
+      <strong>결제금액</strong> : {{price}}원<br/>
+      <strong>결제 수단</strong> : {{cardName}} xxxx-xxxx-xxxx-{{lastFourDigits}}<br/>
+      <strong>결제일시</strong> : {{paidAt}}<br/>
+      <strong>다음 자동 결제일</strong> : {{nextPaymentDue}}
+      </p>
+    </td>
+  </tr>
+  @@stores@@
+  @@signature@@
+</table>
+@@footer@@

@@ -5,6 +5,7 @@ const Op = require('sequelize').Op
 const Subscription = require('../src/subscription')
 const Reservation = require('../src/reservation/reservation')
 const Billing = require('../src/billing')
+const sendEmail = require('../src/send-email')
 
 const startOfToday = () => {
   let date = new Date()
@@ -25,6 +26,14 @@ const log = (subs) => {
   (${curr.id} 결제된 구독 / ${next.id} 다음구독)`)
 }
 
+const sendFailureEmail = (subscription) => new Promise((resolve, reject) =>
+  subscription.getUser().then((user) =>
+    sendEmail(user.email, '라이블 구독 갱신 실패', 'payment_failure', { })
+    .then(() => resolve(user))
+    .catch((err) => reject(err))
+  )
+)
+
 const renew = (subscription) => new Promise((resolve, reject) => {
   subscription.getNext().then((next) => {
     if (!next) {
@@ -42,8 +51,8 @@ const renew = (subscription) => new Promise((resolve, reject) => {
         if (subscription.from > yesterday()) {
           console.error(`User ${subscription.user_id} : 재구독 실패 (첫 번째)`)
           // TODO push notification
-          // TODO send failure mail
-          reject(err)
+          sendFailureEmail(subscription).then(() => reject(err))
+            .catch((err) => reject(err))
         } else {
           console.error(`User ${subscription.user_id} : 재구독 실패`)
           Reservation.destroy({
@@ -53,8 +62,8 @@ const renew = (subscription) => new Promise((resolve, reject) => {
               console.error(`User ${subscription.user_id} : 재구독 두번째 실패로 예약 취소`)
             }
             // TODO push notification
-            // TODO send failure mail
-            reject(err)
+            sendFailureEmail(subscription).then(() => reject(err))
+              .catch((err) => reject(err))
           }).catch((err) => reject(err))
         }
       })

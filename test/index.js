@@ -1,6 +1,5 @@
 'use strict'
 
-const User = require('../src/user/user')
 const expect = require('chai').expect
 const handler = require('../handler')
 require('dotenv').config() // .env 파일에서 환경변수 읽어오기
@@ -432,47 +431,6 @@ describe('Subscription', function() {
       { }, callback)
   })
 
-})
-
-
-/*
- *
- * 구독 테스트
- *
- */
-
-
-describe('Subscription renew', function() {
-  it('successful renewal', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    const startOfToday = () => {
-      let date = new Date()
-      date.setHours(0, 0, 0)
-      return date
-    }
-    const thirtyDaysFromNow = () => {
-      let date = new Date()
-      date.setDate(date.getDate() + 30)
-      date.setHours(23, 59, 59)
-      return date
-    }
-    User.findOne({ where: { email: userEmail } })
-      .then((user) => user.getActiveSubscriptions()) // TODO change
-      .then(([curr, next]) => next.update({
-        from: startOfToday(),
-        to: thirtyDaysFromNow(),
-      })).then(() => {
-        test( handler.subscriptionRenew,
-          {},
-          callback
-        )
-      })
-  })
-
   it('successful cancellation of a subscription', function(done) {
     const callback = (error, result) => {
       const body = JSON.parse(result.body)
@@ -561,3 +519,5 @@ describe('User deletion', function() {
 })
 
 require('./web')()
+
+//require('./schedule')()

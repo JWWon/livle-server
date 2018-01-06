@@ -136,7 +136,7 @@ module.exports = () => {
     it('successfully get ticket details', function(done) {
       const callback = (error, result) => {
         if (result.statusCode === 200) {
-          //const body = JSON.parse(result.body)
+          // const body = JSON.parse(result.body)
           done()
         } else {
           done(new Error(result.body))

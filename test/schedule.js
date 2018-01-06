@@ -45,7 +45,6 @@ module.exports = () => {
           )
         })
     })
-
   })
 
   describe('Noshow check', function() {

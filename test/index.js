@@ -39,7 +39,10 @@ describe('User', function() {
     }
 
     test(handler.userRouter,
-      { httpMethod: 'POST', body: { email: userEmail, password: userPass, nickname: 'hi' } },
+      {
+        httpMethod: 'POST',
+        body: { email: userEmail, password: userPass, nickname: 'hi' },
+      },
       callback)
   })
 
@@ -195,20 +198,19 @@ describe('Ticket', function() {
 })
 
 describe('Subscription', function() {
-
   it('successful free trial', function(done) {
     const callback = (error, result) => {
       const user = JSON.parse(result.body)
       if (result.statusCode === 200) {
         console.log(user)
         if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error("Failed to return subscription data"))
+          return done(new Error('Failed to return subscription data'))
         }
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
         if (daysBetween < 30) {
-          return done(new Error("Subscription shorter than 30 days"))
+          return done(new Error('Subscription shorter than 30 days'))
         }
         done()
       } else {
@@ -365,7 +367,7 @@ describe('Subscription', function() {
           expiry: expiry,
           birth: birth,
           password: password,
-        }
+        },
       }, callback )
   })
 
@@ -386,26 +388,27 @@ describe('Subscription', function() {
     )
   })
 
-  it('subscription failure within a valid period after a cancellation', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 405) {
-        done()
-      } else {
-        done(new Error(result.body))
+  it('subscription failure within a valid period after a cancellation',
+    function(done) {
+      const callback = (error, result) => {
+        if (result.statusCode === 405) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
       }
-    }
 
-    test( handler.subscriptionCreate,
-      { body:
-        {
-          cardNumber: cardNumber,
-          expiry: expiry,
-          birth: birth,
-          password: password,
-        },
-      }, callback
-    )
-  }).timeout(5000)
+      test( handler.subscriptionCreate,
+        { body:
+          {
+            cardNumber: cardNumber,
+            expiry: expiry,
+            birth: birth,
+            password: password,
+          },
+        }, callback
+      )
+    }).timeout(5000)
 
   it('successful restoration of subscription', function(done) {
     const callback = (error, result) => {
@@ -413,13 +416,13 @@ describe('Subscription', function() {
       if (result.statusCode === 200) {
         console.log(user)
         if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error("Failed to return subscription data"))
+          return done(new Error('Failed to return subscription data'))
         }
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
         if (daysBetween < 30) {
-          return done(new Error("Subscription shorter than 30 days"))
+          return done(new Error('Subscription shorter than 30 days'))
         }
         done()
       } else {
@@ -473,13 +476,13 @@ describe('Paid subscription', function() {
       if (result.statusCode === 200) {
         console.log(user)
         if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error("Failed to return subscription data"))
+          return done(new Error('Failed to return subscription data'))
         }
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
         if (daysBetween < 30) {
-          return done(new Error("Subscription shorter than 30 days"))
+          return done(new Error('Subscription shorter than 30 days'))
         }
         done()
       } else {
@@ -498,7 +501,6 @@ describe('Paid subscription', function() {
       }, callback
     )
   }).timeout(5000)
-
 })
 
 describe('User deletion', function() {
@@ -520,4 +522,4 @@ describe('User deletion', function() {
 
 require('./web')()
 
-//require('./schedule')()
+// require('./schedule')()

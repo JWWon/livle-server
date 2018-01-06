@@ -1031,3 +1031,6 @@ definitions:
         type: string
         description: 카드 비밀번호 앞 두자리
         example: '12'
+      skipTrial:
+        type: boolean
+        description: true일 경우 무료체험 가능 여부를 검사하지 않고 바로 결제합니다.

@@ -18,7 +18,8 @@ const thirtyDaysFrom = (from) => {
   return date
 }
 
-const auth = (user, cardNumber) => {
+const auth = (user, paymentInfo) => {
+  const cardNumber = paymentInfo.cardNumber
   const createInitial = (trial) => {
     const now = new Date()
     return new Promise((resolve, reject) =>
@@ -65,7 +66,7 @@ const auth = (user, cardNumber) => {
     )
   }
 
-  if (!user.free_trial_id) {
+  if (!paymentInfo.skipTrial && !user.free_trial_id) {
     // FreeTrial 로그를 남김
     return FreeTrial.log(cardNumber).then((ft) =>
       user.update({ free_trial_id: ft.id })
@@ -87,14 +88,16 @@ module.exports = function(paymentInfo) {
           last_four_digits: paymentInfo.cardNumber.slice(-4),
         }).then((user) =>
           // 유저 모델에 카드 정보 업데이트 완료
-          auth(this, paymentInfo.cardNumber)
+          auth(this, paymentInfo)
           .then(() => resolve(user))
           .catch((err) =>
             // 결제 실패 (ex. 잔액 부족, 한도 초과...)
             Billing.delete(this.id).then(() =>
               this.update({ card_name: null, last_four_digits: null })
-            ).then(() => reject({ code: 402, err: '결제에 실패했습니다.' })
-            ).catch((err) => {
+            ).then(() => {
+              console.log(err)
+              reject({ code: 402, err: '결제에 실패했습니다.' })
+            }).catch((err) => {
               console.error(err)
               reject({ code: 402, err: '결제에 실패했습니다.' })
             })

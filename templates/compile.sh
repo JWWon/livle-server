@@ -12,7 +12,7 @@ DEST="$PWD/dist"
 
 shopt -s nullglob
 shopt -s extglob
-for f in !(header|footer).html
+for f in !(header|footer|signature|stores).html
 do
   sed "s/@@header@@/$HEADER/g; s/@@footer@@/$FOOTER/g; s/@@signature@@/$SIGNATURE/g; s/@@stores@@/$STORES/g" $f > "$DEST/$f"
 done

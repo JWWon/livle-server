@@ -18,8 +18,11 @@ module.exports = () => {
   describe('Subscription renew', function() {
     it('successful renewal', function(done) {
       const callback = (error, result) => {
-        expect(result.statusCode).to.equal(200)
-        done()
+        if (result.statusCode === 200) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
       }
 
       const startOfToday = () => {
@@ -33,23 +36,19 @@ module.exports = () => {
         date.setHours(23, 59, 59)
         return date
       }
-      User.findOne({ where: { email: userEmail } })
-        .then((user) => user.getActiveSubscriptions()) // TODO change
-        .then(([curr, next]) => next.update({
-          from: startOfToday(),
-          to: thirtyDaysFromNow(),
-        })).then(() => {
-          test( handler.subscriptionRenew,
-            {},
-            callback
-          )
-        })
-    })
+      handler.subscriptionRenew({}, {}, callback)
+    }).timeout(10000)
   })
 
   describe('Noshow check', function() {
+    it('successful checked', function(done) {
+      done(new Error('Not implemented'))
+    })
   })
 
   describe('Destroy user data', function() {
+    it('successful destroyal', function(done) {
+      done(new Error('Not implemented'))
+    })
   })
 }

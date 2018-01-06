@@ -7,6 +7,15 @@ const Ticket = require('../../src/ticket/ticket')
 const Reservation = require('../../src/reservation/reservation')
 const FreeTrial = require('../../src/free_trial')
 
+require('dotenv').config() // .env 파일에서 환경변수 읽어오기
+const paymentInfo = {
+  cardNumber: process.env.CARD_NUMBER,
+  expiry: process.env.EXPIRY,
+  birth: process.env.BIRTH,
+  password: process.env.PASSWORD,
+  skipTrial: true,
+}
+
 const startOfDay = (d) => {
   let date = new Date(d)
   date.setHours(0, 0, 0)
@@ -32,13 +41,43 @@ const users = _.times(100, () => {
 
 const now = new Date()
 
+const createUserWithValidSubscription = (email) =>
+  User.signUp(email, 'fakepassword')
+    .then((user) => User.findOne({ where: { email: email } }))
+    .then((user) => user.subscribe(paymentInfo))
+    .then((user) => User.findOne({ where: { email: email } }))
+
+const fakeExpire = (subscription) => subscription.update({
+  from: startOfDay(nDaysFrom(-31, now)),
+  to: nDaysFrom(-1, now),
+}).then((sub) => sub.getNext()).then((nextSub) => nextSub.update({
+  from: startOfDay(now),
+  to: nDaysFrom(30, now),
+}))
+
 const subscriptionTesters = () => {
   const freeTrialDone = FreeTrial.create({ card_hash: 'test' })
     .then((ft) => User.signUp('freeTrialDone', 'fakepassword')
       .then((user) => User.findOne({ where: { email: 'freeTrialDone' } }))
       .then((user) => user.update({ free_trial_id: ft.id }))
     )
-  return freeTrialDone
+  const subscriptionExpired =
+    createUserWithValidSubscription('subscriptionExpired')
+    .then((user) => user.getSubscription())
+    .then((sub) => fakeExpire(sub))
+
+  const subscriptionCancelledAndExpired =
+    createUserWithValidSubscription('cancelledAndExpired')
+    .then((user) => user.getSubscription()
+      .then((sub) => fakeExpire(sub))
+      .then((sub) => user.unsubscribe())
+    )
+
+  return Promise.all([
+    freeTrialDone,
+    subscriptionExpired,
+    subscriptionCancelledAndExpired,
+  ])
 }
 
 module.exports = () => new Promise((resolve, reject) =>

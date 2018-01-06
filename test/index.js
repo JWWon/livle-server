@@ -522,4 +522,4 @@ describe('User deletion', function() {
 
 require('./web')()
 
-// require('./schedule')()
+require('./schedule')()

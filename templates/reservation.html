@@ -1,87 +1,42 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    <table width="100%" border="0" cellpadding="0" cellspacing="0"
-      style="font-family: 'AppleSDGothicNeo', sans-serif">
-      <tr>
-        <td class="container" style="padding: 0">
-
-          <div class="content">
-            <table width="100%" border="0" cellpadding="0" cellspacing="0"
-              style="background: #082123; padding: 22px 25px; min-width: 500px;
-              font-weight: 400; font-size: 22px">
-              <tr>
-                <td>
-                  <img src="https://www.livle.kr/img/logo-white.png"
-                  style="margin-bottom: 63px" width="100px" height="20px"/>
-                </td>
-              </tr>
-              <tr>
-                <td align="center" style="line-height: 1.73; letter-spacing: -1.2px;">
-                  <p style="text-align: center;
-                  color: white;
-                   margin-top: 0px; margin-bottom: 66px">
-                  {{nickname}}님의 공연이<br/>
-                  성공적으로 예약되었습니다.
-                  </p>
-                  <p style="border-radius: 8px;
-  background-color: #47efb2; margin-left: 60px; margin-right: 60px; padding: 27px 21px;">
-                  <strong>공연명</strong> : {{title}}<br/>
-                  <strong>장소</strong> : {{place}}<br/>
-                  <strong>시간</strong> : {{startAt}}
-                  </p>
-                </td>
-              </tr>
-              <tr>
-                <td align="center">
-                  <ul style="text-align: left; color: white; margin-left: 30px; margin-right: 30px">
-                    <li>티켓 취소는 공연 시작 시간 기준 24시간 이전까지 가능합니다.</li>
-                    <li>현장에서 애플리케이션 내 티켓 리스트를 검수원에세 보여주시면
-                      확인 후 바로 입장 가능합니다.</li>
-                    <li>예약 및 입장에 문제가 있을 때는 이메일 contacts@livle.kr 혹은
-                      카카오톡 플러스친구 @Livle로 문의주시기 바랍니다.</li>
-                  </ul>
-                </td>
-              </tr>
-              <tr>
-                <td align="center" style="font-size: 18px; color: white">
-                  <p style="margin: 74px 0">
-                  자, 축제를 시작하세요,
-                  당신의 삶은 라이브 그 자체입니다.
-                  LIFE IS LIVE
-                  </p>
-                </td>
-              </tr>
-            </table>
-          </div>
-
-          <div class="footer">
-            <table width="100%" border="0" cellpadding="0" cellspacing="0"
-              style="background: black; min-width: 500px">
-              <tr>
-                <td align="center" style="
-                font-size: 22px;
-                font-weight: 400;
-                font-style: normal;
-                font-stretch: normal;
-                line-height: normal;
-                letter-spacing: -1.2px;
-                color: white; padding: 57px 40px 66px 40px;">
-                  라이블 ㅣ www.livle.co.kr ㅣ contacts@livle.kr<br/>
-                  경기도 성남시 분당구 판교로289번길 20,<br/>
-                  스타트업캠퍼스 8층<br/>
-                  Copyright @ Livle All Rights Reserved<br/>
-                  고객센터 : 070-8163-4068<br/>
-                </td>
-              </tr>
-            </table>
-          </div>
-
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
+@@header@@
+<table width="100%" border="0" cellpadding="0" cellspacing="0"
+                                               style="background: #082123; padding: 22px 25px; min-width: 500px;
+                                               font-weight: 400; font-size: 22px">
+  <tr>
+    <td align="center" style="line-height: 1.73; letter-spacing: -1.2px;">
+      <p style="text-align: center;
+      color: white;
+      margin-top: 0px; margin-bottom: 66px">
+      {{nickname}}님의 공연이<br/>
+      성공적으로 예약되었습니다.
+      </p>
+      <p style="border-radius: 8px;
+      background-color: #47efb2; margin-left: 60px; margin-right: 60px; padding: 27px 21px;">
+      <strong>공연명</strong> : {{title}}<br/>
+      <strong>장소</strong> : {{place}}<br/>
+      <strong>시간</strong> : {{startAt}}
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <ul style="text-align: left; color: white; margin-left: 30px; margin-right: 30px">
+        <li>티켓 취소는 공연 시작 시간 기준 24시간 이전까지 가능합니다.</li>
+        <li>현장에서 애플리케이션 내 티켓 리스트를 검수원에세 보여주시면
+          확인 후 바로 입장 가능합니다.</li>
+        <li>예약 및 입장에 문제가 있을 때는 이메일 contacts@livle.kr 혹은
+          카카오톡 플러스친구 @Livle로 문의주시기 바랍니다.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" style="font-size: 18px; color: white">
+      <p style="margin: 74px 0">
+      자, 축제를 시작하세요,
+      당신의 삶은 라이브 그 자체입니다.
+      LIFE IS LIVE
+      </p>
+    </td>
+  </tr>
+</table>
+@@footer@@

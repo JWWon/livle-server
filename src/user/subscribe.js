@@ -3,6 +3,7 @@
 const Subscription = require('../subscription')
 const FreeTrial = require('../free_trial')
 const Billing = require('../billing')
+const sendEmail = require('../send-email')
 
 const startOfDay = (d) => {
   let date = new Date(d)
@@ -45,7 +46,18 @@ const auth = (user, cardNumber) => {
       })
       .then(([curr, next]) => {
         if (trial) {
-          // TODO send mail
+          const formatDate = (date) => {
+            const month = date.getMonth() + 1
+            const d = date.getDate()
+            return `${month}월 ${d}일`
+          }
+          sendEmail(user.email, '라이블 멤버십 가입을 환영합니다.',
+            'free_trial', { toDate: formatDate(curr.to) })
+            .then(() => resolve(user))
+            .catch((err) => {
+              console.error(err)
+              resolve(user)
+            })
         }
         resolve(user)
       })
@@ -69,23 +81,29 @@ module.exports = function(paymentInfo) {
     this.getSubscription().then((currSub) => {
       if (currSub) reject({ code: 409, err: '이미 구독 중입니다.' })
       Billing.create(this.id, paymentInfo).then((payRes) =>
-        // 빌링키 발급 성공
-        auth(this, paymentInfo.cardNumber).catch((err) =>
-          Billing.delete(this.id).then(() =>
-            reject({ code: 402, err: '결제에 실패했습니다.' })
+        // 빌링키 발급 성공 (카드 인증 성공)
+        this.update({
+          card_name: payRes.card_name,
+          last_four_digits: paymentInfo.cardNumber.slice(-4),
+        }).then((user) =>
+          // 유저 모델에 카드 정보 업데이트 완료
+          auth(this, paymentInfo.cardNumber)
+          .then(() => resolve(user))
+          .catch((err) =>
+            // 결제 실패 (ex. 잔액 부족, 한도 초과...)
+            Billing.delete(this.id).then(() =>
+              this.update({ card_name: null, last_four_digits: null })
+            ).then(() => reject({ code: 402, err: '결제에 실패했습니다.' })
+            ).catch((err) => {
+              console.error(err)
+              reject({ code: 402, err: '결제에 실패했습니다.' })
+            })
           )
-        ).then(() =>
-          // Successfully logged (free trial) or paid
-          this.update({
-            card_name: payRes.card_name,
-            last_four_digits: paymentInfo.cardNumber.slice(-4),
-          }).then((user) => resolve(user))
-          .catch((err) => {
-            console.error(err)
-            reject(err)
-          })
         )
-      ).catch((err) => reject({ code: 403, err: err }))
+      ).catch((err) => {
+        // 빌링키 발급 실패 (카드 인증 실패 ex. 비밀번호 오류)
+        reject({ code: 403, err: err })
+      })
     })
   )
 }

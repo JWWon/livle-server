@@ -19,11 +19,13 @@ module.exports = (params, respond) => {
           new Promise((resolve, reject) => {
             const formatDate = (date) => {
               const hour = date.getHours()
-              const minute = date.getMinutes()
               const h = hour > 12 ? hour - 12 : hour
               const hh = h < 10 ? '0' + h : h
 
-              return `${hour > 11 ? 'PM' : 'AM'} ${hh}:${minute}`
+              const m = date.getMinutes()
+              const mm = m < 10 ? '0' + m : m
+
+              return `${hour > 11 ? 'PM' : 'AM'} ${hh}:${mm}`
             }
 
             return sendEmail(user.email, '라이블 공연 예약', 'reservation',

@@ -2,6 +2,7 @@
 
 const Partner = require('./partner')
 const Artist = require('../ticket/artist')
+const Ticket = require('../ticket/ticket')
 
 module.exports = (params, respond) => {
   if (!params.auth) return respond(401, '로그인되지 않았습니다.')
@@ -14,6 +15,7 @@ module.exports = (params, respond) => {
         return respond(403, '권한이 없습니다.')
       }
       partner.getTickets({ include: [{ model: Artist }] })
+        .then((tickets) => Ticket.withReservedCount(tickets))
         .then((tickets) => respond(200, tickets))
         .catch((err) => {
           console.error(err)

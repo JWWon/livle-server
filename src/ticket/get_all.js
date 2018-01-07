@@ -13,6 +13,7 @@ module.exports = (params, respond) => {
         options.where = { partner_id: partner.id }
       }
       return Ticket.findAll(options)
+        .then((tickets) => Ticket.withReservedCount(tickets))
         .then((tickets) => respond(200, tickets))
         .catch((err) => respond(500, err))
     }).catch((err) => {

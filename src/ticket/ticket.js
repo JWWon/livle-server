@@ -74,4 +74,17 @@ Ticket.getList = () => new Promise((resolve, reject) => {
   })
 })
 
+Ticket.withReservedCount = (tickets) => {
+  const reservedCounts = _.map(tickets, (ticket) =>
+    Reservation.count({ where: { ticket_id: ticket.id } })
+  )
+  return Promise.all(reservedCounts).then((countArray) =>
+    _.map(tickets, (ticket, index) => {
+      let t = ticket.dataValues
+      t.reserved = countArray[index]
+      return t
+    })
+  )
+}
+
 module.exports = Ticket

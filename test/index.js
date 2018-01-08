@@ -10,6 +10,8 @@ const cardNumber = process.env.CARD_NUMBER
 const expiry = process.env.EXPIRY
 const birth = process.env.BIRTH
 const password = process.env.PASSWORD
+const userEmail = process.env.TESTER_EMAIL
+const userPass = 'test'
 
 let authToken = ''
 
@@ -23,8 +25,6 @@ const test = (func, params, callback) => {
   }, {}, callback)
 }
 
-const userEmail = 'test@test.com'
-const userPass = 'test'
 
 describe('User', function() {
   it('successful creation', function(done) {
@@ -44,7 +44,25 @@ describe('User', function() {
         body: { email: userEmail, password: userPass, nickname: 'hi' },
       },
       callback)
-  })
+  }).timeout(5000)
+
+  it('creation failure with not existing email', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 405) {
+        done()
+      } else {
+        done(new Error(body))
+      }
+    }
+
+    test(handler.userRouter,
+      {
+        httpMethod: 'POST',
+        body: { email: 'nonexsisting@ne.com', password: userPass, nickname: 'hi' },
+      },
+      callback)
+  }).timeout(5000)
 
   it('creation failure when no password', function(done) {
     const callback = (error, result) => {

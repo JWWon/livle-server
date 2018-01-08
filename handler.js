@@ -65,3 +65,4 @@ module.exports.subscriptionRestore = lambda(require('./src/subscription/restore'
 
 module.exports.subscriptionRenew = lambda(require('./schedule/subscription_renewer'))
 module.exports.noshowChecker = lambda(require('./schedule/noshow_checker'))
+module.exports.userDestroyer = lambda(require('./schedule/user_destroyer'))

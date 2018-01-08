@@ -55,7 +55,14 @@ module.exports = () => {
 
   describe('Destroy user data', function() {
     it('successful destroyal', function(done) {
-      done(new Error('Not implemented'))
+      const callback = (error, result) => {
+        if (result.statusCode === 200) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      }
+      handler.userDestroyer({}, {}, callback)
     })
   })
 }

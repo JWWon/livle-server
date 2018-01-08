@@ -20,6 +20,9 @@ const clear = (user) =>
     password: flag,
     password_reset_token: null,
     facebook_token: null,
+  }).then((user) => {
+    console.log(`Cleared user ${user.id}`)
+    return user
   })
 
 module.exports = (params, respond) => {
@@ -31,8 +34,8 @@ module.exports = (params, respond) => {
     },
     paranoid: false,
   }).then((users) => Promise.all(_.map(users, clear)))
-    .then(() => {
-      console.log('User destroyer successfully completed')
+    .then((users) => {
+      console.log(`User destroyer completed, clearing ${users.length} users`)
       respond(200)
     }).catch((err) => {
       console.error('Error destroying users')

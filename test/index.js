@@ -522,9 +522,9 @@ describe('Paid subscription', function() {
 })
 
 describe('User deletion', function() {
-  it('successful deletion', function(done) {
+  it('deletion failure while subscription not expired yet', function(done) {
     const callback = (error, result) => {
-      if (result.statusCode === 200) {
+      if (result.statusCode === 405) {
         done()
       } else {
         done(new Error(result.body))

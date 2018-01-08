@@ -235,6 +235,14 @@ functions:
     handler: handler.subscriptionRenew
     events:
       - schedule: cron(0 12 * * ? *) # Everyday 12pm UTC
+  noshowChecker:
+    handler: handler.noshowChecker
+    events:
+      - schedule: rate(1 hour) # Every hour
+  userDestroyer:
+    handler: handler.userDestroyer
+    events:
+      - schedule: cron(0 0 * * ? *) # Everyday 12am UTC
 
 resources:
   Resources:

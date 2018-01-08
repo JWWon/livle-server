@@ -13,7 +13,7 @@ const Ticket = sequelize.define('ticket', {
   place: { type: S.STRING, allowNull: false },
   video_id: S.STRING,
   // eslint-disable-next-line new-cap
-  checkin_code: S.STRING(4),
+  checkin_code: S.STRING(4), // 종료되면 null이 됩니다.
 },
   { timestamps: false }
 )

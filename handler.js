@@ -62,4 +62,6 @@ module.exports.subscriptionCreate = lambda(require('./src/subscription/create'))
 module.exports.subscriptionUpdate = lambda(require('./src/subscription/update'))
 module.exports.subscriptionCancel = lambda(require('./src/subscription/cancel'))
 module.exports.subscriptionRestore = lambda(require('./src/subscription/restore'))
+
 module.exports.subscriptionRenew = lambda(require('./schedule/subscription_renewer'))
+module.exports.noshowChecker = lambda(require('./schedule/noshow_checker'))

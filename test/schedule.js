@@ -42,7 +42,14 @@ module.exports = () => {
 
   describe('Noshow check', function() {
     it('successful checked', function(done) {
-      done(new Error('Not implemented'))
+      const callback = (error, result) => {
+        if (result.statusCode === 200) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      }
+      handler.noshowChecker({}, {}, callback)
     })
   })
 

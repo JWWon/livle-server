@@ -49,7 +49,7 @@ describe('User', function() {
   it('creation failure with not existing email', function(done) {
     const callback = (error, result) => {
       const body = JSON.parse(result.body)
-      if (result.statusCode === 405) {
+      if (result.statusCode === 404) {
         done()
       } else {
         done(new Error(body))
@@ -83,10 +83,10 @@ describe('User', function() {
     }
 
     test( handler.userCreate,
-      { body: { email: 'test@test.com', password: 'testtest' } },
+      { body: { email: userEmail, password: userPass } },
       callback
     )
-  })
+  }).timeout(5000)
 
   it('creation failure on invalid email', function(done) {
     const callback = (error, result) => {

@@ -24,7 +24,7 @@ module.exports = (params, respond) => {
         .then((user) => respond(200, user))
         .catch((err) => respond(403, '이미 가입되어 있는 이메일 주소입니다.'))
     } else {
-      respond(405, '존재하지 않는 이메일 주소입니다.')
+      respond(404, '존재하지 않는 이메일 주소입니다.')
     }
   })
 }

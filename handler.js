@@ -27,9 +27,11 @@ const lambda = (func) => {
 }
 
 module.exports.userRouter = lambda(require('./src/user/router'))
+// 이 3개는 테스트 모듈 때문에 존재 -> 삭제해야 함
 module.exports.userCreate = lambda(require('./src/user/create'))
 module.exports.userGet = lambda(require('./src/user/get'))
 module.exports.userDestroy = lambda(require('./src/user/destroy'))
+//
 module.exports.userSignin = lambda(require('./src/user/signin'))
 module.exports.userFacebook = lambda(require('./src/user/facebook'))
 module.exports.userRequestPassword = lambda(require('./src/user/request_password'))
@@ -58,9 +60,12 @@ module.exports.reservationCancel = lambda(require('./src/reservation/cancel'))
 
 module.exports.fileUpload = lambda(require('./src/file/upload'))
 
+module.exports.subscriptionRouter = lambda(require('./src/subscription/router'))
+// 이 3개는 테스트 모듈 때문에 존재 -> 삭제해야 함
 module.exports.subscriptionCreate = lambda(require('./src/subscription/create'))
 module.exports.subscriptionUpdate = lambda(require('./src/subscription/update'))
 module.exports.subscriptionCancel = lambda(require('./src/subscription/cancel'))
+//
 module.exports.subscriptionRestore = lambda(require('./src/subscription/restore'))
 
 module.exports.subscriptionRenew = lambda(require('./schedule/subscription_renewer'))

@@ -195,23 +195,17 @@ functions:
           path: file
           method: get
           cors: true
-  subscriptionCreate:
-    handler: handler.subscriptionCreate
+  subscriptionRouter:
+    handler: handler.subscriptionRouter
     events:
       - http:
           path: subscription
           method: post
           cors: true
-  subscriptionUpdate:
-    handler: handler.subscriptionUpdate
-    events:
       - http:
           path: subscription
           method: patch
           cors: true
-  subscriptionCancel:
-    handler: handler.subscriptionCancel
-    events:
       - http:
           path: subscription
           method: delete
@@ -223,10 +217,6 @@ functions:
           path: subscription/restore
           method: post
           cors: true
-  subscriptionRenew:
-    handler: handler.subscriptionRenew
-    events:
-      - schedule: cron(0 12 * * ? *) # Everyday 12pm UTC
   reservationGet:
     handler: handler.reservationGet
     events:
@@ -241,6 +231,10 @@ functions:
           path: reservation/{reservationId}
           method: delete
           cors: true
+  subscriptionRenew:
+    handler: handler.subscriptionRenew
+    events:
+      - schedule: cron(0 12 * * ? *) # Everyday 12pm UTC
 
 resources:
   Resources:

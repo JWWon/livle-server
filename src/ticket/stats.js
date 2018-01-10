@@ -33,7 +33,17 @@ module.exports = (params, respond) =>
           ticketWithStats.reservations = _.map(reservations,
             (r) => {
               let data = r.dataValues
-              data.user = r.subscription && r.subscription.user.dataValues
+              if (r.subscription) {
+                if (r.subscription.user) {
+                  data.user = r.subscription && r.subscription.user.dataValues
+                } else {
+                  console.error('유저 정보 미아')
+                  console.error(r)
+                }
+              } else {
+                console.error('구독 정보 미아')
+                console.error(r)
+              }
               data.subscription = undefined
               return data
             })

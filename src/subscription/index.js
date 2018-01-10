@@ -30,7 +30,7 @@ const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
   }
 
   return sendEmail(user.email, '라이블 결제 성공', 'payment_success',
-    { nickname: user.nickname,
+    { nickname: user.nickname || '라이블 유저',
       price: Billing.price,
       cardName: user.card_name,
       lastFourDigits: user.last_four_digits,

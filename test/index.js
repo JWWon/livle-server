@@ -1,6 +1,5 @@
 'use strict'
 
-const User = require('../src/user/user')
 const expect = require('chai').expect
 const handler = require('../handler')
 require('dotenv').config() // .env 파일에서 환경변수 읽어오기
@@ -11,6 +10,8 @@ const cardNumber = process.env.CARD_NUMBER
 const expiry = process.env.EXPIRY
 const birth = process.env.BIRTH
 const password = process.env.PASSWORD
+const userEmail = process.env.TESTER_EMAIL
+const userPass = 'test'
 
 let authToken = ''
 
@@ -24,8 +25,6 @@ const test = (func, params, callback) => {
   }, {}, callback)
 }
 
-const userEmail = 'test@test.com'
-const userPass = 'test'
 
 describe('User', function() {
   it('successful creation', function(done) {
@@ -40,9 +39,30 @@ describe('User', function() {
     }
 
     test(handler.userRouter,
-      { httpMethod: 'POST', body: { email: userEmail, password: userPass, nickname: 'hi' } },
+      {
+        httpMethod: 'POST',
+        body: { email: userEmail, password: userPass, nickname: 'hi' },
+      },
       callback)
-  })
+  }).timeout(5000)
+
+  it('creation failure with not existing email', function(done) {
+    const callback = (error, result) => {
+      const body = JSON.parse(result.body)
+      if (result.statusCode === 404) {
+        done()
+      } else {
+        done(new Error(body))
+      }
+    }
+
+    test(handler.userRouter,
+      {
+        httpMethod: 'POST',
+        body: { email: 'nonexsisting@ne.com', password: userPass, nickname: 'hi' },
+      },
+      callback)
+  }).timeout(5000)
 
   it('creation failure when no password', function(done) {
     const callback = (error, result) => {
@@ -63,10 +83,10 @@ describe('User', function() {
     }
 
     test( handler.userCreate,
-      { body: { email: 'test@test.com', password: 'testtest' } },
+      { body: { email: userEmail, password: userPass } },
       callback
     )
-  })
+  }).timeout(5000)
 
   it('creation failure on invalid email', function(done) {
     const callback = (error, result) => {
@@ -196,20 +216,19 @@ describe('Ticket', function() {
 })
 
 describe('Subscription', function() {
-
   it('successful free trial', function(done) {
     const callback = (error, result) => {
       const user = JSON.parse(result.body)
       if (result.statusCode === 200) {
         console.log(user)
         if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error("Failed to return subscription data"))
+          return done(new Error('Failed to return subscription data'))
         }
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
         if (daysBetween < 30) {
-          return done(new Error("Subscription shorter than 30 days"))
+          return done(new Error('Subscription shorter than 30 days'))
         }
         done()
       } else {
@@ -366,7 +385,7 @@ describe('Subscription', function() {
           expiry: expiry,
           birth: birth,
           password: password,
-        }
+        },
       }, callback )
   })
 
@@ -387,26 +406,27 @@ describe('Subscription', function() {
     )
   })
 
-  it('subscription failure within a valid period after a cancellation', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 405) {
-        done()
-      } else {
-        done(new Error(result.body))
+  it('subscription failure within a valid period after a cancellation',
+    function(done) {
+      const callback = (error, result) => {
+        if (result.statusCode === 405) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
       }
-    }
 
-    test( handler.subscriptionCreate,
-      { body:
-        {
-          cardNumber: cardNumber,
-          expiry: expiry,
-          birth: birth,
-          password: password,
-        },
-      }, callback
-    )
-  }).timeout(5000)
+      test( handler.subscriptionCreate,
+        { body:
+          {
+            cardNumber: cardNumber,
+            expiry: expiry,
+            birth: birth,
+            password: password,
+          },
+        }, callback
+      )
+    }).timeout(5000)
 
   it('successful restoration of subscription', function(done) {
     const callback = (error, result) => {
@@ -414,13 +434,13 @@ describe('Subscription', function() {
       if (result.statusCode === 200) {
         console.log(user)
         if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error("Failed to return subscription data"))
+          return done(new Error('Failed to return subscription data'))
         }
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
         if (daysBetween < 30) {
-          return done(new Error("Subscription shorter than 30 days"))
+          return done(new Error('Subscription shorter than 30 days'))
         }
         done()
       } else {
@@ -430,47 +450,6 @@ describe('Subscription', function() {
 
     test( handler.subscriptionRestore,
       { }, callback)
-  })
-
-})
-
-
-/*
- *
- * 구독 테스트
- *
- */
-
-
-describe('Subscription renew', function() {
-  it('successful renewal', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    const startOfToday = () => {
-      let date = new Date()
-      date.setHours(0, 0, 0)
-      return date
-    }
-    const thirtyDaysFromNow = () => {
-      let date = new Date()
-      date.setDate(date.getDate() + 30)
-      date.setHours(23, 59, 59)
-      return date
-    }
-    User.findOne({ where: { email: userEmail } })
-      .then((user) => user.getActiveSubscriptions()) // TODO change
-      .then(([curr, next]) => next.update({
-        from: startOfToday(),
-        to: thirtyDaysFromNow(),
-      })).then(() => {
-        test( handler.subscriptionRenew,
-          {},
-          callback
-        )
-      })
   })
 
   it('successful cancellation of a subscription', function(done) {
@@ -515,13 +494,13 @@ describe('Paid subscription', function() {
       if (result.statusCode === 200) {
         console.log(user)
         if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error("Failed to return subscription data"))
+          return done(new Error('Failed to return subscription data'))
         }
         const from = new Date(user.currentSubscription.from)
         const to = new Date(user.currentSubscription.to)
         const daysBetween = (to - from) / 1000 / 60 / 60 / 24
         if (daysBetween < 30) {
-          return done(new Error("Subscription shorter than 30 days"))
+          return done(new Error('Subscription shorter than 30 days'))
         }
         done()
       } else {
@@ -540,13 +519,12 @@ describe('Paid subscription', function() {
       }, callback
     )
   }).timeout(5000)
-
 })
 
 describe('User deletion', function() {
-  it('successful deletion', function(done) {
+  it('deletion failure while subscription not expired yet', function(done) {
     const callback = (error, result) => {
-      if (result.statusCode === 200) {
+      if (result.statusCode === 405) {
         done()
       } else {
         done(new Error(result.body))
@@ -560,233 +538,6 @@ describe('User deletion', function() {
   })
 })
 
-/*
- *
- * 웹 테스트
- *
- */
+require('./web')()
 
-describe('Web', () => null)
-
-describe('Partner', function() {
-  let partnerId
-
-  it('successful creation', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      partnerId = res.id
-      done()
-    }
-
-    test( handler.partnerCreate,
-      { body:
-        { username: 'test@test.com', company: 'test', password: 'test' },
-      },
-      callback )
-  })
-
-
-  it('successful signin', function(done) {
-    const callback = (error, result) => {
-      const res = JSON.parse(result.body)
-      authToken = res.token
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerSignin,
-      { query: { username: 'admin@livle.kr', password: 'livle' } },
-      callback
-    )
-  })
-
-  it('successful approval', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerApprove,
-      { path: { partnerId: partnerId } },
-      callback
-    )
-  })
-
-  it('successful deletion', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerDestroy,
-      { body: { username: 'test@test.com', password: 'test' } },
-      callback )
-  })
-
-  it('successfully get user from session', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerGet,
-      { }, callback)
-  })
-
-  it('successfully get users list', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.userAll,
-      { }, callback)
-  })
-
-  it('successfully get partners list', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerAll,
-      { }, callback)
-  })
-
-  it('successfully get one\'s own concerts list', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) {
-        const body = JSON.parse(result.body)
-        console.log(body)
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.partnerTickets,
-      { path: { partnerId: 1 } }, callback)
-    // Under a condition that the admin account's id is 1
-  })
-
-  it('successfully get concerts list', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) {
-        const body = JSON.parse(result.body)
-        console.log(body)
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.ticketAll,
-      { }, callback)
-  })
-
-  it('successfully get ticket details', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) {
-        //const body = JSON.parse(result.body)
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.ticketStats,
-      { path: { ticketId: 1 } }, callback)
-  })
-})
-
-describe('File', function() {
-  it('successful signing', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.fileUpload,
-      { },
-      callback
-    )
-  })
-})
-
-describe('Ticket', function() {
-  it('successful creation', function(done) {
-    const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    let date = new Date()
-    date.setDate(date.getDate() + 5)
-    test( handler.ticketCreate,
-      { body: { title: '테스트 콘서트', start_at: date, end_at: date,
-        image: 'test', capacity: 100, place: '판교' } },
-      callback
-    )
-  })
-
-  let ticketId
-  it('successful creation with artists', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      ticketId = res.id
-      done()
-    }
-
-    let date = new Date()
-    date.setDate(date.getDate() + 5)
-    test( handler.ticketCreate,
-      { body: { title: '테스트 콘서트', start_at: date, end_at: date,
-        image: 'test', capacity: 100, place: '판교',
-        artists: [
-          { name: '아이유', image: 'iu' },
-          { name: 'asdf', image: 'qwer' },
-        ],
-      } },
-      callback
-    )
-  })
-
-  it('successful update', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      ticketId = res.id
-      done()
-    }
-
-    test( handler.ticketUpdate,
-      { path: { ticketId: ticketId },
-        body: {
-          title: '테스트 콘서트 업데이트',
-          image: 'test2', capacity: 50, place: '판교',
-          artists: [
-            { id: 1, name: '아이유2', image: 'iu' },
-            { name: 'hello', image: 'qwer' },
-            { name: '수란', image: 'suran' },
-          ],
-        },
-      },
-      callback
-    )
-  })
-
-  it('successful deletion', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.ticketDestroy,
-      { path: { ticketId: ticketId } },
-      callback
-    )
-  })
-})
+require('./schedule')()

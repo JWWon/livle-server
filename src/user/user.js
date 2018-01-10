@@ -7,6 +7,7 @@ const saltRounds = 10
 const jwt = require('jsonwebtoken')
 const secret = 'livleusersecret'
 const FreeTrial = require('../free_trial')
+const sendEmail = require('../send-email')
 const uuid = require('uuid/v1')
 
 const User = sequelize.define('user', {
@@ -146,7 +147,12 @@ User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
       password: hash,
       nickname: nickname,
     }).then((user) => {
-      return resolve(user.sessionData())
+      sendEmail(user.email, '라이블 가입을 환영합니다.', 'welcome', {})
+        .then((sent) => resolve(user.sessionData()))
+        .catch((err) => {
+          console.error(err)
+          resolve(user.sessionData())
+        })
     }).catch((err) => reject(err))
   )
 )

@@ -10,13 +10,14 @@ module.exports = (params, respond) => {
   ) ) {
     return respond(400, '결제 정보가 누락되었습니다.')
   }
+  // data.skipTrial : optional
 
   const token = params.auth
   return User.fromToken(token)
     .then((user) => user.getSubscription().then((sub) => {
       if (sub) return respond(405, '이미 구독 중입니다.')
       const checkFreeTrial = () => new Promise((resolve, reject) => {
-        if (!user.free_trial_id) {
+        if (!data.skipTrial && !user.free_trial_id) {
           FreeTrial.check(data.cardNumber)
             .then((available) => {
               if (!available) return respond(406, '이미 체험한 카드입니다.')

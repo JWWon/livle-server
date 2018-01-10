@@ -51,9 +51,18 @@ module.exports = (toAddress, title, templateName, markupData) => {
         Source: 'no-reply@livle.co.kr',
       }
 
-      resolve()
       return ses.sendEmail(sesParams,
-        (err, data) => err ? reject(err) : resolve())
-    }).catch((err) => reject(err))
+        (err, data) => {
+          if (err) {
+            console.warn('Failed to send email', err)
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+    }).catch((err) => {
+      console.error('Error while sending email', err)
+      reject(err)
+    })
   )
 }

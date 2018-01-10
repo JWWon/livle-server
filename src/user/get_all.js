@@ -1,6 +1,7 @@
 'use strict'
 
 const Partner = require('../partner/partner')
+const Subscription = require('../subscription')
 const User = require('./user')
 const _ = require('lodash')
 
@@ -11,7 +12,9 @@ module.exports = (params, respond) => {
     .then((partner) => {
       if (!partner.isAdmin()) return respond(403, '권한이 없습니다.')
 
-      return User.findAll().then((users) => {
+      return User.findAll({
+        include: [{ model: Subscription }],
+      }).then((users) => {
         const userList = _.map(users, (u) => {
           const uData = u.dataValues
           uData.password = undefined

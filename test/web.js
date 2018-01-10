@@ -84,8 +84,13 @@ module.exports = () => {
 
     it('successfully get users list', function(done) {
       const callback = (error, result) => {
-        expect(result.statusCode).to.equal(200)
-        done()
+        const users = JSON.parse(result.body)
+        if (result.statusCode === 200) {
+          console.log(users)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
       }
 
       test( handler.userAll,

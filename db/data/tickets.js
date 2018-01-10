@@ -6,8 +6,9 @@ const Artist = require('../../src/ticket/artist')
 
 // Helper functions
 const getNextWeekOf = (date) => {
-  date.setDate(date.getDate() + 7)
-  return date
+  let result = new Date(date)
+  result.setDate(result.getDate() + 7)
+  return result
 }
 
 // Constants
@@ -23,27 +24,28 @@ const PLACES = [
   '판교 스타트업캠퍼스 컨퍼런스홀',
 ]
 const IMAGES = [
-  'http://i.ebayimg.com/images/g/5OcAAOSwTuJYo4Jm/s-l1600.jpg',
+  'https://i.pinimg.com/736x/7c/35/f8/7c35f82d82935f825c53778052987016--concert-stage-design-football-design.jpg',
   'https://cdn.londonandpartners.com/visit/london-organisations/alexandra-palace/92923-640x360-alexandra-palace-gig-640.jpg',
   'https://static.pexels.com/photos/154147/pexels-photo-154147.jpeg',
   'https://media.timeout.com/images/102503695/image.jpg',
 ]
 const ARTIST_IMAGES = [
-  'http://clipart-library.com/images/qiBoqa5dT.jpg',
+  'https://www.thefamouspeople.com/profiles/images/adele-1.jpg',
   'https://www.thefamouspeople.com/images/ariana-grande-min.jpg',
-  'http://www.trendingtopmost.com/wp-content/uploads/2016/12/Rihanna-3.jpg',
+  'https://www.billboard.com/files/styles/pushdown_327x216/public/media/bruno-mars-onstage-smile-a-billboard-1548.jpg',
   'https://i.pinimg.com/736x/6e/63/d7/6e63d71df99b4904c403c285039fd286--shawn-mendez-celebrities.jpg',
 ]
 const TICKET_SIZE = 16 // Count of tickets to add
 const MAX = {
-  VACANCIES: 20,
+  VACANCIES: 30,
   RUNTIME: 4,
   ARTISTS: 6,
 }
 
 const hoursAfter = (date) => {
-  date.setHours(date.getHours() + faker.random.number(MAX.RUNTIME))
-  return date
+  let result = new Date(date)
+  result.setHours(result.getHours() + faker.random.number(MAX.RUNTIME))
+  return result
 }
 
 const randomCode = (digits) => digits > 0 ?
@@ -58,7 +60,7 @@ const tickets = _.times(TICKET_SIZE, () => {
     end_at: hoursAfter(startAt),
     image: _.sample(IMAGES),
     checkin_code: randomCode(4),
-    capacity: 20, // faker.random.number(MAX.VACANCIES),
+    capacity: faker.random.number({ min: 20, max: MAX.VACANCIES }),
     place: _.sample(PLACES),
     video_id: 'T9fKvVGBBy4',
   })

@@ -47,7 +47,7 @@ Reservation.reserve = (ticket, subscription) =>
           where: { subscription_id: subscription.id },
           transaction: t,
         }).then((usedCount) => { // 현재 구독에서 이용한 예약 기회
-          if (usedCount >= 2) throw new Error('used up')
+          if (usedCount >= subscription.limit) throw new Error('used up')
 
           return Reservation.findOne({
             where: {

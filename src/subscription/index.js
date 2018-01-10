@@ -10,6 +10,7 @@ const Subscription = sequelize.define('subscription', {
   from: { type: S.DATE, allowNull: false }, // n월 n일 00:00:00
   to: { type: S.DATE, allowNull: false }, // n월 n+30일 23:59:59
   expired: { type: S.BOOLEAN, defaultValue: false },
+  limit: { type: S.INTEGER, defaultValue: 2 },
 }, {
   deletedAt: 'cancelled_at', paranoid: true,
   createdAt: 'created_at', updatedAt: 'updated_at',

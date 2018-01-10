@@ -6,13 +6,15 @@ const Ticket = require('../src/ticket/ticket')
 
 const now = new Date()
 
-const process = (reservation) => {
+const suspend = (reservation, suspendBy) => {
   if (reservation.checked_at) {
     throw new Error('Cannot process checked-in reservation')
   }
-  return reservation.getUser().then((user) =>
-    user.update({ suspended_by: suspendUntil() })
-  ).then((user) => reservation.update({ cancelled_at: now }))
+
+  return reservation.getSubscription()
+    .then((sub) => sub.getUser()).then((user) =>
+      user.update({ suspended_by: suspendBy })
+    ).then((user) => reservation.update({ cancelled_at: now }))
 }
 
 const processNoshows = (ticket) =>
@@ -20,11 +22,18 @@ const processNoshows = (ticket) =>
     where: {
       checked_at: { [Op.eq]: null },
     }
-  }).then((noshows) => Promise.all(_.map(noshows, process)))
-    .then((reservations) => {
-      console.log(`Ticket ${ticket.id} : \
+  }).then((noshows) => {
+    const suspendUntil = () => {
+      let date = new Date(ticket.end_at)
+      date.setDate(date.getDate() + 3)
+      return date
+    }
+    return Promise.all(_.map(noshows, (noshow) => suspend(noshow, suspendUntil())))
+  }).then((reservations) => {
+    console.log(`Ticket ${ticket.id} : \
       ${reservations.length} noshows processed`)
-    }).then((ticket) => ticket.update({ checkin_code: null }))
+    return ticket.update({ checkin_code: null })
+  })
 
 module.exports = (params, respond) => {
   console.log(`Noshow checker runs at ${now}`)

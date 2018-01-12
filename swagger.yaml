@@ -47,6 +47,9 @@ paths:
                 type: string
                 example: 라이블
                 description: optional
+              fcmToken:
+                type: string
+                description: 푸시 알림을 보내기 위한 기기 식별토큰
       responses:
         '200':
           description: 가입 성공
@@ -129,6 +132,9 @@ paths:
             properties:
               accessToken:
                 type: string
+              fcmToken:
+                type: string
+                description: 푸시 알림을 보내기 위한 기기 식별토큰
       responses:
         '200':
           description: '기존 계정을 발견, 로그인'
@@ -218,6 +224,9 @@ paths:
               password:
                 type: string
                 example: '12345'
+              fcmToken:
+                type: string
+                description: 푸시 알림을 보내기 위한 기기 식별토큰
       responses:
         '200':
           description: 로그인 성공

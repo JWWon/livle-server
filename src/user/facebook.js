@@ -20,6 +20,7 @@ const fetchFromFacebook = (token) => new Promise((resolve, reject) => {
 
 module.exports = (params, respond) => {
   const token = params.body.accessToken
+  const fcmToken = params.body.fcmToken
 
   if (!token) return respond(400)
 
@@ -33,7 +34,9 @@ module.exports = (params, respond) => {
       },
     }).spread((user, created) => {
       if (user.password) return respond(403)
-      return respond(created ? 201 : 200, user.sessionData())
+      return user.update({ fcm_token: fcmToken }).then((user) =>
+        respond(created ? 201 : 200, user.sessionData())
+      )
     }).catch((err) => respond(500, err))
   ).catch((err) => respond(401, err))
 }

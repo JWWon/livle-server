@@ -16,8 +16,7 @@ module.exports = (params, respond) => {
   }).then((user) => !user ? respond(404)
     : user.update({ password_reset_token: uuid() })
   ).then((user) => sendEmail(
-        user.email,
-        '라이블 비밀번호 재설정 이메일',
+        user.email, '라이블 비밀번호를 재설정해주세요.',
         'request_password',
         {
           nickname: user.nickname || '라이블 유저',

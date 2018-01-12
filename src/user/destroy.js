@@ -3,7 +3,8 @@ const User = require('./user')
 const R = User.REJECTIONS
 
 module.exports = (params, respond) => {
-  if (!params.body.email || !params.body.password) {
+  const body = params.body
+  if (!body || !body.email || !body.password) {
     respond(400, '이메일과 비밀번호를 입력해주세요.')
   }
 

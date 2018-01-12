@@ -46,6 +46,7 @@ const renew = (subscription) => new Promise((resolve, reject) => {
             resolve(subscription)
           })
         ).catch((err) => {
+          console.error(`User ${user.id} : 빌링 키 삭제 실패`)
           reject(err)
         })
       }).catch((err) => reject(err))

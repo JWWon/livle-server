@@ -30,7 +30,8 @@ const sendPaymentEmail = (user, paidAt, nextPaymentDue) => {
     return `${year}.${twoDigits(month)}.${twoDigits(d)}`
   }
 
-  return sendEmail(user.email, '라이블 결제 성공', 'payment_success',
+  return sendEmail(user.email,
+    '라이블 멤버십 이용권 자동 결제가 성공했습니다.', 'payment_success',
     { nickname: user.nickname || '라이블 유저',
       price: Billing.price,
       cardName: user.card_name,

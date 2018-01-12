@@ -28,7 +28,8 @@ module.exports = (params, respond) => {
               return `${hour > 11 ? 'PM' : 'AM'} ${hh}:${mm}`
             }
 
-            return sendEmail(user.email, '라이블 공연 예약', 'reservation',
+            return sendEmail(user.email, '라이블 공연이 예약되었습니다.',
+              'reservation',
               {
                 nickname: user.nickname,
                 title: ticket.title,

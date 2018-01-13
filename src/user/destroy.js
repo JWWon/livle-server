@@ -5,10 +5,10 @@ const R = User.REJECTIONS
 module.exports = (params, respond) => {
   const body = params.body
   if (!body || !body.email || !body.password) {
-    respond(400, '이메일과 비밀번호를 입력해주세요.')
+    return respond(400, '이메일과 비밀번호를 입력해주세요.')
   }
 
-  return User.dropOut(params.body.email, params.body.password)
+  return User.dropOut(body.email, body.password)
     .then((success) => {
       if (success) {
         respond(200)
@@ -21,6 +21,7 @@ module.exports = (params, respond) => {
       } else if (err === R.WRONG_PASSWORD) {
         respond(403, '비밀번호가 틀립니다.')
       } else {
+        console.error(err)
         respond(500, err)
       }
     })

@@ -6,6 +6,7 @@ const Subscription = require('../src/subscription')
 const Reservation = require('../src/reservation/reservation')
 const Billing = require('../src/billing')
 const sendEmail = require('../src/send-email')
+const sendPush = require('../src/send-push')
 
 const startOfToday = () => {
   let date = new Date()
@@ -26,13 +27,16 @@ const log = (subs) => {
   (${curr.id} 결제된 구독 / ${next.id} 다음구독)`)
 }
 
-const sendFailureEmail = (subscription) => new Promise((resolve, reject) =>
-  subscription.getUser().then((user) =>
-    sendEmail(user.email, '라이블 구독 갱신 실패', 'payment_failure', { })
-    .then(() => resolve(user))
-    .catch((err) => reject(err))
+const notifyFailure = (subscription) => new Promise((resolve, reject) =>
+  subscription.getUser().then((user) => {
+    const push = user.fcm_token ? sendPush(user.fcm_token,
+      '구독 갱신에 실패했습니다. ' +
+      '구독 정보가 업데이트되지 않으면 예약이 취소됩니다.') : Promise.resolve()
+    const email = sendEmail(user.email,
+      '라이블 구독 갱신 실패', 'payment_failure', { })
+    return Promise.all([push, email]).then(() => resolve())
+  }).catch((err) => reject(err))
   )
-)
 
 const renew = (subscription) => new Promise((resolve, reject) => {
   subscription.getNext().then((next) => {
@@ -57,8 +61,7 @@ const renew = (subscription) => new Promise((resolve, reject) => {
       }).catch((err) => {
         if (subscription.from > yesterday()) {
           console.error(`User ${subscription.user_id} : 재구독 실패 (첫 번째)`)
-          // TODO push notification
-          sendFailureEmail(subscription).then(() => reject(err))
+          notifyFailure(subscription).then(() => reject(err))
             .catch((err) => reject(err))
         } else {
           console.error(`User ${subscription.user_id} : 재구독 실패`)
@@ -68,8 +71,7 @@ const renew = (subscription) => new Promise((resolve, reject) => {
             if (cancelledCount > 0) {
               console.error(`User ${subscription.user_id} : 재구독 두번째 실패로 예약 취소`)
             }
-            // TODO push notification
-            sendFailureEmail(subscription).then(() => reject(err))
+            notifyFailure(subscription).then(() => reject(err))
               .catch((err) => reject(err))
           }).catch((err) => reject(err))
         }

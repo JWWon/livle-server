@@ -109,6 +109,11 @@ paths:
           type: string
           description: JWT Token
           required: true
+        - name: fcmToken
+          in: query
+          description: 현재 기기의 fcm 토큰
+          required: true
+          type: string
       responses:
         '200':
           description: 성공

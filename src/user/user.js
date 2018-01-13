@@ -140,23 +140,24 @@ User.prototype.deepUserData = function() {
   )
 }
 
-User.signUp = (email, password, nickname, fcmToken) => new Promise((resolve, reject) =>
-  bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
-    : User.create({
-      email: email,
-      password: hash,
-      nickname: nickname,
-      fcm_token: fcmToken,
-    }).then((user) => {
-      sendEmail(user.email, '라이블 가입을 환영합니다.', 'welcome', {})
-        .then((sent) => resolve(user.sessionData()))
-        .catch((err) => {
-          console.error(err)
-          resolve(user.sessionData())
-        })
-    }).catch((err) => reject(err))
+User.signUp = (email, password, nickname, fcmToken) =>
+  new Promise((resolve, reject) =>
+    bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
+      : User.create({
+        email: email,
+        password: hash,
+        nickname: nickname,
+        fcm_token: fcmToken,
+      }).then((user) => {
+        sendEmail(user.email, '라이블 가입을 환영합니다.', 'welcome', {})
+          .then((sent) => resolve(user.sessionData()))
+          .catch((err) => {
+            console.error(err)
+            resolve(user.sessionData())
+          })
+      }).catch((err) => reject(err))
+    )
   )
-)
 
 User.prototype.updatePassword = function(password) {
   return new Promise((resolve, reject) =>

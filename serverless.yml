@@ -218,19 +218,20 @@ functions:
           path: subscription/restore
           method: post
           cors: true
-  reservationGet:
-    handler: handler.reservationGet
+  reservationRouter:
+    handler: handler.reservationRouter
     events:
       - http:
           path: reservation
           method: get
           cors: true
-  reservationCancel:
-    handler: handler.reservationCancel
-    events:
       - http:
           path: reservation/{reservationId}
           method: delete
+          cors: true
+      - http:
+          path: reservation/{reservationId}/check
+          method: post
           cors: true
   subscriptionRenew:
     handler: handler.subscriptionRenew

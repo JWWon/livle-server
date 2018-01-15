@@ -18,6 +18,7 @@ const User = sequelize.define('user', {
   password: S.STRING, // 페이스북으로 가입한 유저의 경우 null
   password_reset_token: S.STRING,
   facebook_token: S.STRING, // unique하게 하고 싶은데 index key length 때문에..
+  fcm_token: S.STRING,
 
   // Subscription
   card_name: S.STRING,
@@ -61,7 +62,6 @@ User.checkSession = (event) => {
 User.REJECTIONS = {
   WRONG_PASSWORD: 'wrong_password',
   SUBSCRIBING: 'subscribing',
-  NOT_FOUND: 'not_found',
   NO_VALID_SUBSCRIPTION: 'no_valid_subscription',
   SUSPENDED: 'suspended',
 }
@@ -140,22 +140,24 @@ User.prototype.deepUserData = function() {
   )
 }
 
-User.signUp = (email, password, nickname) => new Promise((resolve, reject) =>
-  bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
-    : User.create({
-      email: email,
-      password: hash,
-      nickname: nickname,
-    }).then((user) => {
-      sendEmail(user.email, '라이블 가입을 환영합니다.', 'welcome', {})
-        .then((sent) => resolve(user.sessionData()))
-        .catch((err) => {
-          console.error(err)
-          resolve(user.sessionData())
-        })
-    }).catch((err) => reject(err))
+User.signUp = (email, password, nickname, fcmToken) =>
+  new Promise((resolve, reject) =>
+    bcrypt.hash(password, saltRounds, (err, hash) => err ? reject(err)
+      : User.create({
+        email: email,
+        password: hash,
+        nickname: nickname,
+        fcm_token: fcmToken,
+      }).then((user) => {
+        sendEmail(user.email, '라이블 가입을 환영합니다.', 'welcome', {})
+          .then((sent) => resolve(user.sessionData()))
+          .catch((err) => {
+            console.error(err)
+            resolve(user.sessionData())
+          })
+      }).catch((err) => reject(err))
+    )
   )
-)
 
 User.prototype.updatePassword = function(password) {
   return new Promise((resolve, reject) =>
@@ -167,21 +169,26 @@ User.prototype.updatePassword = function(password) {
   )
 }
 
-User.signIn = (email, password) => new Promise((resolve, reject) =>
+User.signIn = (email, password, fcmToken) => new Promise((resolve, reject) =>
   User.findOne({
     where: {
       email: email,
     },
-  }).then((user) =>
-    bcrypt.compare(password, user.password, (err, res) => {
-      if (err) return reject(err)
-      if (res) {
-        return resolve(user.sessionData())
-      } else {
-        reject(User.REJECTIONS.WRONG_PASSWORD)
-      }
-    })
-  ).catch((err) => reject(User.REJECTIONS.NOT_FOUND))
+  }).then((user) => {
+    if (!user) {
+      resolve()
+    } else {
+      bcrypt.compare(password, user.password, (err, res) => {
+        if (err) return reject(err)
+        if (res) {
+          return user.update({ fcm_token: fcmToken })
+            .then((user) => resolve(user.sessionData()))
+        } else {
+          reject(User.REJECTIONS.WRONG_PASSWORD)
+        }
+      })
+    }
+  }).catch((err) => reject(err))
 )
 
 User.dropOut = (email, password) => new Promise((resolve, reject) =>
@@ -189,7 +196,7 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
     where: {
       email: email,
     },
-  }).then((user) => !user ? reject(User.REJECTIONS.NOT_FOUND) :
+  }).then((user) => !user ? resolve(null) :
     bcrypt.compare(password, user.password, (err, res) => {
       if (err) return reject(err)
       if (res) {
@@ -200,7 +207,7 @@ User.dropOut = (email, password) => new Promise((resolve, reject) =>
             return user.update({
               email: `${user.email}#${uuid()}`,
             }).then((user) => user.destroy())
-              .then(() => resolve())
+              .then(() => resolve(true))
           }
         })
       } else {

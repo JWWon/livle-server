@@ -35,6 +35,7 @@ provider:
     IMP_SECRET: ${file(./keys.yml):IMP_SECRET}
     PUSHER_KEY: ${file(./keys.yml):PUSHER_KEY}
     PUSHER_SECRET: ${file(./keys.yml):PUSHER_SECRET}
+    FCM_SERVER_KEY: ${file(./keys.yml):FCM_SERVER_KEY}
   vpc:
     securityGroupIds:
       - "Fn::GetAtt": LivleSecurityGroup.GroupId
@@ -217,19 +218,20 @@ functions:
           path: subscription/restore
           method: post
           cors: true
-  reservationGet:
-    handler: handler.reservationGet
+  reservationRouter:
+    handler: handler.reservationRouter
     events:
       - http:
           path: reservation
           method: get
           cors: true
-  reservationCancel:
-    handler: handler.reservationCancel
-    events:
       - http:
           path: reservation/{reservationId}
           method: delete
+          cors: true
+      - http:
+          path: reservation/{reservationId}/check
+          method: post
           cors: true
   subscriptionRenew:
     handler: handler.subscriptionRenew

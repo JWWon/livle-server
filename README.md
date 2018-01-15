@@ -20,6 +20,8 @@ IMP_SECRET=
 
 AWS_PROFILE=livle-serverless
 
+FCM_SERVER_KEY=
+
 # Card info for test
 CARD_NUMBER='1111-2222-3333-4444'
 EXPIRY='2017-12'
@@ -33,8 +35,10 @@ FB_TOKEN=
 PUSHER_KEY=
 PUSHER_SECRET=
 
-# 테스트 코드를 돌릴 때 메일이 발송될 주소
+# 테스트 셋을 돌릴 때 메일이 발송될 주소
 TESTER_EMAIL=
+# 테스트 셋을 돌릴 때 푸시가 발송될 디바이스의 토큰
+TEST_FCM_TOKEN=
 
 # Dev server
 # 평소에는 주석, migrate 할 때 Local 주석하고 여기 주석 풀기
@@ -76,4 +80,5 @@ IMP_KEY:
 IMP_SECRET:
 PUSHER_KEY:
 PUSHER_SECRET:
+FCM_SERVER_KEY:
 ```

@@ -19,16 +19,16 @@ const suspend = (reservation, suspendBy) => {
 
 const processNoshows = (ticket) =>
   ticket.getReservations({
-    where: {
-      checked_at: { [Op.eq]: null },
-    }
+    where: { checked_at: { [Op.eq]: null } },
   }).then((noshows) => {
     const suspendUntil = () => {
       let date = new Date(ticket.end_at)
       date.setDate(date.getDate() + 3)
       return date
     }
-    return Promise.all(_.map(noshows, (noshow) => suspend(noshow, suspendUntil())))
+    return Promise.all(
+      _.map(noshows, (noshow) => suspend(noshow, suspendUntil()))
+    )
   }).then((reservations) => {
     console.log(`Ticket ${ticket.id} : \
       ${reservations.length} noshows processed`)

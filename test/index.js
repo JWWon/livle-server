@@ -12,6 +12,7 @@ const birth = process.env.BIRTH
 const password = process.env.PASSWORD
 const userEmail = process.env.TESTER_EMAIL
 const userPass = 'test'
+const fcmToken = process.env.TESTER_FCM_TOKEN
 
 let authToken = ''
 
@@ -41,7 +42,7 @@ describe('User', function() {
     test(handler.userRouter,
       {
         httpMethod: 'POST',
-        body: { email: userEmail, password: userPass, nickname: 'hi' },
+        body: { email: userEmail, password: userPass, nickname: 'hi', fcmToken: fcmToken },
       },
       callback)
   }).timeout(5000)
@@ -535,6 +536,16 @@ describe('User deletion', function() {
       { body: { email: userEmail, password: userPass } },
       callback
     )
+  })
+})
+
+describe('Push notification', function() {
+  it('successful push notification', function(done) {
+    require('../src/send-push')(fcmToken, 'Test push')
+      .then((res) => {
+        console.log(res)
+        done()
+      }).catch((err) => done(err))
   })
 })
 

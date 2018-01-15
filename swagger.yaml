@@ -663,10 +663,12 @@ paths:
           description: 성공
         '401':
           description: 로그인되지 않음
+        '403':
+          description: 공연 시작까지 4시간보다 적게 남음
         '404':
           description: 잘못된 예약 아이디이거나 이 유저의 예약이 아님
         '405':
-          description: 취소할 수 없는 예약 (공연 시작까지 24시간보다 적게 남았거나 이미 체크인처리를 함)
+          description: 이미 체크인처리가 된 예약
   '/reservation/{reservationId}/check':
     post:
       tags:

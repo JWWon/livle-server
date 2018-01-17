@@ -16,17 +16,6 @@ describe('Subscription renew', function() {
       }
     }
 
-    const startOfToday = () => {
-      let date = new Date()
-      date.setHours(0, 0, 0)
-      return date
-    }
-    const thirtyDaysFromNow = () => {
-      let date = new Date()
-      date.setDate(date.getDate() + 30)
-      date.setHours(23, 59, 59)
-      return date
-    }
     handler.subscriptionRenew({}, {}, callback)
   }).timeout(10000)
 })

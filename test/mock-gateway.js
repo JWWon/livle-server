@@ -1,15 +1,15 @@
 const _ = require('lodash')
 const handler = require('../handler')
 
+/**
+ * ApiGateway의 작동을 모방하는 클래스
+ */
 function Gateway() {
   this.headers = {}
 }
 
-Gateway.prototype.setAuth = function (token) {
+Gateway.prototype.setAuth = function(token) {
   this.headers.Authorization = token
-}
-
-const parsePathParams = (path) => {
 }
 
 const parseQuery = (path) => {
@@ -26,7 +26,7 @@ const parseQuery = (path) => {
   }, { })
 }
 
-Gateway.prototype.apiCall = function (method, path, params) {
+Gateway.prototype.apiCall = function(method, path, params) {
   let event = {
     headers: this.headers,
     body: params.body ? JSON.stringify(params.body) : null,
@@ -94,6 +94,8 @@ Gateway.prototype.apiCall = function (method, path, params) {
           return promisify(handler.subscriptionRouter)(event)
         case 'restore':
           return promisify(handler.subscriptionRestore)(event)
+        default:
+          event.pathParameters = { reservationId: paths[1] }
       }
     }
     case 'reservation': {

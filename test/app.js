@@ -71,7 +71,7 @@ describe('User', function() {
 
   it('creation failure on invalid email', function(done) {
     gateway.apiCall('POST', 'user', {
-      body: { email: 'hahahacom', password: 'hello' }
+      body: { email: 'hahahacom', password: 'hello' },
     }).then((result) => {
       if (result.statusCode === 405) return done()
       done(new Error(result))
@@ -353,7 +353,7 @@ describe('Subscription', function() {
 describe('Paid subscription', function() {
   it('successful signin', function(done) {
     gateway.apiCall('POST', 'user/session', {
-      body: { email: 'freeTrialDone', password: 'fakepassword' }
+      body: { email: 'freeTrialDone', password: 'fakepassword' },
     }).then((result) => {
       const body = JSON.parse(result.body)
       if (result.statusCode === 200) {
@@ -395,7 +395,7 @@ describe('User deletion', function() {
       body: {
         email: userEmail,
         password: userPass,
-      }
+      },
     }).then((result) => {
       if (result.statusCode === 200) {
         done()
@@ -410,7 +410,7 @@ describe('User deletion', function() {
       body: {
         email: userEmail,
         password: userPass,
-      }
+      },
     }).then((result) => {
       if (result.statusCode === 405) {
         done()

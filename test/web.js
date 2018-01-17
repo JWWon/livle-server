@@ -20,7 +20,7 @@ describe('Partner', function() {
 
   it('successful signin', function(done) {
     gateway.apiCall('POST', 'partner/session', {
-      body: { username: 'admin@livle.kr', password: 'livle' }
+      body: { username: 'admin@livle.kr', password: 'livle' },
     }).then((result) => {
       const partner = JSON.parse(result.body)
       partnerId = partner.id
@@ -46,7 +46,7 @@ describe('Partner', function() {
 
   it('successful deletion', function(done) {
     gateway.apiCall('DELETE', 'partner', {
-      body: { username: 'test@test.com', password: 'test' }
+      body: { username: 'test@test.com', password: 'test' },
     }).then((result) => {
       if (result.statusCode === 200) {
         done()
@@ -66,12 +66,14 @@ describe('Partner', function() {
       }
     })
   })
+})
 
+describe('Partner actions', function() {
   it('successfully get users list', function(done) {
     gateway.apiCall('GET', 'user/all', {})
       .then((result) => {
-        const users = JSON.parse(result.body)
         if (result.statusCode === 200) {
+          const users = JSON.parse(result.body)
           console.log(users)
           done()
         } else {
@@ -83,8 +85,8 @@ describe('Partner', function() {
   it('successfully get partners list', function(done) {
     gateway.apiCall('GET', 'partner/all', {})
       .then((result) => {
-        const partners = JSON.parse(result.body)
         if (result.statusCode === 200) {
+          const partners = JSON.parse(result.body)
           console.log(partners)
           done()
         } else {
@@ -108,7 +110,7 @@ describe('Partner', function() {
   })
 
   it('successfully get concerts list', function(done) {
-    gateway.apiCall('GET', 'ticket/all' , {})
+    gateway.apiCall('GET', 'ticket/all', {})
       .then((result) => {
         if (result.statusCode === 200) {
           const body = JSON.parse(result.body)
@@ -121,7 +123,7 @@ describe('Partner', function() {
   })
 
   it('successfully get ticket details', function(done) {
-    gateway.apiCall('GET', 'ticket/1/stats' , {})
+    gateway.apiCall('GET', 'ticket/1/stats', {})
       .then((result) => {
         if (result.statusCode === 200) {
           // const body = JSON.parse(result.body)
@@ -156,7 +158,7 @@ describe('Ticket', function() {
       end_at: date,
       image: 'test',
       capacity: 100,
-      place: '판교' }
+      place: '판교' },
     }).then((result) => {
       if (result.statusCode === 200) {
         done()

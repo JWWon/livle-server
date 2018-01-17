@@ -61,7 +61,15 @@ Gateway.prototype.apiCall = function(method, path, params) {
         case 'all':
           return promisify(handler.userAll)(event)
         default:
-          throw new Error(`Unknown path: ${path}`)
+          event.pathParameters = { userId: paths[1] }
+          switch (paths[2]) {
+            case 'suspend':
+              if (method === 'DELETE') {
+                return promisify(handler.userUnsuspend)(event)
+              }
+            default:
+              throw new Error(`Unknown path: ${path}`)
+          }
       }
     }
     case 'ticket': {

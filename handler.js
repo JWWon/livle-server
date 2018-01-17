@@ -33,6 +33,7 @@ module.exports.userFacebook = lambda(require('./src/user/facebook'))
 module.exports.userRequestPassword = lambda(require('./src/user/request_password'))
 module.exports.userUpdatePassword = lambda(require('./src/user/update_password'))
 module.exports.userAll = lambda(require('./src/user/get_all'))
+module.exports.userUnsuspend = lambda(require('./src/user/unsuspend'))
 
 module.exports.partnerRouter = lambda(require('./src/partner/router'))
 module.exports.partnerSignin = lambda(require('./src/partner/signin'))

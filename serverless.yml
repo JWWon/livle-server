@@ -60,15 +60,7 @@ functions:
     events:
       - http:
           path: user
-          method: post
-          cors: true
-      - http:
-          path: user
-          method: get
-          cors: true
-      - http:
-          path: user
-          method: delete
+          method: any
           cors: true
   userSignin:
     handler: handler.userSignin

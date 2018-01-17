@@ -1,8 +1,12 @@
 'use strict'
 
+const Gateway = require('./mock-gateway')
+const gateway = new Gateway()
+require('dotenv').config() // .env 파일에서 환경변수 읽어오기
+
+// TODO Replace those
 const expect = require('chai').expect
 const handler = require('../handler')
-require('dotenv').config() // .env 파일에서 환경변수 읽어오기
 
 // 테스트에 사용되는 환경변수들
 const fbToken = process.env.FB_TOKEN
@@ -29,104 +33,84 @@ const test = (func, params, callback) => {
 
 describe('User', function() {
   it('successful creation', function(done) {
-    const callback = (error, result) => {
+    gateway.apiCall('POST', 'user', {
+      body: {
+        email: userEmail,
+        password: userPass,
+        nickname: 'hi',
+        fcmToken: fcmToken },
+    }).then((result) => {
       const body = JSON.parse(result.body)
       if (result.statusCode === 200) {
         console.log(body)
-        authToken = body.token
-        if (authToken) return done()
+        gateway.setAuth(body.token)
+        if (body.token) return done()
       }
       done(new Error(body))
-    }
-
-    test(handler.userRouter,
-      {
-        httpMethod: 'POST',
-        body: { email: userEmail, password: userPass, nickname: 'hi', fcmToken: fcmToken },
-      },
-      callback)
+    })
   }).timeout(5000)
 
   it('creation failure with not existing email', function(done) {
-    const callback = (error, result) => {
+    gateway.apiCall('POST', 'user', {
+      body: {
+        email: 'nonexsisting@ne.com',
+        password: userPass,
+        nickname: 'hi' },
+    }).then((result) => {
       const body = JSON.parse(result.body)
       if (result.statusCode === 404) {
         done()
       } else {
         done(new Error(body))
       }
-    }
-
-    test(handler.userRouter,
-      {
-        httpMethod: 'POST',
-        body: { email: 'nonexsisting@ne.com', password: userPass, nickname: 'hi' },
-      },
-      callback)
+    })
   }).timeout(5000)
 
   it('creation failure when no password', function(done) {
-    const callback = (error, result) => {
+    gateway.apiCall('POST', 'user', {
+      body: { email: 'abc@abc.com' },
+    }).then((result) => {
       if (result.statusCode === 400) return done()
       done(new Error(result))
-    }
-
-    test( handler.userCreate,
-      { body: { email: 'abc@abc.com' } },
-      callback
-    )
+    })
   })
 
   it('creation failure on duplicate email', function(done) {
-    const callback = (error, result) => {
+    gateway.apiCall('POST', 'user', {
+      body: { email: userEmail, password: userPass },
+    }).then((result) => {
       if (result.statusCode === 403) return done()
       done(new Error(result))
-    }
-
-    test( handler.userCreate,
-      { body: { email: userEmail, password: userPass } },
-      callback
-    )
+    })
   }).timeout(5000)
 
   it('creation failure on invalid email', function(done) {
-    const callback = (error, result) => {
+    gateway.apiCall('POST', 'user', {
+      body: { email: 'hahahacom', password: 'hello' }
+    }).then((result) => {
       if (result.statusCode === 405) return done()
       done(new Error(result))
-    }
-
-    test( handler.userCreate,
-      { body: { email: 'hahahacom', password: 'hello' } },
-      callback
-    )
+    })
   })
 
   it('successful retrieval', function(done) {
-    const callback = (error, result) => {
-      const body = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(body)
-        return done()
-      }
-      done(new Error(body))
-    }
-
-    test( handler.userGet,
-      { query: { fcmToken: 'test' } },
-      callback
-    )
+    gateway.apiCall('GET', 'user?fcmToken=test', {})
+      .then((result) => {
+        const body = JSON.parse(result.body)
+        if (result.statusCode === 200) {
+          console.log(body)
+          return done()
+        }
+        done(new Error(body))
+      })
   })
 
   it('successful password request', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) return done()
-      done(new Error(result))
-    }
-
-    test( handler.userRequestPassword,
-      { query: { email: userEmail } },
-      callback
-    )
+    gateway.apiCall('GET', `user/password?email=${userEmail}`, {})
+      .then((result) => {
+        if (result.statusCode === 200) return done()
+        done(new Error(result))
+      })
   }).timeout(5000)
 
   /*
@@ -146,7 +130,9 @@ describe('User', function() {
   */
 
   it('successful signin', function(done) {
-    const callback = (error, result) => {
+    gateway.apiCall('POST', 'user/session', {
+      body: { email: userEmail, password: userPass },
+    }).then((result) => {
       const body = JSON.parse(result.body)
       if (result.statusCode === 200) {
         console.log(body)
@@ -154,35 +140,27 @@ describe('User', function() {
         if (authToken) return done()
       }
       done(new Error(body))
-    }
-
-    test( handler.userSignin,
-      { body: { email: userEmail, password: userPass } },
-      callback
-    )
+    })
   })
 
   it('successful signin with facebook', function(done) {
-    const callback = (error, result) => {
+    /* 토큰 구하는 곳
+     * https://developers.facebook.com/tools/explorer
+     */
+    gateway.apiCall('POST', 'user/facebook', {
+      body: { accessToken: fbToken },
+    }).then((result) => {
       const code = result.statusCode
       if (code === 200 || code === 201) {
         return done()
       }
       return done(new Error(code))
-    }
-
-    /* 토큰 구하는 곳
-     * https://developers.facebook.com/tools/explorer
-     */
-    test( handler.userFacebook,
-      { body: { accessToken: fbToken } },
-      callback
-    )
+    })
   }).timeout(5000)
 })
 
 let ticket
-describe('Ticket', function() {
+xdescribe('Ticket', function() {
   it('successful retrieve of list', function(done) {
     const callback = (error, result) => {
       const body = JSON.parse(result.body)
@@ -216,7 +194,7 @@ describe('Ticket', function() {
   })
 })
 
-describe('Subscription', function() {
+xdescribe('Subscription', function() {
   it('successful free trial', function(done) {
     const callback = (error, result) => {
       const user = JSON.parse(result.body)
@@ -471,7 +449,7 @@ describe('Subscription', function() {
   })
 })
 
-describe('Paid subscription', function() {
+xdescribe('Paid subscription', function() {
   it('successful signin', function(done) {
     const callback = (error, result) => {
       const body = JSON.parse(result.body)
@@ -523,23 +501,38 @@ describe('Paid subscription', function() {
 })
 
 describe('User deletion', function() {
-  it('deletion failure while subscription not expired yet', function(done) {
-    const callback = (error, result) => {
+  it('successful deletion', function(done) {
+    gateway.apiCall('DELETE', 'user', {
+      body: {
+        email: userEmail,
+        password: userPass,
+      }
+    }).then((result) => {
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    })
+  })
+
+  xit('deletion failure while subscription not expired yet', function(done) {
+    gateway.apiCall('DELETE', 'user', {
+      body: {
+        email: userEmail,
+        password: userPass,
+      }
+    }).then((result) => {
       if (result.statusCode === 405) {
         done()
       } else {
         done(new Error(result.body))
       }
-    }
-
-    test( handler.userDestroy,
-      { body: { email: userEmail, password: userPass } },
-      callback
-    )
+    })
   })
 })
 
-describe('Push notification', function() {
+xdescribe('Push notification', function() {
   it('successful push notification', function(done) {
     require('../src/send-push')(fcmToken, 'Test push')
       .then((res) => {

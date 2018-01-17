@@ -31,7 +31,7 @@ Gateway.prototype.apiCall = function (method, path, params) {
     headers: this.headers,
     body: params.body ? JSON.stringify(params.body) : null,
     queryStringParameters: parseQuery(path),
-    pathParameters: {},
+    pathParameters: null,
     httpMethod: method,
   }
 
@@ -95,6 +95,12 @@ Gateway.prototype.apiCall = function (method, path, params) {
         case 'restore':
           return promisify(handler.subscriptionRestore)(event)
       }
+    }
+    case 'reservation': {
+      if (paths[1]) {
+        event.pathParameters = { reservationId: paths[1] }
+      }
+      return promisify(handler.reservationRouter)(event)
     }
   }
 }

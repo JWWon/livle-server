@@ -28,8 +28,9 @@ module.exports = (params, respond) => {
 
   return User.fromToken(token)
     .then((user) =>
-      user.getReservations()
-      .then((reservations) =>
+      user.getReservations({
+        where: { checked_at: null },
+      }).then((reservations) =>
         respond(200, _.map(reservations, sanitize))
       ).catch((err) => respond(500, err))
     ).catch((err) => {

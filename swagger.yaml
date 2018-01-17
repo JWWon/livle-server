@@ -335,7 +335,7 @@ paths:
         '403':
           description: 유효하지 않은 세션
   /partner/session:
-    get:
+    post:
       tags:
         - partner
       summary: 로그인
@@ -344,14 +344,17 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: username
-          in: query
-          type: string
-          required: true
-        - name: password
-          in: query
-          type: string
-          required: true
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                example: contacts@livle.kr
+              password:
+                type: string
+                example: '12345'
       responses:
         '200':
           description: 로그인 성공

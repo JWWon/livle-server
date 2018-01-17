@@ -1,3 +1,7 @@
+const Gateway = require('./mock-gateway')
+const gateway = new Gateway()
+
+// TODO remove those
 const handler = require('../handler')
 const expect = require('chai').expect
 
@@ -17,140 +21,135 @@ describe('Partner', function() {
   let partnerId
 
   it('successful creation', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      partnerId = res.id
-      done()
-    }
-
-    test( handler.partnerCreate,
-      { body:
-        { username: 'test@test.com', company: 'test', password: 'test' },
-      },
-      callback )
+    gateway.apiCall('POST', 'partner', {
+      body: { username: 'test@test.com', company: 'test', password: 'test' },
+    }).then((result) => {
+      if (result.statusCode === 200) {
+        const partner = JSON.parse(result.body)
+        partnerId = partner.id
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    })
   })
 
-
   it('successful signin', function(done) {
-    const callback = (error, result) => {
-      const res = JSON.parse(result.body)
-      authToken = res.token
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerSignin,
-      { query: { username: 'admin@livle.kr', password: 'livle' } },
-      callback
-    )
+    gateway.apiCall('POST', 'partner/session', {
+      body: { username: 'admin@livle.kr', password: 'livle' }
+    }).then((result) => {
+      const partner = JSON.parse(result.body)
+      partnerId = partner.id
+      gateway.setAuth(partner.token)
+      if (partner.token) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    })
   })
 
   it('successful approval', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerApprove,
-      { path: { partnerId: partnerId } },
-      callback
-    )
+    gateway.apiCall('POST', `partner/${partnerId}/approve`, { })
+      .then((result) => {
+        if (result.statusCode === 200) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 
   it('successful deletion', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerDestroy,
-      { body: { username: 'test@test.com', password: 'test' } },
-      callback )
+    gateway.apiCall('DELETE', 'partner', {
+      body: { username: 'test@test.com', password: 'test' }
+    }).then((result) => {
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    })
   })
 
-  it('successfully get user from session', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerGet,
-      { }, callback)
+  it('successfully get partner from session', function(done) {
+    gateway.apiCall('GET', 'partner', {
+    }).then((result) => {
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    })
   })
 
   it('successfully get users list', function(done) {
-    const callback = (error, result) => {
-      const users = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(users)
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.userAll,
-      { }, callback)
+    gateway.apiCall('GET', 'user/all', {})
+      .then((result) => {
+        const users = JSON.parse(result.body)
+        if (result.statusCode === 200) {
+          console.log(users)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 
   it('successfully get partners list', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.partnerAll,
-      { }, callback)
-  })
+    gateway.apiCall('GET', 'partner/all', {})
+      .then((result) => {
+        const partners = JSON.parse(result.body)
+        if (result.statusCode === 200) {
+          console.log(partners)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
+  }).timeout(5000)
 
   it('successfully get one\'s own concerts list', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) {
-        const body = JSON.parse(result.body)
-        console.log(body)
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.partnerTickets,
-      { path: { partnerId: 1 } }, callback)
     // Under a condition that the admin account's id is 1
+    gateway.apiCall('GET', `partner/1/tickets`, {})
+      .then((result) => {
+        if (result.statusCode === 200) {
+          const body = JSON.parse(result.body)
+          console.log(body)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 
   it('successfully get concerts list', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) {
-        const body = JSON.parse(result.body)
-        console.log(body)
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.ticketAll,
-      { }, callback)
+    gateway.apiCall('GET', 'ticket/all' , {})
+      .then((result) => {
+        if (result.statusCode === 200) {
+          const body = JSON.parse(result.body)
+          console.log(body)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 
   it('successfully get ticket details', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) {
-        // const body = JSON.parse(result.body)
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.ticketStats,
-      { path: { ticketId: 1 } }, callback)
+    gateway.apiCall('GET', 'ticket/1/stats' , {})
+      .then((result) => {
+        if (result.statusCode === 200) {
+          // const body = JSON.parse(result.body)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 })
 
-describe('File', function() {
+xdescribe('File', function() {
   it('successful signing', function(done) {
     const callback = (error, result) => {
       expect(result.statusCode).to.equal(200)
@@ -164,7 +163,7 @@ describe('File', function() {
   })
 })
 
-describe('Ticket', function() {
+xdescribe('Ticket', function() {
   it('successful creation', function(done) {
     const callback = (error, result) => {
       if (error) return done(error)

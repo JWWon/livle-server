@@ -156,9 +156,10 @@ describe('User', function() {
 })
 
 let ticket
-xdescribe('Ticket', function() {
+describe('Ticket', function() {
   it('successful retrieve of list', function(done) {
-    const callback = (error, result) => {
+    gateway.apiCall('GET', 'ticket', {
+    }).then((result) => {
       const body = JSON.parse(result.body)
       if (result.statusCode === 200) {
         console.log(body)
@@ -166,27 +167,18 @@ xdescribe('Ticket', function() {
         return done()
       }
       done(new Error(body))
-    }
-
-    test( handler.ticketGet,
-      {},
-      callback
-    )
+    })
   })
 
   it('reservation failure with no subscription', function(done) {
-    const callback = (error, result) => {
+    gateway.apiCall('POST', `ticket/${ticket.id}/reserve`, {
+    }).then((result) => {
       if (result.statusCode === 403) {
         done()
       } else {
         done(new Error(result.body))
       }
-    }
-
-    test( handler.ticketReserve,
-      { path: { ticketId: ticket.id } },
-      callback
-    )
+    })
   })
 })
 

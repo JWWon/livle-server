@@ -45,25 +45,47 @@ Gateway.prototype.apiCall = function (method, path, params) {
   const paths = path.split('?')[0].split('/')
   switch (paths[0]) {
     case 'user': {
-      if (paths[1]) {
-        switch (paths[1]) {
-          case 'session':
-            return promisify(handler.userSignin)(event)
-          case 'facebook':
-            return promisify(handler.userFacebook)(event)
-          case 'password':
-            if (method === 'POST') {
-              return promisify(handler.userUpdatePassword)(event)
-            } else if (method === 'GET') {
-              return promisify(handler.userRequestPassword)(event)
+      switch (paths[1]) {
+        case undefined:
+          return promisify(handler.userRouter)(event)
+        case 'session':
+          return promisify(handler.userSignin)(event)
+        case 'facebook':
+          return promisify(handler.userFacebook)(event)
+        case 'password':
+          if (method === 'POST') {
+            return promisify(handler.userUpdatePassword)(event)
+          } else if (method === 'GET') {
+            return promisify(handler.userRequestPassword)(event)
+          }
+        case 'all':
+          return promisify(handler.userAll)(event)
+        default:
+          throw new Error(`Unknown path: ${path}`)
+      }
+    }
+    case 'ticket': {
+      switch (paths[1]) {
+        case undefined:
+          return promisify(handler.ticketRouter)(event)
+        case 'all':
+          return promisify(handler.ticketAll)(event)
+        default: {
+          event.pathParameters = { ticketId: paths[1] }
+          switch (paths[2]) {
+            case undefined: {
+              if (method === 'PATCH') {
+                return promisify(handler.ticketUpdate)(event)
+              } else if (method === 'DELETE') {
+                return promisify(handler.ticketDestroy)(event)
+              }
             }
-          case 'all':
-              return promisify(handler.userAll)(event)
-          default:
-            throw new Error(`Unknown path: ${path}`)
+            case 'stats':
+              return promisify(handler.ticketStats)(event)
+            case 'reserve':
+              return promisify(handler.ticketReserve)(event)
+          }
         }
-      } else {
-        return promisify(handler.userRouter)(event)
       }
     }
   }

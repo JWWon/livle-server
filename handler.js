@@ -33,10 +33,8 @@ module.exports.userRequestPassword = lambda(require('./src/user/request_password
 module.exports.userUpdatePassword = lambda(require('./src/user/update_password'))
 module.exports.userAll = lambda(require('./src/user/get_all'))
 
-module.exports.partnerCreate = lambda(require('./src/partner/create'))
-module.exports.partnerGet = lambda(require('./src/partner/get'))
+module.exports.partnerRouter = lambda(require('./src/partner/router'))
 module.exports.partnerSignin = lambda(require('./src/partner/signin'))
-module.exports.partnerDestroy = lambda(require('./src/partner/destroy'))
 module.exports.partnerAll = lambda(require('./src/partner/get_all'))
 module.exports.partnerApprove = lambda(require('./src/partner/approve'))
 module.exports.partnerTickets = lambda(require('./src/partner/tickets'))

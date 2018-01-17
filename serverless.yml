@@ -97,19 +97,12 @@ functions:
           path: user/all
           method: get
           cors: true
-  partnerCreate:
-    handler: handler.partnerCreate
+  partnerRouter:
+    handler: handler.partnerRouter
     events:
       - http:
           path: partner
-          method: post
-          cors: true
-  partnerGet:
-    handler: handler.partnerGet
-    events:
-      - http:
-          path: partner
-          method: get
+          method: any
           cors: true
   partnerSignin:
     handler: handler.partnerSignin
@@ -131,6 +124,13 @@ functions:
       - http:
           path: partner/{partnerId}/approve
           method: post
+          cors: true
+  partnerTickets:
+    handler: handler.partnerTickets
+    events:
+      - http:
+          path: partner/{partnerId}/tickets
+          method: get
           cors: true
   ticketRouter:
     handler: handler.ticketRouter

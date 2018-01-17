@@ -102,6 +102,24 @@ Gateway.prototype.apiCall = function (method, path, params) {
       }
       return promisify(handler.reservationRouter)(event)
     }
+    case 'partner': {
+      switch (paths[1]) {
+        case undefined:
+          return promisify(handler.partnerRouter)(event)
+        case 'session':
+          return promisify(handler.partnerSignin)(event)
+        case 'all':
+          return promisify(handler.partnerAll)(event)
+        default:
+          event.pathParameters = { partnerId: paths[1] }
+          switch (paths[2]) {
+            case 'approve':
+              return promisify(handler.partnerApprove)(event)
+            case 'tickets':
+              return promisify(handler.partnerTickets)(event)
+          }
+      }
+    }
   }
 }
 

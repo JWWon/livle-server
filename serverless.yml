@@ -132,19 +132,12 @@ functions:
           path: partner/{partnerId}/approve
           method: post
           cors: true
-  ticketCreate:
-    handler: handler.ticketCreate
+  ticketRouter:
+    handler: handler.ticketRouter
     events:
       - http:
           path: ticket
-          method: post
-          cors: true
-  ticketGet:
-    handler: handler.ticketGet
-    events:
-      - http:
-          path: ticket
-          method: get
+          method: any
           cors: true
   ticketAll:
     handler: handler.ticketAll

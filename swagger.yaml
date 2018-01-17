@@ -819,6 +819,37 @@ paths:
           description: 복구할 수 있는 상태가 아님 (미납이거나 취소한 적이 없음)
         '404':
           description: 복구할 구독이 없음
+  '/subscription/{subscriptionId}/limit':
+    patch:
+      tags:
+        - subscription
+      summary: '[관리자] 유저의 예약 가능 횟수를 변경'
+      parameters:
+        - name: Authorization
+          in: header
+          description: 세션토큰
+          required: true
+          type: string
+        - name: subscriptionId
+          in: path
+          required: true
+          type: string
+        - name: limit
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              limit:
+                type: integer
+                example: 3
+      responses:
+        '200':
+          description: 업데이트 성공
+        '401':
+          description: 로그인되어 있지 않음
+        '403':
+          description: 권한이 없음
   /file:
     get:
       tags:

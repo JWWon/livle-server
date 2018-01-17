@@ -147,6 +147,19 @@ describe('Partner actions', function() {
         }
       })
   })
+
+  it('successfully release suspension of an user', function(done) {
+    gateway.apiCall('DELETE', `user/1/suspend`, {})
+      .then((result) => {
+        if (result.statusCode === 200) {
+          const user = JSON.parse(result.body)
+          console.log(user)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
+  })
 })
 
 describe('File', function() {

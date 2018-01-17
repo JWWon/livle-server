@@ -97,6 +97,13 @@ functions:
           path: user/all
           method: get
           cors: true
+  userUnsuspend:
+    handler: handler.userUnsuspend
+    events:
+      - http:
+          path: user/{userId}/suspend
+          method: delete
+          cors: true
   partnerRouter:
     handler: handler.partnerRouter
     events:

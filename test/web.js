@@ -135,8 +135,8 @@ describe('Partner actions', function() {
   })
 
   it('successfully modify limit of a subscription', function(done) {
-    gateway.apiCall('PATCH', 'subscription/1/limit', { body: {
-      limit: 3 }
+    gateway.apiCall('PATCH', 'subscription/1/limit', {
+      body: { limit: 3 },
     }).then((result) => {
         if (result.statusCode === 200) {
           const s = JSON.parse(result.body)

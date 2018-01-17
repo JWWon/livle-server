@@ -2,7 +2,6 @@
 
 const Partner = require('../partner/partner')
 const Subscription = require('.')
-const _ = require('lodash')
 
 module.exports = (params, respond) => {
   if (!params.auth) return respond(401, '로그인되지 않았습니다.')

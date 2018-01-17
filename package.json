@@ -4,7 +4,7 @@
   "description": "Livle server with serverless framework for aws lambda",
   "scripts": {
     "deploy": "eslint src & serverless deploy",
-    "lint": "eslint src",
+    "lint": "eslint src schedule test",
     "test": "eslint src & mocha"
   },
   "author": "",

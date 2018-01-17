@@ -3,8 +3,8 @@
 const Partner = require('./partner')
 
 module.exports = (params, respond) => {
-  const username = params.query.username
-  const password = params.query.password
+  const username = params.body.username
+  const password = params.body.password
   if (!username || !password) {
     respond(400, '유저명이나 비밀번호가 입력되지 않았습니다.')
   }

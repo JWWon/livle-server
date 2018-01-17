@@ -60,15 +60,7 @@ functions:
     events:
       - http:
           path: user
-          method: post
-          cors: true
-      - http:
-          path: user
-          method: get
-          cors: true
-      - http:
-          path: user
-          method: delete
+          method: any
           cors: true
   userSignin:
     handler: handler.userSignin
@@ -105,26 +97,19 @@ functions:
           path: user/all
           method: get
           cors: true
-  partnerCreate:
-    handler: handler.partnerCreate
+  partnerRouter:
+    handler: handler.partnerRouter
     events:
       - http:
           path: partner
-          method: post
-          cors: true
-  partnerGet:
-    handler: handler.partnerGet
-    events:
-      - http:
-          path: partner
-          method: get
+          method: any
           cors: true
   partnerSignin:
     handler: handler.partnerSignin
     events:
       - http:
           path: partner/session
-          method: get
+          method: post
           cors: true
   partnerAll:
     handler: handler.partnerAll
@@ -140,19 +125,19 @@ functions:
           path: partner/{partnerId}/approve
           method: post
           cors: true
-  ticketCreate:
-    handler: handler.ticketCreate
+  partnerTickets:
+    handler: handler.partnerTickets
     events:
       - http:
-          path: ticket
-          method: post
-          cors: true
-  ticketGet:
-    handler: handler.ticketGet
-    events:
-      - http:
-          path: ticket
+          path: partner/{partnerId}/tickets
           method: get
+          cors: true
+  ticketRouter:
+    handler: handler.ticketRouter
+    events:
+      - http:
+          path: ticket
+          method: any
           cors: true
   ticketAll:
     handler: handler.ticketAll
@@ -201,15 +186,7 @@ functions:
     events:
       - http:
           path: subscription
-          method: post
-          cors: true
-      - http:
-          path: subscription
-          method: patch
-          cors: true
-      - http:
-          path: subscription
-          method: delete
+          method: any
           cors: true
   subscriptionRestore:
     handler: handler.subscriptionRestore

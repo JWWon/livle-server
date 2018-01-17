@@ -11,7 +11,7 @@ module.exports = (params, respond) => {
 
   return Partner.fromHeaders({ Authorization: params.auth })
     .then((partner) => {
-      if (partner.id !== partnerId) {
+      if (partner.id != partnerId) {
         return respond(403, '권한이 없습니다.')
       }
       partner.getTickets({ include: [{ model: Artist }] })

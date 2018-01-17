@@ -25,7 +25,6 @@
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
     "dotenv": "^4.0.0",
     "eslint": "^4.12.0",
     "eslint-config-google": "^0.9.1",

@@ -113,21 +113,17 @@ describe('User', function() {
       })
   }).timeout(5000)
 
-  /*
-  it('successful password update', function(done) {
-    const callback = (error, result) => {
+  xit('successful password update', function(done) {
+    // 메일로 토큰을 받아야 업데이트 가능하므로 테스트하지 않음
+    gateway.apiCall('POST', 'user/password', {
+      body: { token: 'token', password: 'newpass' },
+    }).then((result) => {
       if(error) done(error)
       console.log(result)
       expect(result.statusCode).to.equal(200)
       done()
-    }
-
-    test( handler.userUpdatePassword,
-      { body: { token: 'test', password: 'new' } },
-      callback
-    )
+    })
   })
-  */
 
   it('successful signin', function(done) {
     gateway.apiCall('POST', 'user/session', {

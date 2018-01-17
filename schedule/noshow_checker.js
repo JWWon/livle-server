@@ -14,7 +14,7 @@ const suspend = (reservation, suspendBy) => {
   return reservation.getSubscription()
     .then((sub) => sub.getUser()).then((user) =>
       user.update({ suspended_by: suspendBy })
-    ).then((user) => reservation.update({ cancelled_at: now }))
+    ).then((user) => reservation.destroy())
 }
 
 const processNoshows = (ticket) =>

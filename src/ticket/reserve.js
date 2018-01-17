@@ -55,10 +55,6 @@ module.exports = (params, respond) => {
                 respond(405, err)
               })
           })
-      }).catch((err) => {
-        console.log('------------------')
-        console.error(err)
-        respond(500, err)
-      })
+      }).catch((err) => respond(500, err))
     ).catch((err) => respond(401, '로그인되지 않았습니다.'))
 }

@@ -23,15 +23,35 @@ const sanitize = (reservation) => _.reduce(reservation.dataValues,
     return result
   }, { })
 
+const ticketAttrs = [
+  ['start_at', 'startAt'],
+  ['end_at', 'endAt'],
+  'title',
+  'place',
+]
+
 module.exports = (params, respond) => {
   const token = params.auth
+  const now = new Date()
 
   return User.fromToken(token)
     .then((user) =>
-      user.getReservations()
-      .then((reservations) =>
-        respond(200, _.map(reservations, sanitize))
-      ).catch((err) => respond(500, err))
+      user.getReservations({
+        where: { checked_at: null },
+      }).then((reservations) => {
+        Promise.all(
+          _.map(reservations, (r) => r.getTicket({ attributes: ticketAttrs }))
+        ).then((tickets) => {
+          const result = _.map(reservations, (r, i) => {
+            const ticket = tickets[i]
+            if (ticket.endAt > now) return null
+            let sanitizedReservation = sanitize(r)
+            sanitizedReservation.ticket = ticket.dataValues
+            return sanitizedReservation
+          })
+          respond(200, _.filter(result, (r) => !!r))
+        })
+      }).catch((err) => respond(500, err))
     ).catch((err) => {
       console.error(err)
       respond(401, '로그인이 필요합니다.')

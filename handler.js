@@ -5,6 +5,7 @@ const lambda = (func) => {
     context.callbackWaitsForEmptyEventLoop = false
 
     const respond = (code, data) => {
+      if (code >= 500) console.error(data)
       callback(null, {
         statusCode: code,
         headers: {

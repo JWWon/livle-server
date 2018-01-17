@@ -241,7 +241,7 @@ describe('Subscription', function() {
 
   it('checkin failure with invalid checkin code', function(done) {
     gateway.apiCall('POST', `reservation/${reservation.id}/check`,
-      { code: '1234' }).then((result) => {
+      { body: { code: '1234' } }).then((result) => {
         if (result.statusCode === 403) {
           done()
         } else {

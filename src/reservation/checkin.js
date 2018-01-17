@@ -6,6 +6,8 @@ module.exports = (params, respond) => {
   const token = params.auth
   const rId = params.path.reservationId
   if (!rId) return respond(400, '예약 아이디가 없습니다.')
+  const code = params.body && params.body.code
+  if (!code) return respond(400, '체크인 코드가 없습니다.')
 
   return User.fromToken(token)
     .then((user) =>
@@ -19,16 +21,14 @@ module.exports = (params, respond) => {
 
         return r.getTicket()
           .then((t) => {
-            if (t.checkin_code === params.body.code) {
+            if (t.checkin_code === code) {
               return r.update({ checked_at: new Date() })
                 .then((r) => respond(200, r.dataValues))
             } else {
               respond(403, '체크인 코드가 틀립니다.') // TODO code
             }
           })
-      }).catch((err) => {
-        console.error(err); respond(500)
-      })
+      }).catch((err) => respond(500, err))
     ).catch((err) =>
       respond(401, '로그인이 필요합니다.')
     )

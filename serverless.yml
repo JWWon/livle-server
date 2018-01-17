@@ -186,15 +186,7 @@ functions:
     events:
       - http:
           path: subscription
-          method: post
-          cors: true
-      - http:
-          path: subscription
-          method: patch
-          cors: true
-      - http:
-          path: subscription
-          method: delete
+          method: any
           cors: true
   subscriptionRestore:
     handler: handler.subscriptionRestore

@@ -48,7 +48,7 @@ describe('User', function() {
       }
       done(new Error(body))
     })
-  }).timeout(5000)
+  }).timeout(10000)
 
   it('creation failure with not existing email', function(done) {
     gateway.apiCall('POST', 'user', {
@@ -64,7 +64,7 @@ describe('User', function() {
         done(new Error(body))
       }
     })
-  }).timeout(5000)
+  }).timeout(10000)
 
   it('creation failure when no password', function(done) {
     gateway.apiCall('POST', 'user', {
@@ -182,92 +182,71 @@ describe('Ticket', function() {
   })
 })
 
-xdescribe('Subscription', function() {
+describe('Subscription', function() {
+  const paymentParams = {
+    cardNumber: cardNumber,
+    expiry: expiry,
+    birth: birth,
+    password: password,
+  }
   it('successful free trial', function(done) {
-    const callback = (error, result) => {
-      const user = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(user)
-        if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error('Failed to return subscription data'))
+    gateway.apiCall('POST', 'subscription', { body: paymentParams })
+      .then((result) => {
+        const user = JSON.parse(result.body)
+        if (result.statusCode === 200) {
+          console.log(user)
+          if (!user.currentSubscription || !user.nextSubscription) {
+            return done(new Error('Failed to return subscription data'))
+          }
+          const from = new Date(user.currentSubscription.from)
+          const to = new Date(user.currentSubscription.to)
+          const daysBetween = (to - from) / 1000 / 60 / 60 / 24
+          if (daysBetween < 30) {
+            return done(new Error('Subscription shorter than 30 days'))
+          }
+          done()
+        } else {
+          done(new Error(result.body))
         }
-        const from = new Date(user.currentSubscription.from)
-        const to = new Date(user.currentSubscription.to)
-        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
-        if (daysBetween < 30) {
-          return done(new Error('Subscription shorter than 30 days'))
-        }
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.subscriptionCreate,
-      { body:
-        {
-          cardNumber: cardNumber,
-          expiry: expiry,
-          birth: birth,
-          password: password,
-        },
-      }, callback
-    )
+      })
   }).timeout(5000)
 
   it('subscription fails if already subscribing', function(done) {
-    const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(405)
-      done()
-    }
-
-    test( handler.subscriptionCreate,
-      { body:
-        {
-          cardNumber: cardNumber,
-          expiry: expiry,
-          birth: birth,
-          password: password,
-        },
-      }, callback
-    )
+    gateway.apiCall('POST', 'subscription', { body: paymentParams })
+      .then((result) => {
+        if (result.statusCode === 405) {
+          return done()
+        }
+        done(new Error(result.body))
+      })
   })
 
   it('successful reservation', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) {
-        const reservation = JSON.parse(result.body)
-        console.log(reservation)
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.ticketReserve,
-      { path: { ticketId: ticket.id } },
-      callback
-    )
+    gateway.apiCall('POST', `ticket/${ticket.id}/reserve`, {})
+      .then((result) => {
+        if (result.statusCode === 200) {
+          const reservation = JSON.parse(result.body)
+          console.log(reservation)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 
   it('reservation failure on duplicate', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 405) {
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.ticketReserve,
-      { path: { ticketId: ticket.id } },
-      callback
-    )
+    gateway.apiCall('POST', `ticket/${ticket.id}/reserve`, {})
+      .then((result) => {
+        if (result.statusCode === 405) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 
   let reservation
-  it('successful retrieval of reservation', function(done) {
+  xit('successful retrieval of reservation', function(done) {
     const callback = (error, result) => {
       if (result.statusCode === 200) {
         const reservations = JSON.parse(result.body)
@@ -285,7 +264,7 @@ xdescribe('Subscription', function() {
     )
   })
 
-  it('checkin failure with invalid checkin code', function(done) {
+  xit('checkin failure with invalid checkin code', function(done) {
     const callback = (error, result) => {
       if (result.statusCode === 403) {
         done()
@@ -300,7 +279,7 @@ xdescribe('Subscription', function() {
     )
   })
 
-  it('successful cancellation of a reservation', function(done) {
+  xit('successful cancellation of a reservation', function(done) {
     const callback = (error, result) => {
       if (result.statusCode === 200) {
         done()
@@ -315,7 +294,7 @@ xdescribe('Subscription', function() {
     )
   })
 
-  it('successful reservation after a cancellation', function(done) {
+  xit('successful reservation after a cancellation', function(done) {
     const callback = (error, result) => {
       if (result.statusCode === 200) {
         const reservation = JSON.parse(result.body)
@@ -330,110 +309,81 @@ xdescribe('Subscription', function() {
       { path: { ticketId: ticket.id } },
       callback
     )
-  }).timeout(5000)
+  })//.timeout(5000)
 
   // TODO successful checkin
 
   it('successful update of payment information', function(done) {
-    const callback = (error, result) => {
-      const body = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(body)
-        done()
-      } else {
-        done(new Error(body))
-      }
-    }
-
-    test( handler.subscriptionUpdate,
-      { body:
-        {
-          cardNumber: cardNumber,
-          expiry: expiry,
-          birth: birth,
-          password: password,
-        },
-      }, callback )
+    gateway.apiCall('PATCH', 'subscription', { body: paymentParams })
+      .then((result) => {
+        const body = JSON.parse(result.body)
+        if (result.statusCode === 200) {
+          console.log(body)
+          done()
+        } else {
+          done(new Error(body))
+        }
+      })
   })
 
   it('successful cancellation of a subscription', function(done) {
-    const callback = (error, result) => {
-      if (result.statusCode === 200) {
-        const body = JSON.parse(result.body)
-        console.log(body)
-        done()
-      } else {
-        done(new Error(body))
-      }
-    }
-
-    test( handler.subscriptionCancel,
-      { },
-      callback
-    )
+    gateway.apiCall('DELETE', 'subscription', { })
+      .then((result) => {
+        if (result.statusCode === 200) {
+          const body = JSON.parse(result.body)
+          console.log(body)
+          done()
+        } else {
+          done(new Error(body))
+        }
+      })
   })
 
   it('subscription failure within a valid period after a cancellation',
     function(done) {
-      const callback = (error, result) => {
-        if (result.statusCode === 405) {
+      gateway.apiCall('POST', 'subscription', { body: paymentParams })
+        .then((result) => {
+          if (result.statusCode === 405) {
+            done()
+          } else {
+            done(new Error(result.body))
+          }
+        })
+    }).timeout(5000)
+
+  it('successful restoration of subscription', function(done) {
+    gateway.apiCall('POST', 'subscription/restore', { })
+      .then((result) => {
+        const user = JSON.parse(result.body)
+        if (result.statusCode === 200) {
+          console.log(user)
+          if (!user.currentSubscription || !user.nextSubscription) {
+            return done(new Error('Failed to return subscription data'))
+          }
+          const from = new Date(user.currentSubscription.from)
+          const to = new Date(user.currentSubscription.to)
+          const daysBetween = (to - from) / 1000 / 60 / 60 / 24
+          if (daysBetween < 30) {
+            return done(new Error('Subscription shorter than 30 days'))
+          }
           done()
         } else {
           done(new Error(result.body))
         }
-      }
-
-      test( handler.subscriptionCreate,
-        { body:
-          {
-            cardNumber: cardNumber,
-            expiry: expiry,
-            birth: birth,
-            password: password,
-          },
-        }, callback
-      )
-    }).timeout(5000)
-
-  it('successful restoration of subscription', function(done) {
-    const callback = (error, result) => {
-      const user = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(user)
-        if (!user.currentSubscription || !user.nextSubscription) {
-          return done(new Error('Failed to return subscription data'))
-        }
-        const from = new Date(user.currentSubscription.from)
-        const to = new Date(user.currentSubscription.to)
-        const daysBetween = (to - from) / 1000 / 60 / 60 / 24
-        if (daysBetween < 30) {
-          return done(new Error('Subscription shorter than 30 days'))
-        }
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    }
-
-    test( handler.subscriptionRestore,
-      { }, callback)
+      })
   })
 
   it('successful cancellation of a subscription', function(done) {
-    const callback = (error, result) => {
-      const body = JSON.parse(result.body)
-      if (result.statusCode === 200) {
-        console.log(body)
-        done()
-      } else {
-        done(new Error(body))
-      }
-    }
-
-    test( handler.subscriptionCancel,
-      { },
-      callback
-    )
+    gateway.apiCall('DELETE', 'subscription', { })
+      .then((result) => {
+        const body = JSON.parse(result.body)
+        if (result.statusCode === 200) {
+          console.log(body)
+          done()
+        } else {
+          done(new Error(body))
+        }
+      })
   })
 })
 
@@ -489,7 +439,8 @@ xdescribe('Paid subscription', function() {
 })
 
 describe('User deletion', function() {
-  it('successful deletion', function(done) {
+  xit('successful deletion', function(done) {
+    // 구독이 만료되지 않아 탈퇴되지 않음
     gateway.apiCall('DELETE', 'user', {
       body: {
         email: userEmail,
@@ -504,7 +455,7 @@ describe('User deletion', function() {
     })
   })
 
-  xit('deletion failure while subscription not expired yet', function(done) {
+  it('deletion failure while subscription not expired yet', function(done) {
     gateway.apiCall('DELETE', 'user', {
       body: {
         email: userEmail,

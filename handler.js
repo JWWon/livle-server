@@ -55,11 +55,6 @@ module.exports.reservationCancel = lambda(require('./src/reservation/cancel'))
 module.exports.fileUpload = lambda(require('./src/file/upload'))
 
 module.exports.subscriptionRouter = lambda(require('./src/subscription/router'))
-// 이 3개는 테스트 모듈 때문에 존재 -> 삭제해야 함
-module.exports.subscriptionCreate = lambda(require('./src/subscription/create'))
-module.exports.subscriptionUpdate = lambda(require('./src/subscription/update'))
-module.exports.subscriptionCancel = lambda(require('./src/subscription/cancel'))
-//
 module.exports.subscriptionRestore = lambda(require('./src/subscription/restore'))
 
 module.exports.subscriptionRenew = lambda(require('./schedule/subscription_renewer'))

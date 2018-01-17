@@ -88,6 +88,14 @@ Gateway.prototype.apiCall = function (method, path, params) {
         }
       }
     }
+    case 'subscription': {
+      switch (paths[1]) {
+        case undefined:
+          return promisify(handler.subscriptionRouter)(event)
+        case 'restore':
+          return promisify(handler.subscriptionRestore)(event)
+      }
+    }
   }
 }
 

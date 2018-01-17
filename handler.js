@@ -54,6 +54,7 @@ module.exports.fileUpload = lambda(require('./src/file/upload'))
 
 module.exports.subscriptionRouter = lambda(require('./src/subscription/router'))
 module.exports.subscriptionRestore = lambda(require('./src/subscription/restore'))
+module.exports.subscriptionLimit = lambda(require('./src/subscription/limit'))
 
 module.exports.subscriptionRenew = lambda(require('./schedule/subscription_renewer'))
 module.exports.noshowChecker = lambda(require('./schedule/noshow_checker'))

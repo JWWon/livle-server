@@ -188,6 +188,13 @@ functions:
           path: subscription
           method: any
           cors: true
+  subscriptionLimit:
+    handler: handler.subscriptionLimit
+    events:
+      - http:
+          path: subscription/{subscriptionId}/limit
+          method: patch
+          cors: true
   subscriptionRestore:
     handler: handler.subscriptionRestore
     events:

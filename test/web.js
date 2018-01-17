@@ -133,6 +133,20 @@ describe('Partner actions', function() {
         }
       })
   })
+
+  it('successfully modify limit of a subscription', function(done) {
+    gateway.apiCall('PATCH', 'subscription/1/limit', { body: {
+      limit: 3 }
+    }).then((result) => {
+        if (result.statusCode === 200) {
+          const s = JSON.parse(result.body)
+          console.log(s)
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
+  })
 })
 
 describe('File', function() {

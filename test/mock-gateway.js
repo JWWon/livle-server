@@ -96,6 +96,10 @@ Gateway.prototype.apiCall = function(method, path, params) {
           return promisify(handler.subscriptionRestore)(event)
         default:
           event.pathParameters = { subscriptionId: paths[1] }
+          switch (paths[2]) {
+            case 'limit':
+              return promisify(handler.subscriptionLimit)(event)
+          }
       }
     }
     case 'reservation': {

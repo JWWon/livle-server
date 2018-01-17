@@ -120,6 +120,8 @@ Gateway.prototype.apiCall = function (method, path, params) {
           }
       }
     }
+    case 'file':
+      return promisify(handler.fileUpload)(event)
   }
 }
 

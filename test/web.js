@@ -1,22 +1,6 @@
 const Gateway = require('./mock-gateway')
 const gateway = new Gateway()
 
-// TODO remove those
-const handler = require('../handler')
-const expect = require('chai').expect
-
-let authToken = ''
-
-const test = (func, params, callback) => {
-  func({
-    headers: { Authorization: authToken },
-    body: JSON.stringify(params.body),
-    queryStringParameters: params.query,
-    pathParameters: params.path,
-    httpMethod: params.httpMethod,
-  }, {}, callback)
-}
-
 describe('Partner', function() {
   let partnerId
 
@@ -149,93 +133,91 @@ describe('Partner', function() {
   })
 })
 
-xdescribe('File', function() {
+describe('File', function() {
   it('successful signing', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.fileUpload,
-      { },
-      callback
-    )
+    gateway.apiCall('GET', 'file', {})
+      .then((result) => {
+        if (result.statusCode === 200) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 })
 
-xdescribe('Ticket', function() {
+describe('Ticket', function() {
   it('successful creation', function(done) {
-    const callback = (error, result) => {
-      if (error) return done(error)
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
     let date = new Date()
     date.setDate(date.getDate() + 5)
-    test( handler.ticketCreate,
-      { body: { title: '테스트 콘서트', start_at: date, end_at: date,
-        image: 'test', capacity: 100, place: '판교' } },
-      callback
-    )
+    gateway.apiCall('POST', 'ticket', { body: {
+      title: '테스트 콘서트',
+      start_at: date,
+      end_at: date,
+      image: 'test',
+      capacity: 100,
+      place: '판교' }
+    }).then((result) => {
+      if (result.statusCode === 200) {
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    })
   })
 
   let ticketId
   it('successful creation with artists', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      ticketId = res.id
-      done()
-    }
-
     let date = new Date()
     date.setDate(date.getDate() + 5)
-    test( handler.ticketCreate,
-      { body: { title: '테스트 콘서트', start_at: date, end_at: date,
-        image: 'test', capacity: 100, place: '판교',
-        artists: [
-          { name: '아이유', image: 'iu' },
-          { name: 'asdf', image: 'qwer' },
-        ],
-      } },
-      callback
-    )
+    gateway.apiCall('POST', 'ticket', { body: {
+      title: '테스트 콘서트',
+      start_at: date,
+      end_at: date,
+      image: 'test', capacity: 100, place: '판교',
+      artists: [
+        { name: '아이유', image: 'iu' },
+        { name: 'asdf', image: 'qwer' },
+      ],
+    } }).then((result) => {
+      if (result.statusCode === 200) {
+        const ticket = JSON.parse(result.body)
+        ticketId = ticket.id
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    })
   })
 
   it('successful update', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      const res = JSON.parse(result.body)
-      ticketId = res.id
-      done()
-    }
-
-    test( handler.ticketUpdate,
-      { path: { ticketId: ticketId },
-        body: {
-          title: '테스트 콘서트 업데이트',
-          image: 'test2', capacity: 50, place: '판교',
-          artists: [
-            { id: 1, name: '아이유2', image: 'iu' },
-            { name: 'hello', image: 'qwer' },
-            { name: '수란', image: 'suran' },
-          ],
-        },
-      },
-      callback
-    )
+    gateway.apiCall('PATCH', `ticket/${ticketId}`, { body: {
+      title: '테스트 콘서트 업데이트',
+      image: 'test2', capacity: 50, place: '판교',
+      artists: [
+        { id: 1, name: '아이유2', image: 'iu' },
+        { name: 'hello', image: 'qwer' },
+        { name: '수란', image: 'suran' },
+      ],
+    } }).then((result) => {
+      if (result.statusCode === 200) {
+        const ticket = JSON.parse(result.body)
+        ticketId = ticket.id
+        done()
+      } else {
+        done(new Error(result.body))
+      }
+    })
   })
 
   it('successful deletion', function(done) {
-    const callback = (error, result) => {
-      expect(result.statusCode).to.equal(200)
-      done()
-    }
-
-    test( handler.ticketDestroy,
-      { path: { ticketId: ticketId } },
-      callback
-    )
+    gateway.apiCall('DELETE', `ticket/${ticketId}`, {})
+      .then((result) => {
+        if (result.statusCode === 200) {
+          done()
+        } else {
+          done(new Error(result.body))
+        }
+      })
   })
 })

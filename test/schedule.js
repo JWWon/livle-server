@@ -1,21 +1,10 @@
 'use strict'
 
 const User = require('../src/user/user')
-const expect = require('chai').expect
 const handler = require('../handler')
 
 require('dotenv').config() // .env 파일에서 환경변수 읽어오기
 const userEmail = process.env.TESTER_EMAIL
-
-const test = (func, params, callback) => {
-  func({
-    headers: { },
-    body: JSON.stringify(params.body),
-    queryStringParameters: params.query,
-    pathParameters: params.path,
-    httpMethod: params.httpMethod,
-  }, {}, callback)
-}
 
 describe('Subscription renew', function() {
   it('successful renewal', function(done) {

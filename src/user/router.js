@@ -3,19 +3,62 @@
 const create = require('./_create')
 const get = require('./_get')
 const destroy = require('./_destroy')
+const signin = require('./_signin')
+const facebook = require('./_facebook')
+const requestPassword = require('./_request-password')
+const updatePassword = require('./_update-password')
+const getAll = require('./_get-all')
 
-module.exports = (params, respond) => {
+const invalidMethod = (params, respond) =>
+  respond(500, `Invalid method ${params.httpMethod}`)
+
+const userRouter = (params, respond) => {
   switch (params.httpMethod) {
     case 'POST':
-      create(params, respond)
-      break
+      return create(params, respond)
     case 'GET':
-      get(params, respond)
-      break
+      return get(params, respond)
     case 'DELETE':
-      destroy(params, respond)
-      break
+      return destroy(params, respond)
     default:
-      console.error(`Invalid method: ${params.httpMethod}`)
+      return invalidMethod(params, respond)
+  }
+}
+
+module.exports = (params, respond) => {
+  const paths = params.fullPath.split('?')[0].split('/')
+  const len = paths.length
+  const lastFrag = paths[len-1]
+  const method = params.httpMethod
+  // fullPath에 basePath가 포함되어서 마지막 Frag로 구분
+  switch (lastFrag) {
+    case 'user':
+      return userRouter(params, respond)
+    case 'session':
+      if (method !== 'POST') {
+        return invalidMethod(params, respond)
+      }
+      return signin(params, respond)
+    case 'facebook':
+      if (method !== 'POST') {
+        return invalidMethod(params, respond)
+      }
+      return facebook(params, respond)
+    case 'password':
+      switch (method) {
+        case 'GET':
+          return requestPassword(params, respond)
+        case 'POST':
+          return updatePassword(params, respond)
+        default:
+          return invalidMethod(params, respond)
+      }
+    case 'all':
+      if (method !== 'GET') {
+        return invalidMethod(params, respond)
+      }
+      return getAll(params, respond)
+    default:
+      respond(500, `Invalid path ${params.fullPath}`)
   }
 }

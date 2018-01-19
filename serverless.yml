@@ -62,37 +62,18 @@ functions:
           path: user
           method: any
           cors: true
-  userSignin:
-    handler: handler.userSignin
-    events:
       - http:
           path: user/session
           method: post
           cors: true
-  userFacebook:
-    handler: handler.userFacebook
-    events:
       - http:
           path: user/facebook
           method: post
           cors: true
-  userRequestPassword:
-    handler: handler.userRequestPassword
-    events:
       - http:
           path: user/password
-          method: get
+          method: any
           cors: true
-  userUpdatePassword:
-    handler: handler.userUpdatePassword
-    events:
-      - http:
-          path: user/password
-          method: post
-          cors: true
-  userAll:
-    handler: handler.userAll
-    events:
       - http:
           path: user/all
           method: get

@@ -17,5 +17,6 @@ module.exports = (params, respond) => {
       break
     default:
       console.error(`Invalid method: ${params.httpMethod}`)
+      respond(500, `Invalid method: ${params.httpMethod}`)
   }
 }

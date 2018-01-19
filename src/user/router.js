@@ -1,8 +1,8 @@
 'use strict'
 
-const create = require('./create')
-const get = require('./get')
-const destroy = require('./destroy')
+const create = require('./_create')
+const get = require('./_get')
+const destroy = require('./_destroy')
 
 module.exports = (params, respond) => {
   switch (params.httpMethod) {

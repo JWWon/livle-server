@@ -2,6 +2,7 @@
 
 const Partner = require('../partner/partner')
 const Subscription = require('../subscription')
+const Reservation = require('../reservation/reservation')
 const User = require('./user')
 const _ = require('lodash')
 
@@ -13,7 +14,10 @@ module.exports = (params, respond) => {
       if (!partner.isAdmin()) return respond(403, '권한이 없습니다.')
 
       return User.findAll({
-        include: [{ model: Subscription }],
+        include: [{
+          model: Subscription,
+          include: [{ model: Reservation }],
+        }],
       }).then((users) => {
         const userList = _.map(users, (u) => {
           const uData = u.dataValues

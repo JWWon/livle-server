@@ -1,177 +1,131 @@
-const Gateway = require('./mock-gateway')
-const gateway = new Gateway()
+'use strict'
+const axios = require('axios')
+axios.defaults.baseURL = 'http://localhost:3000'
+function setAuth(token) {
+  axios.defaults.headers.common['Authorization'] = token
+}
 
 describe('Partner', function() {
   let partnerId
 
   it('successful creation', function(done) {
-    gateway.apiCall('POST', 'partner', {
-      body: { username: 'test@test.com', company: 'test', password: 'test' },
-    }).then((result) => {
-      if (result.statusCode === 200) {
-        const partner = JSON.parse(result.body)
-        partnerId = partner.id
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    })
+    axios.post('/partner', {
+      username: 'test5@test.com',
+      company: 'test',
+      password: 'test',
+    },).then((res) => {
+      const partner = res.data
+      partnerId = partner.id
+      done()
+    }).catch(done)
   })
 
   it('successful signin', function(done) {
-    gateway.apiCall('POST', 'partner/session', {
-      body: { username: 'admin@livle.kr', password: 'livle' },
-    }).then((result) => {
-      const partner = JSON.parse(result.body)
+    axios.post('/partner/session', {
+      username: 'admin@livle.kr',
+      password: 'livle',
+    }).then((res) => {
+      const partner = res.data
       partnerId = partner.id
-      gateway.setAuth(partner.token)
+      setAuth(partner.token)
       if (partner.token) {
         done()
       } else {
-        done(new Error(result.body))
+        done(new Error('Missing token'))
       }
-    })
+    }).catch(done)
   })
 
   it('successful approval', function(done) {
-    gateway.apiCall('POST', `partner/${partnerId}/approve`, { })
-      .then((result) => {
-        if (result.statusCode === 200) {
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
+    axios.post(`/partner/${partnerId}/approve`)
+      .then((res) => done())
+      .catch(done)
   })
 
   it('successful deletion', function(done) {
-    gateway.apiCall('DELETE', 'partner', {
-      body: { username: 'test@test.com', password: 'test' },
-    }).then((result) => {
-      if (result.statusCode === 200) {
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    })
+    axios.delete('/partner', {
+      data: { username: 'test@test.com', password: 'test' },
+    }).then((res) => done())
+      .catch(done)
   })
 
   it('successfully get partner from session', function(done) {
-    gateway.apiCall('GET', 'partner', {
-    }).then((result) => {
-      if (result.statusCode === 200) {
+    axios.get('/partner')
+      .then((res) => done())
+      .catch(done)
+  })
+})
+
+describe('Listing', function() {
+  it('successfully get users list', function(done) {
+    axios.get('/user/all')
+      .then((res) => {
+        const users = res.data
+        console.log(users)
         done()
-      } else {
-        done(new Error(result.body))
-      }
-    })
+      }).catch(done)
+  })
+
+  it('successfully get partners list', function(done) {
+    axios.get('/partner/all')
+      .then((res) => {
+        const partners = res.data
+        console.log(partners)
+        done()
+      }).catch(done)
+  })
+
+  it('successfully get one\'s own concerts list', function(done) {
+    // Under a condition that the admin account's id is 1
+    axios.get('/partner/1/tickets')
+      .then((res) => {
+        const concerts = res.data
+        console.log(concerts)
+        done()
+      }).catch(done)
+  })
+
+  it('successfully get concerts list', function(done) {
+    axios.get('/ticket/all')
+      .then((res) => {
+        const concerts = res.data
+        console.log(concerts)
+        done()
+      }).catch(done)
   })
 })
 
 describe('Partner actions', function() {
-  it('successfully get users list', function(done) {
-    gateway.apiCall('GET', 'user/all', {})
-      .then((result) => {
-        if (result.statusCode === 200) {
-          const users = JSON.parse(result.body)
-          console.log(users)
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
-  })
-
-  it('successfully get partners list', function(done) {
-    gateway.apiCall('GET', 'partner/all', {})
-      .then((result) => {
-        if (result.statusCode === 200) {
-          const partners = JSON.parse(result.body)
-          console.log(partners)
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
-  }).timeout(5000)
-
-  it('successfully get one\'s own concerts list', function(done) {
-    // Under a condition that the admin account's id is 1
-    gateway.apiCall('GET', `partner/1/tickets`, {})
-      .then((result) => {
-        if (result.statusCode === 200) {
-          const body = JSON.parse(result.body)
-          console.log(body)
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
-  })
-
-  it('successfully get concerts list', function(done) {
-    gateway.apiCall('GET', 'ticket/all', {})
-      .then((result) => {
-        if (result.statusCode === 200) {
-          const body = JSON.parse(result.body)
-          console.log(body)
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
-  })
-
   it('successfully get ticket details', function(done) {
-    gateway.apiCall('GET', 'ticket/1/stats', {})
-      .then((result) => {
-        if (result.statusCode === 200) {
-          // const body = JSON.parse(result.body)
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
+    axios.get('/ticket/1/stats')
+      .then((res) => done())
+      .catch(done)
   })
 
   it('successfully modify limit of a subscription', function(done) {
-    gateway.apiCall('PATCH', 'subscription/1/limit', {
-      body: { limit: 3 },
-    }).then((result) => {
-        if (result.statusCode === 200) {
-          const s = JSON.parse(result.body)
-          console.log(s)
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
+    axios.patch('/subscription/1/limit', { limit: 3 })
+    .then((res) => {
+      const s = res.data
+      console.log(s)
+      done()
+    }).catch(done)
   })
 
   it('successfully release suspension of an user', function(done) {
-    gateway.apiCall('DELETE', `user/1/suspend`, {})
-      .then((result) => {
-        if (result.statusCode === 200) {
-          const user = JSON.parse(result.body)
-          console.log(user)
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
+    axios.delete('/user/1/suspend')
+      .then((res) => {
+        const user = res.data
+        console.log(user)
+        done()
+      }).catch(done)
   })
 })
 
 describe('File', function() {
   it('successful signing', function(done) {
-    gateway.apiCall('GET', 'file', {})
-      .then((result) => {
-        if (result.statusCode === 200) {
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
+    axios.get('/file')
+      .then((res) => done())
+      .catch(done)
   })
 })
 
@@ -179,27 +133,22 @@ describe('Ticket', function() {
   it('successful creation', function(done) {
     let date = new Date()
     date.setDate(date.getDate() + 5)
-    gateway.apiCall('POST', 'ticket', { body: {
+    axios.post('/ticket', {
       title: '테스트 콘서트',
       start_at: date,
       end_at: date,
       image: 'test',
       capacity: 100,
-      place: '판교' },
-    }).then((result) => {
-      if (result.statusCode === 200) {
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    })
+      place: '판교'
+    }).then((res) => done())
+    .catch(done)
   })
 
   let ticketId
   it('successful creation with artists', function(done) {
     let date = new Date()
     date.setDate(date.getDate() + 5)
-    gateway.apiCall('POST', 'ticket', { body: {
+    axios.post('/ticket', {
       title: '테스트 콘서트',
       start_at: date,
       end_at: date,
@@ -208,19 +157,15 @@ describe('Ticket', function() {
         { name: '아이유', image: 'iu' },
         { name: 'asdf', image: 'qwer' },
       ],
-    } }).then((result) => {
-      if (result.statusCode === 200) {
-        const ticket = JSON.parse(result.body)
-        ticketId = ticket.id
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    })
+    }).then((res) => {
+      const ticket = res.data
+      ticketId = ticket.id
+      done()
+    }).catch(done)
   })
 
   it('successful update', function(done) {
-    gateway.apiCall('PATCH', `ticket/${ticketId}`, { body: {
+    axios.patch(`/ticket/${ticketId}`, {
       title: '테스트 콘서트 업데이트',
       image: 'test2', capacity: 50, place: '판교',
       artists: [
@@ -228,25 +173,16 @@ describe('Ticket', function() {
         { name: 'hello', image: 'qwer' },
         { name: '수란', image: 'suran' },
       ],
-    } }).then((result) => {
-      if (result.statusCode === 200) {
-        const ticket = JSON.parse(result.body)
-        ticketId = ticket.id
-        done()
-      } else {
-        done(new Error(result.body))
-      }
-    })
+    }).then((res) => {
+      const ticket = res.data
+      ticketId = ticket.id
+      done()
+    }).catch(done)
   })
 
   it('successful deletion', function(done) {
-    gateway.apiCall('DELETE', `ticket/${ticketId}`, {})
-      .then((result) => {
-        if (result.statusCode === 200) {
-          done()
-        } else {
-          done(new Error(result.body))
-        }
-      })
+    axios.delete(`/ticket/${ticketId}`)
+      .then((res) => done())
+      .catch(done)
   })
 })

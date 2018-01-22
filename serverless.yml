@@ -77,7 +77,7 @@ functions:
           method: any
           cors: true
       - http:
-          path: user/all
+          path: user/list
           method: get
           cors: true
   userUnsuspend:
@@ -101,11 +101,11 @@ functions:
           path: partner/session
           method: post
           cors: true
-  partnerAll:
-    handler: handler.partnerAll
+  partnerList:
+    handler: handler.partnerList
     events:
       - http:
-          path: partner/all
+          path: partner/list
           method: get
           cors: true
   partnerApprove:
@@ -129,11 +129,11 @@ functions:
           path: ticket
           method: any
           cors: true
-  ticketAll:
-    handler: handler.ticketAll
+  ticketList:
+    handler: handler.ticketList
     events:
       - http:
-          path: ticket/all
+          path: ticket/list
           method: get
           cors: true
   ticketUpdate:

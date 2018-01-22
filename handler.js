@@ -33,7 +33,7 @@ module.exports.userUnsuspend = lambda(require('./src/user/unsuspend'))
 
 module.exports.partnerRouter = lambda(require('./src/partner/router'))
 module.exports.partnerSignin = lambda(require('./src/partner/signin'))
-module.exports.partnerAll = lambda(require('./src/partner/get_all'))
+module.exports.partnerList = lambda(require('./src/partner/list'))
 module.exports.partnerApprove = lambda(require('./src/partner/approve'))
 module.exports.partnerTickets = lambda(require('./src/partner/tickets'))
 
@@ -41,7 +41,7 @@ module.exports.ticketRouter = lambda(require('./src/ticket/router'))
 module.exports.ticketUpdate = lambda(require('./src/ticket/update'))
 module.exports.ticketDestroy = lambda(require('./src/ticket/destroy'))
 module.exports.ticketReserve = lambda(require('./src/ticket/reserve'))
-module.exports.ticketAll = lambda(require('./src/ticket/get_all'))
+module.exports.ticketList = lambda(require('./src/ticket/list'))
 module.exports.ticketStats = lambda(require('./src/ticket/stats'))
 
 module.exports.reservationRouter = lambda(require('./src/reservation/router'))

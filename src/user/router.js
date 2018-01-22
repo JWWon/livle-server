@@ -7,7 +7,7 @@ const signin = require('./_signin')
 const facebook = require('./_facebook')
 const requestPassword = require('./_request-password')
 const updatePassword = require('./_update-password')
-const getAll = require('./_get-all')
+const list = require('./_list')
 
 const invalidMethod = (params, respond) =>
   respond(500, `Invalid method ${params.httpMethod}`)
@@ -53,11 +53,11 @@ module.exports = (params, respond) => {
         default:
           return invalidMethod(params, respond)
       }
-    case 'all':
+    case 'list':
       if (method !== 'GET') {
         return invalidMethod(params, respond)
       }
-      return getAll(params, respond)
+      return list(params, respond)
     default:
       respond(500, `Invalid path ${params.fullPath}`)
   }

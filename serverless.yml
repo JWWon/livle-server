@@ -45,6 +45,8 @@ provider:
 
 plugins:
   - serverless-domain-manager
+  - serverless-webpack
+  - serverless-offline
 
 custom:
   customDomain:

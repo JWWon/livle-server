@@ -111,6 +111,15 @@ describe('Listing', function() {
         done()
       }).catch(done)
   })
+
+  it('successfully find concerts by title and state', function(done) {
+    axios.get('/ticket/list?page=1&title=a&state=end')
+      .then((res) => {
+        const concerts = res.data
+        console.log(concerts)
+        done()
+      }).catch(done)
+  })
 })
 
 describe('Partner actions', function() {

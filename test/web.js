@@ -66,6 +66,15 @@ describe('Listing', function() {
       }).catch(done)
   })
 
+  it('successfully find users by email', function(done) {
+    axios.get('/user/list?page=1&email=livle')
+      .then((res) => {
+        const users = res.data
+        console.log(users)
+        done()
+      }).catch(done)
+  })
+
   it('successfully get partners list', function(done) {
     axios.get('/partner/list?page=1')
       .then((res) => {

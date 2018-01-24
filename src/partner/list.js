@@ -11,6 +11,7 @@ const fetchList = async (page, where) => {
     where: where,
     offset: (page - 1) * perPage,
     limit: perPage,
+    order: [ ['created_at', 'DESC'] ],
   })
   const list = _.map(partners, (p) => {
     const pData = p.dataValues

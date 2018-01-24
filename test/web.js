@@ -84,6 +84,15 @@ describe('Listing', function() {
       }).catch(done)
   })
 
+  it('successfully find partners by company and approval state', function(done) {
+    axios.get('/partner/list?page=1&company=iv&approved=true')
+      .then((res) => {
+        const partners = res.data
+        console.log(partners)
+        done()
+      }).catch(done)
+  })
+
   it('successfully get one\'s own concerts list', function(done) {
     // Under a condition that the admin account's id is 1
     axios.get('/partner/1/tickets?page=1')

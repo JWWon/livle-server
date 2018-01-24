@@ -75,7 +75,7 @@ describe('Listing', function() {
       }).catch(done)
   })
 
-  it('successfully get partners list', function(done) {
+  it('successfully get all partners list [admin only]', function(done) {
     axios.get('/partner/list?page=1')
       .then((res) => {
         const partners = res.data
@@ -93,9 +93,9 @@ describe('Listing', function() {
       }).catch(done)
   })
 
-  it('successfully get one\'s own concerts list', function(done) {
+  it('successfully get another partner\'s concerts list [admin only]', function(done) {
     // Under a condition that the admin account's id is 1
-    axios.get('/partner/1/tickets?page=1')
+    axios.get('/ticket/list?page=1&partnerId=3')
       .then((res) => {
         const concerts = res.data
         console.log(concerts)

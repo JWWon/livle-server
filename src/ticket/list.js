@@ -32,8 +32,9 @@ module.exports = (params, respond) => {
 
   const title = params.query && params.query.title
   const state = params.query && params.query.state
+  const partnerId = params.query && params.query.partnerId
   const buildWhere = () => {
-    if (!title && !state) return undefined
+    if (!title && !state && !partnerId) return undefined
     let where = {}
     const now = new Date()
     if (title) where.title = { [Op.like]: `%${title}%` }
@@ -42,14 +43,21 @@ module.exports = (params, respond) => {
     } else if (state === 'end') {
       where.end_at = { [Op.lt]: now }
     }
+    if (partnerId) where.partner_id = partnerId
     return where
   }
   const where = buildWhere()
-  console.log(where)
 
   return Partner.fromHeaders({ Authorization: params.auth })
     .then((partner) => {
-      if (!partner.isAdmin) return respond(403, '권한이 없습니다.')
+      if (!partner.isAdmin) {
+        if (where.partner_id && where.partner_id !== partner.id) {
+          return respond(403, '권한이 없습니다.')
+        } else {
+          where = where || { }
+          where.partner_id = partnerId
+        }
+      }
 
       fetchList(page, where).then((result) => respond(200, result))
         .catch((err) => respond(500, err))

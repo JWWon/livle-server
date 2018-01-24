@@ -35,7 +35,6 @@ module.exports.partnerRouter = lambda(require('./src/partner/router'))
 module.exports.partnerSignin = lambda(require('./src/partner/signin'))
 module.exports.partnerList = lambda(require('./src/partner/list'))
 module.exports.partnerApprove = lambda(require('./src/partner/approve'))
-module.exports.partnerTickets = lambda(require('./src/partner/tickets'))
 
 module.exports.ticketRouter = lambda(require('./src/ticket/router'))
 module.exports.ticketUpdate = lambda(require('./src/ticket/update'))

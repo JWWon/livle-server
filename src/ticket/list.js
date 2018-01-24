@@ -13,6 +13,7 @@ const fetchList = async (page, where) => {
     include: [{ model: Artist }],
     offset: (page - 1) * perPage,
     limit: perPage,
+    order: [ ['start_at', 'ASC'] ],
   })
   const tickets = await Ticket.withReservedCount(_tickets)
   return {

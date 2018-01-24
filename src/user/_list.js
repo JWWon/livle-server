@@ -18,6 +18,7 @@ const fetchList = async (page, where) => {
     where: where,
     offset: (page - 1) * perPage,
     limit: perPage,
+    order: [ ['created_at', 'DESC'] ],
   })
   const userList = _.map(users, (u) => {
     const uData = u.dataValues

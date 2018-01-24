@@ -33,6 +33,7 @@ Gateway.prototype.apiCall = function(method, path, params) {
     queryStringParameters: parseQuery(path),
     pathParameters: null,
     httpMethod: method,
+    path: path,
   }
 
   const promisify = (func) => (event) =>
@@ -47,21 +48,21 @@ Gateway.prototype.apiCall = function(method, path, params) {
     case 'user': {
       switch (paths[1]) {
         case undefined:
-          return promisify(handler.userRouter)(event)
         case 'session':
-          return promisify(handler.userSignin)(event)
         case 'facebook':
-          return promisify(handler.userFacebook)(event)
         case 'password':
-          if (method === 'POST') {
-            return promisify(handler.userUpdatePassword)(event)
-          } else if (method === 'GET') {
-            return promisify(handler.userRequestPassword)(event)
-          }
         case 'all':
-          return promisify(handler.userAll)(event)
+          return promisify(handler.userRouter)(event)
         default:
-          throw new Error(`Unknown path: ${path}`)
+          event.pathParameters = { userId: paths[1] }
+          switch (paths[2]) {
+            case 'suspend':
+              if (method === 'DELETE') {
+                return promisify(handler.userUnsuspend)(event)
+              }
+            default:
+              throw new Error(`Unknown path: ${path}`)
+          }
       }
     }
     case 'ticket': {

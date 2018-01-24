@@ -1,27 +1,23 @@
 'use strict'
 
 const Partner = require('../partner/partner')
-const Subscription = require('../subscription')
 const User = require('./user')
-const _ = require('lodash')
 
 module.exports = (params, respond) => {
   if (!params.auth) return respond(401, '로그인되지 않았습니다.')
+  const userId = params.path && params.path.userId
+  if (!userId) return respond(400)
 
   return Partner.fromHeaders({ Authorization: params.auth })
-    .then((partner) => {
-      if (!partner.isAdmin()) return respond(403, '권한이 없습니다.')
-
-      return User.findAll({
-        include: [{ model: Subscription }],
-      }).then((users) => {
-        const userList = _.map(users, (u) => {
-          const uData = u.dataValues
+    .then((currPartner) => {
+      if (!currPartner.isAdmin) return respond(403, '권한이 없습니다.')
+      User.findById(userId)
+        .then((user) => user.update({ suspended_by: null }))
+        .then((user) => {
+          const uData = user.dataValues
           uData.password = undefined
-          return uData
+          respond(200, uData)
         })
-        return respond(200, userList)
-      })
     }).catch((err) => {
       if (err) {
         return respond(403, '유효하지 않은 세션입니다.')

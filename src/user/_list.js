@@ -1,29 +1,36 @@
 'use strict'
 
-const Partner = require('./partner')
-const Artist = require('../ticket/artist')
-const Ticket = require('../ticket/ticket')
+const Partner = require('../partner/partner')
+const Subscription = require('../subscription')
+const Reservation = require('../reservation/reservation')
+const User = require('./user')
+const _ = require('lodash')
 const perPage = 20
 
-const fetchList = async (partner, page) => {
-  const counts = await Ticket.count()
-  const _tickets = await partner.getTickets({
-    include: [{ model: Artist }],
+const fetchList = async (page) => {
+  const counts = await User.count()
+  const users = await User.findAll({
+    include: [{
+      model: Subscription,
+      include: [{ model: Reservation }],
+    }],
     offset: (page - 1) * perPage,
     limit: perPage,
   })
-  const tickets = await Ticket.withReservedCount(_tickets)
+  const userList = _.map(users, (u) => {
+    const uData = u.dataValues
+    uData.password = undefined
+    return uData
+  })
   return {
     total_pages: Math.ceil(counts / perPage),
     current_page: page,
-    data: tickets,
+    data: userList,
   }
 }
 
 module.exports = (params, respond) => {
   if (!params.auth) return respond(401, '로그인되지 않았습니다.')
-  // 이 파트너의 공연 정보를 가져오고자 합니다.
-  const partnerId = params.path && params.path.partnerId
 
   const page = params.query && Number(params.query.page)
   if (!page || page < 1) {
@@ -32,12 +39,9 @@ module.exports = (params, respond) => {
 
   return Partner.fromHeaders({ Authorization: params.auth })
     .then((partner) => {
-      if (partner.id != partnerId) {
-        return respond(403, '권한이 없습니다.')
-      }
+      if (!partner.isAdmin()) return respond(403, '권한이 없습니다.')
 
-      fetchList(partner, page)
-        .then((result) => respond(200, result))
+      fetchList(page).then((result) => respond(200, result))
         .catch((err) => respond(500, err))
     }).catch((err) => {
       if (err) {

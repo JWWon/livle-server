@@ -21,6 +21,7 @@ const lambda = (func) => {
     params.query = event.queryStringParameters
     params.auth = event.headers && event.headers.Authorization
     params.path = event.pathParameters
+    params.fullPath = event.path
     params.httpMethod = event.httpMethod
 
     func(params, respond)
@@ -28,15 +29,11 @@ const lambda = (func) => {
 }
 
 module.exports.userRouter = lambda(require('./src/user/router'))
-module.exports.userSignin = lambda(require('./src/user/signin'))
-module.exports.userFacebook = lambda(require('./src/user/facebook'))
-module.exports.userRequestPassword = lambda(require('./src/user/request_password'))
-module.exports.userUpdatePassword = lambda(require('./src/user/update_password'))
-module.exports.userAll = lambda(require('./src/user/get_all'))
+module.exports.userUnsuspend = lambda(require('./src/user/unsuspend'))
 
 module.exports.partnerRouter = lambda(require('./src/partner/router'))
 module.exports.partnerSignin = lambda(require('./src/partner/signin'))
-module.exports.partnerAll = lambda(require('./src/partner/get_all'))
+module.exports.partnerList = lambda(require('./src/partner/list'))
 module.exports.partnerApprove = lambda(require('./src/partner/approve'))
 module.exports.partnerTickets = lambda(require('./src/partner/tickets'))
 
@@ -44,7 +41,7 @@ module.exports.ticketRouter = lambda(require('./src/ticket/router'))
 module.exports.ticketUpdate = lambda(require('./src/ticket/update'))
 module.exports.ticketDestroy = lambda(require('./src/ticket/destroy'))
 module.exports.ticketReserve = lambda(require('./src/ticket/reserve'))
-module.exports.ticketAll = lambda(require('./src/ticket/get_all'))
+module.exports.ticketList = lambda(require('./src/ticket/list'))
 module.exports.ticketStats = lambda(require('./src/ticket/stats'))
 
 module.exports.reservationRouter = lambda(require('./src/reservation/router'))

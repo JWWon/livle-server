@@ -45,6 +45,8 @@ provider:
 
 plugins:
   - serverless-domain-manager
+  - serverless-webpack
+  - serverless-offline
 
 custom:
   customDomain:
@@ -62,40 +64,28 @@ functions:
           path: user
           method: any
           cors: true
-  userSignin:
-    handler: handler.userSignin
-    events:
       - http:
           path: user/session
           method: post
           cors: true
-  userFacebook:
-    handler: handler.userFacebook
-    events:
       - http:
           path: user/facebook
           method: post
           cors: true
-  userRequestPassword:
-    handler: handler.userRequestPassword
-    events:
       - http:
           path: user/password
+          method: any
+          cors: true
+      - http:
+          path: user/list
           method: get
           cors: true
-  userUpdatePassword:
-    handler: handler.userUpdatePassword
+  userUnsuspend:
+    handler: handler.userUnsuspend
     events:
       - http:
-          path: user/password
-          method: post
-          cors: true
-  userAll:
-    handler: handler.userAll
-    events:
-      - http:
-          path: user/all
-          method: get
+          path: user/{userId}/suspend
+          method: delete
           cors: true
   partnerRouter:
     handler: handler.partnerRouter
@@ -111,11 +101,11 @@ functions:
           path: partner/session
           method: post
           cors: true
-  partnerAll:
-    handler: handler.partnerAll
+  partnerList:
+    handler: handler.partnerList
     events:
       - http:
-          path: partner/all
+          path: partner/list
           method: get
           cors: true
   partnerApprove:
@@ -139,11 +129,11 @@ functions:
           path: ticket
           method: any
           cors: true
-  ticketAll:
-    handler: handler.ticketAll
+  ticketList:
+    handler: handler.ticketList
     events:
       - http:
-          path: ticket/all
+          path: ticket/list
           method: get
           cors: true
   ticketUpdate:

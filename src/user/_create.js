@@ -20,7 +20,10 @@ module.exports = (params, respond) => {
     if (valid) {
       User.signUp(body.email, body.password, body.nickname, body.fcmToken)
         .then((user) => respond(200, user))
-        .catch((err) => respond(403, '이미 가입되어 있는 이메일 주소입니다.'))
+        .catch((err) => {
+          console.error(err)
+          respond(403, '이미 가입되어 있는 이메일 주소입니다.')
+        })
     } else {
       respond(404, '존재하지 않는 이메일 주소입니다.')
     }

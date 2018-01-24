@@ -13,8 +13,8 @@ module.exports = (params, respond) => {
     .then((partner) => {
       if (partner.approved) {
         let partnerData = partner.dataValues
-        partnerData.password = null
         partnerData.token = partner.getToken()
+        partnerData.password = null
         return respond(200, partnerData)
       } else {
         return respond(401, '승인되지 않은 유저입니다.')

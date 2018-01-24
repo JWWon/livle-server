@@ -1,14 +1,7 @@
 const S = require('sequelize')
 const sequelize = require('../config/sequelize')
-
-  /*
-const cookie = require('cookie')
-
-const cookieKey = 'Authorization'
-const cookiePrefix = 'Bearer '
-*/
-
 const jwt = require('jsonwebtoken')
+const _ = require('lodash')
 const secret = 'livlepartnersecret'
 
 const Partner = sequelize.define('partner', {
@@ -22,8 +15,11 @@ const Partner = sequelize.define('partner', {
   { createdAt: 'created_at', updatedAt: 'updated_at' },
 )
 
+const tokenData = (data) =>
+  _.pick(data, ['id', 'username', 'password', 'company', 'approved'])
+
 Partner.prototype.getToken = function() {
-  return jwt.sign(this.dataValues, secret)
+  return jwt.sign(tokenData(this.dataValues), secret)
 }
 
 Partner.prototype.isAdmin = function() {
@@ -33,8 +29,11 @@ Partner.prototype.isAdmin = function() {
 Partner.fromHeaders = (headers) => new Promise( (resolve, reject) => {
   const token = ( headers && headers.Authorization ) || null
   if (!token) return reject()
-  return jwt.verify(token, secret, (err, decoded) => err ? reject(err)
-    : Partner.findById(decoded.id).then((partner) => resolve(partner)) )
+  return jwt.verify(token, secret, (err, decoded) => {
+    if (err) return reject(err)
+    Partner.findOne({ where: tokenData(decoded) })
+      .then((partner) => resolve(partner))
+  })
 })
 
 const Ticket = require('../ticket/ticket')

@@ -35,6 +35,7 @@ module.exports = (params, respond) => {
             case 402: // 결제 실패 또는 구독 정보 업데이트 실패
             case 403: // 결제 정보 인증 실패
               respond(err.code, err.err)
+              break
             default:
               console.error(err)
               respond(500, err)

@@ -269,6 +269,9 @@ paths:
           in: query
           type: string
           required: true
+        - name: email
+          in: query
+          type: string
       responses:
         '200':
           description: 성공
@@ -422,6 +425,16 @@ paths:
           in: query
           type: string
           required: true
+        - name: username
+          in: query
+          type: string
+        - name: company
+          in: query
+          type: string
+        - name: approved
+          in: query
+          type: string
+          description: true | false
       responses:
         '200':
           description: 성공
@@ -678,6 +691,13 @@ paths:
           in: query
           type: string
           required: true
+        - name: title
+          in: query
+          type: string
+        - name: state
+          in: query
+          type: string
+          description: due | end
       responses:
         '200':
           description: 성공

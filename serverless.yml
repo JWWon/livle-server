@@ -55,6 +55,12 @@ custom:
     basePath: ${self:provider.stage}
     stage: ${self:provider.stage}
     createRoute53Record: true
+  webpackIncludeModules:
+    forceInclude:
+      - mysql2
+
+package:
+  individually: true
 
 functions:
   userRouter:
@@ -114,13 +120,6 @@ functions:
       - http:
           path: partner/{partnerId}/approve
           method: post
-          cors: true
-  partnerTickets:
-    handler: handler.partnerTickets
-    events:
-      - http:
-          path: partner/{partnerId}/tickets
-          method: get
           cors: true
   ticketRouter:
     handler: handler.ticketRouter

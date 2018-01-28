@@ -66,7 +66,16 @@ describe('Listing', function() {
       }).catch(done)
   })
 
-  it('successfully get partners list', function(done) {
+  it('successfully find users by email', function(done) {
+    axios.get('/user/list?page=1&email=livle')
+      .then((res) => {
+        const users = res.data
+        console.log(users)
+        done()
+      }).catch(done)
+  })
+
+  it('successfully get all partners list [admin only]', function(done) {
     axios.get('/partner/list?page=1')
       .then((res) => {
         const partners = res.data
@@ -75,9 +84,18 @@ describe('Listing', function() {
       }).catch(done)
   })
 
-  it('successfully get one\'s own concerts list', function(done) {
+  it('successfully find partners by company and approval state', function(done) {
+    axios.get('/partner/list?page=1&company=iv&approved=true')
+      .then((res) => {
+        const partners = res.data
+        console.log(partners)
+        done()
+      }).catch(done)
+  })
+
+  it('successfully get another partner\'s concerts list [admin only]', function(done) {
     // Under a condition that the admin account's id is 1
-    axios.get('/partner/1/tickets?page=1')
+    axios.get('/ticket/list?page=1&partnerId=3')
       .then((res) => {
         const concerts = res.data
         console.log(concerts)
@@ -87,6 +105,15 @@ describe('Listing', function() {
 
   it('successfully get concerts list', function(done) {
     axios.get('/ticket/list?page=1')
+      .then((res) => {
+        const concerts = res.data
+        console.log(concerts)
+        done()
+      }).catch(done)
+  })
+
+  it('successfully find concerts by title and state', function(done) {
+    axios.get('/ticket/list?page=1&title=a&state=end')
       .then((res) => {
         const concerts = res.data
         console.log(concerts)

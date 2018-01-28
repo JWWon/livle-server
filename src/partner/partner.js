@@ -19,7 +19,7 @@ const Partner = sequelize.define('partner', {
   company: { type: S.STRING, allowNull: false },
   approved: { type: S.BOOLEAN, defaultValue: false },
 },
-  { timestamps: false }
+  { createdAt: 'created_at', updatedAt: 'updated_at' },
 )
 
 Partner.prototype.getToken = function() {

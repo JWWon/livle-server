@@ -6,9 +6,9 @@ Server is hosted on AWS Labmda and automating process using AWS CloudFormation.
 ```
 
 # Related Projects
-Client       : https://github.com/livle-dev/livle-client
-Partner Page : https://github.com/livle-dev/livle-partner
-Landing Page : https://github.com/livle-dev/livle-landing
+* Client       : https://github.com/livle-dev/livle-client
+* Partner Page : https://github.com/livle-dev/livle-partner
+* Landing Page : https://github.com/livle-dev/livle-landing
 
 # Quick Start - SERVER
 

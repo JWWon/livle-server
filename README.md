@@ -94,6 +94,6 @@ FCM_SERVER_KEY:
 
 # Contributer
 ![](http://drive.google.com/uc?export=view&id=1PexrKHr5vVgiM-hXCP-tOf7HVaaF_AQx)
-`Jiwoon Won` email: wonjiwn@naver.com, github: https://github.com/JWWon
-`Jaeseong Seo` email: 07js23@gmail.com, github: https://github.com/js-seo
-`Sanghyuk Son` email: saanghyuk@gmail.com, github: https://github.com/saanghyuk
+* `Jiwoon Won` email: wonjiwn@naver.com, github: https://github.com/JWWon
+* `Jaeseong Seo` email: 07js23@gmail.com, github: https://github.com/js-seo
+* `Sanghyuk Son` email: saanghyuk@gmail.com, github: https://github.com/saanghyuk

@@ -1,10 +1,22 @@
-# Development Settings
+# LIVLE
+```
+This Project is Back-End Server for LIVLE which provides client to watch a concert twice a month by subscribing service.
+Server is hosted on AWS Labmda and automating process using AWS CloudFormation.
+© 2018 LIVLE
+```
 
-##1. 로컬 환경 변수의 NODE\_ENV를 dev로 설정
+# Related Projects
+Client       : https://github.com/livle-dev/livle-client
+Partner Page : https://github.com/livle-dev/livle-partner
+Landing Page : https://github.com/livle-dev/livle-landing
+
+# Quick Start - SERVER
+
+### 1. 로컬 환경 변수의 NODE_ENV를 dev로 설정
 사용하는 쉘에 따라 `~/.zshrc` or `~/.bashrc`에 다음 줄 추가
 `export NODE_ENV=dev`
 
-##2. 사용할 환경변수 설정
+### 2. 사용할 환경변수 설정
 `.env` 파일에 다음 정보 입력
 
 ```yaml
@@ -49,22 +61,16 @@ TEST_FCM_TOKEN=
 #DB_USER=
 ```
 
-##3. 로컬 데이터베이스 마이그레이션
+### 3. 로컬 데이터베이스 마이그레이션
 - Mysql 설치 후 위에 입력한 이름(`DB_NAME`)에 해당하는 데이터베이스 생성
 - `$ node db/migrate` : 로컬 마이그레이션
 - `$ node db/reset` : 로컬 마이그레이션 + 시드 데이터 추가
 
-##4. AWS CLI 설정
+### 4. AWS CLI 설정
 - aws cli 설치 후 `livle-serverless`라는 이름으로 profile을 만듭니다.
 
-##5. 테스트
+### 5. 테스트
 - 위 세팅을 모두 마치고 `yarn test` 커맨드 실행해서 에러 없으면 성공
-
-# 실제 서버 Migrate
-*Production 이후에는 하면 안되는 방법*
-*기존 테이블을 모두 드랍하고 다시 만듭니다*
-위에서 Local에 주석처리, Dev server 부분을 주석 풀고 `node ./migrate.js`
-
 
 # Deploy
 AWS CLI 통해서 credential 세팅해두어야 함
@@ -82,3 +88,12 @@ PUSHER_KEY:
 PUSHER_SECRET:
 FCM_SERVER_KEY:
 ```
+
+# Project Structure
+![](http://drive.google.com/uc?export=view&id=1OSAwR9WeHGqZjJCp3ovsmXRk_JSsN4ua)
+
+# Contributer
+![](http://drive.google.com/uc?export=view&id=1PexrKHr5vVgiM-hXCP-tOf7HVaaF_AQx)
+`Jiwoon Won` email: wonjiwn@naver.com, github: https://github.com/JWWon
+`Jaeseong Seo` email: 07js23@gmail.com, github: https://github.com/js-seo
+`Sanghyuk Son` email: saanghyuk@gmail.com, github: https://github.com/saanghyuk
